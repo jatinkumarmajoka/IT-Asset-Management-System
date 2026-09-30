@@ -1,59 +1,621 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# IT Asset Management System
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="360" alt="Laravel">
 </p>
 
-## About Laravel
+<p align="center">
+  <strong>IT Asset Management System</strong><br>
+  A dynamic web-based system for managing, tracking, issuing, verifying, and maintaining organizational IT assets.
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+<p align="center">
+  <img src="https://img.shields.io/badge/Laravel-PHP-red?style=for-the-badge&logo=laravel" alt="Laravel">
+  <img src="https://img.shields.io/badge/PHP-8.x-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
+  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-UI-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/Vite-Build-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
+</p>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 📌 About the Project
 
-## Learning Laravel
+The **IT Asset Management System** is a web-based application designed to manage an organization's IT and physical assets digitally.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+The system replaces manual asset registers and spreadsheets with a centralized application for maintaining asset records, department assignments, locations, users, categories, issue history, verification records, and asset status.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+The application is designed to be **dynamic, scalable, and database-driven**, allowing organizations to manage large numbers of assets while maintaining a complete history of asset movement and ownership.
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🎯 Objectives
 
-### Premium Partners
+The main objectives of the system are:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+* Digitize IT asset records
+* Maintain a centralized asset database
+* Track assets assigned to employees/departments
+* Record asset issue and return information
+* Track asset locations
+* Maintain asset categories and manufacturers
+* Perform physical asset verification
+* Maintain asset history
+* Reduce duplicate/manual data entry
+* Improve asset accountability
+* Generate reliable asset records and reports
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚀 Key Features
 
-## Code of Conduct
+### 📦 Asset Management
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Manage complete information about organizational assets, including:
 
-## Security Vulnerabilities
+* Asset name
+* Asset category
+* Make and model
+* Serial number
+* Asset ID / identification number
+* Purchase information
+* Asset status
+* Current location
+* Current occupant
+* Department
+* Remarks
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 👤 Asset Assignment
 
-## License
+Track who is currently using an asset.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The system can maintain:
+
+* Present occupant
+* Department
+* Date of issue
+* Date of return
+* Assignment history
+* Asset status
+
+### 🏢 Department Management
+
+Manage organizational departments and associate assets with the appropriate department.
+
+### 📍 Location Management
+
+Track where assets are physically located.
+
+Examples:
+
+* Office
+* Computer Lab
+* Department
+* Store
+* Server Room
+* Classroom
+
+### 🗂️ Category Management
+
+Create and manage asset categories such as:
+
+* Desktop Computers
+* Laptops
+* Monitors
+* Printers
+* UPS
+* Networking Equipment
+* Servers
+* Projectors
+* Accessories
+* Other IT Equipment
+
+### 🔍 Physical Verification
+
+The system supports physical verification of assets and can record information such as:
+
+| Field               | Description                          |
+| ------------------- | ------------------------------------ |
+| Name of Item        | Asset/item name                      |
+| Make & Model        | Manufacturer and model               |
+| Issued Quantity     | Quantity according to stock register |
+| Physically Verified | Quantity physically found            |
+| Present Occupant    | Current user/custodian               |
+| Date of Issue       | Asset issue date                     |
+| Remarks             | Additional observations              |
+
+### 📊 Dashboard
+
+The dashboard can provide an overview of:
+
+* Total assets
+* Active assets
+* Assigned assets
+* Available assets
+* Under-repair assets
+* Retired assets
+* Department-wise assets
+* Location-wise assets
+
+### 📝 Import & Data Management
+
+The system supports structured asset data management and import workflows for transferring existing records into the application.
+
+### 🔄 Asset History
+
+Maintain historical information about asset movements and assignments instead of only storing the current state.
+
+---
+
+## 🛠️ Technology Stack
+
+### Backend
+
+* PHP
+* Laravel
+* Laravel Eloquent ORM
+* RESTful application architecture
+
+### Frontend
+
+* Blade
+* HTML5
+* CSS3
+* JavaScript
+* Tailwind CSS
+* Vite
+
+### Database
+
+* MySQL
+
+### Development Tools
+
+* Git
+* GitHub
+* Composer
+* Node.js
+* npm
+* VS Code
+* XAMPP
+
+---
+
+## 📁 Project Structure
+
+```text
+it-asset-management/
+│
+├── app/
+│   ├── Http/
+│   ├── Models/
+│   ├── Services/
+│   └── ...
+│
+├── bootstrap/
+│
+├── config/
+│
+├── database/
+│   ├── migrations/
+│   ├── seeders/
+│   └── factories/
+│
+├── public/
+│
+├── resources/
+│   ├── css/
+│   ├── js/
+│   └── views/
+│
+├── routes/
+│
+├── storage/
+│
+├── tests/
+│
+├── artisan
+├── composer.json
+├── package.json
+├── vite.config.js
+└── README.md
+```
+
+---
+
+# ⚙️ Installation & Setup
+
+## Requirements
+
+Before installing the project, make sure the following are installed:
+
+* PHP 8.x
+* Composer
+* MySQL
+* Node.js
+* npm
+* Git
+* XAMPP / Apache
+
+---
+
+## 1. Clone the Repository
+
+```bash
+git clone YOUR_GITHUB_REPOSITORY_URL
+```
+
+Enter the project directory:
+
+```bash
+cd it-asset-management
+```
+
+---
+
+## 2. Install PHP Dependencies
+
+```bash
+composer install
+```
+
+---
+
+## 3. Install Frontend Dependencies
+
+```bash
+npm install
+```
+
+---
+
+## 4. Create Environment File
+
+Copy the example environment file:
+
+### Windows
+
+```powershell
+copy .env.example .env
+```
+
+### macOS / Linux
+
+```bash
+cp .env.example .env
+```
+
+---
+
+## 5. Generate Application Key
+
+```bash
+php artisan key:generate
+```
+
+---
+
+## 6. Configure Database
+
+Create a MySQL database using phpMyAdmin or MySQL.
+
+Example:
+
+```text
+Database Name: it_asset_management
+```
+
+Update the `.env` file:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=it_asset_management
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+> Never commit your `.env` file to GitHub.
+
+---
+
+## 7. Run Database Migrations
+
+```bash
+php artisan migrate
+```
+
+If seed data is available:
+
+```bash
+php artisan db:seed
+```
+
+Or:
+
+```bash
+php artisan migrate --seed
+```
+
+---
+
+## 8. Build Frontend Assets
+
+For development:
+
+```bash
+npm run dev
+```
+
+For production:
+
+```bash
+npm run build
+```
+
+---
+
+## 9. Start Laravel
+
+```bash
+php artisan serve
+```
+
+The application will normally be available at:
+
+```text
+http://127.0.0.1:8000
+```
+
+---
+
+# 💻 Development Workflow
+
+This project is intended to be developed across multiple computers using Git and GitHub.
+
+### First computer
+
+After making changes:
+
+```bash
+git status
+git add .
+git commit -m "Describe your changes"
+git push
+```
+
+### Second computer
+
+Before starting work:
+
+```bash
+git pull
+```
+
+After making changes:
+
+```bash
+git add .
+git commit -m "Describe your changes"
+git push
+```
+
+### Recommended workflow
+
+```text
+                ┌───────────────┐
+                │    GitHub     │
+                │  Repository   │
+                └───────┬───────┘
+                        │
+              ┌─────────┴─────────┐
+              │                   │
+              ▼                   ▼
+       ┌─────────────┐     ┌─────────────┐
+       │ Office PC   │     │ Personal PC │
+       │   XAMPP     │     │   XAMPP     │
+       └─────────────┘     └─────────────┘
+              │                   │
+              └─────── Git ───────┘
+```
+
+---
+
+# 🔐 Security
+
+Sensitive configuration files should never be committed to the repository.
+
+The following files/directories are intentionally ignored:
+
+```text
+.env
+/vendor
+/node_modules
+/public/build
+/storage/*.key
+```
+
+Make sure passwords, API keys, database credentials, and other secrets remain inside `.env`.
+
+---
+
+# 🗄️ Database
+
+The application uses a relational MySQL database.
+
+Database structure is maintained through Laravel migrations:
+
+```bash
+php artisan migrate
+```
+
+To create a new migration:
+
+```bash
+php artisan make:migration create_example_table
+```
+
+To rollback the latest migration:
+
+```bash
+php artisan migrate:rollback
+```
+
+---
+
+# 🧪 Testing
+
+Run the application's test suite with:
+
+```bash
+php artisan test
+```
+
+Or:
+
+```bash
+vendor/bin/phpunit
+```
+
+---
+
+# 🔧 Useful Laravel Commands
+
+### Clear application cache
+
+```bash
+php artisan optimize:clear
+```
+
+### Check routes
+
+```bash
+php artisan route:list
+```
+
+### Start development server
+
+```bash
+php artisan serve
+```
+
+### Run migrations
+
+```bash
+php artisan migrate
+```
+
+### Create model
+
+```bash
+php artisan make:model ModelName
+```
+
+### Create controller
+
+```bash
+php artisan make:controller ControllerName
+```
+
+### Create migration
+
+```bash
+php artisan make:migration create_table_name_table
+```
+
+---
+
+# 📌 Current Development Status
+
+| Module                 | Status            |
+| ---------------------- | ----------------- |
+| Laravel Application    | 🟢 Active         |
+| Database               | 🟢 Active         |
+| Asset Management       | 🟢 Active         |
+| Categories             | 🟢 Active         |
+| Locations              | 🟢 Active         |
+| Departments            | 🟢 Active         |
+| Asset Assignment       | 🟢 Active         |
+| Asset Verification     | 🟢 Active         |
+| Import System          | 🟡 In Development |
+| Reports                | 🟡 In Development |
+| Dashboard              | 🟡 In Development |
+| Authentication & Roles | 🟡 In Development |
+
+> Update this table as development progresses.
+
+---
+
+# 🗺️ Future Improvements
+
+Planned improvements may include:
+
+* Advanced dashboard analytics
+* Role-based access control
+* User management
+* Asset QR codes
+* Barcode scanning
+* Asset transfer workflow
+* Asset return workflow
+* Maintenance management
+* Warranty tracking
+* Purchase records
+* Depreciation tracking
+* PDF reports
+* Excel exports
+* Audit logs
+* Notifications
+* Advanced search and filtering
+* Department-wise reports
+* Location-wise reports
+* Import/export improvements
+
+---
+
+# 🤝 Development
+
+This project is maintained as a continuously evolving application.
+
+Development workflow:
+
+```text
+Feature Development
+        ↓
+Local Testing
+        ↓
+Git Commit
+        ↓
+GitHub Push
+        ↓
+Other Computer
+        ↓
+Git Pull
+        ↓
+Continue Development
+```
+
+---
+
+# 📄 License
+
+This project is intended for organizational/internal use.
+
+The Laravel framework itself is open-source and licensed under the MIT License.
+
+---
+
+## 👨‍💻 Project
+
+**IT Asset Management System**
+
+Built with:
+
+**Laravel + PHP + MySQL + Tailwind CSS + JavaScript**
+
+---
+
+<p align="center">
+  <strong>IT Asset Management System</strong><br>
+  Digital asset tracking • Assignment • Verification • Management
+</p>
