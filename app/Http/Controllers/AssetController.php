@@ -13,96 +13,306 @@ use Illuminate\Http\Request;
 
 class AssetController extends Controller
 {
-    public function __construct(private AssetService $assetService) {}
+    public function __construct(
+        private AssetService $assetService
+    ) {}
 
+
+    /**
+     * Display all assets.
+     */
     public function index(Request $request)
     {
-        $query = Asset::with(['department', 'category', 'occupant']);
+        $query = Asset::query()
+            ->with([
+                'department',
+                'category',
+                'occupant',
+            ]);
 
+
+        /*
+         * Search
+         */
         if ($request->filled('search')) {
-            $term = trim($request->string('search'));
+
+            $term = trim(
+                $request->string('search')
+            );
+
             $query->where(function ($q) use ($term) {
-                $q->where('asset_code', 'like', "%{$term}%")
-                  ->orWhere('item_name', 'like', "%{$term}%")
-                  ->orWhere('make', 'like', "%{$term}%")
-                  ->orWhere('model', 'like', "%{$term}%")
-                  ->orWhere('barcode_number', 'like', "%{$term}%")
-                  ->orWhere('asset_serial_number', 'like', "%{$term}%");
+
+                $q->where(
+                    'asset_code',
+                    'like',
+                    "%{$term}%"
+                )
+                ->orWhere(
+                    'item_name',
+                    'like',
+                    "%{$term}%"
+                )
+                ->orWhere(
+                    'make',
+                    'like',
+                    "%{$term}%"
+                )
+                ->orWhere(
+                    'model',
+                    'like',
+                    "%{$term}%"
+                )
+                ->orWhere(
+                    'barcode_number',
+                    'like',
+                    "%{$term}%"
+                )
+                ->orWhere(
+                    'asset_serial_number',
+                    'like',
+                    "%{$term}%"
+                );
+
             });
+
         }
 
-        $query->when($request->filled('department_id'),
-            fn ($q) => $q->where('department_id', $request->integer('department_id'))
+
+        /*
+         * Department filter
+         */
+        $query->when(
+            $request->filled('department_id'),
+            fn ($q) =>
+                $q->where(
+                    'department_id',
+                    $request->integer('department_id')
+                )
         );
 
-        $query->when($request->filled('category_id'),
-            fn ($q) => $q->where('category_id', $request->integer('category_id'))
+
+        /*
+         * Category filter
+         */
+        $query->when(
+            $request->filled('category_id'),
+            fn ($q) =>
+                $q->where(
+                    'category_id',
+                    $request->integer('category_id')
+                )
         );
 
-        $query->when($request->filled('asset_status'),
-            fn ($q) => $q->where('asset_status', $request->string('asset_status'))
+
+        /*
+         * Status filter
+         */
+        $query->when(
+            $request->filled('asset_status'),
+            fn ($q) =>
+                $q->where(
+                    'asset_status',
+                    $request->string('asset_status')
+                )
         );
 
-        $assets = $query->latest()->paginate(15)->withQueryString();
 
-        $departments = Department::where('status', 'active')->orderBy('name')->get();
-        $categories = Category::where('status', 'active')->orderBy('name')->get();
+        /*
+         * Pagination
+         */
+        $assets = $query
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('assets.index', compact('assets', 'departments', 'categories'));
+
+        /*
+         * Filter dropdown data
+         */
+        $departments = Department::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+
+        $categories = Category::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+
+        return view(
+            'assets.index',
+            compact(
+                'assets',
+                'departments',
+                'categories'
+            )
+        );
     }
 
+
+    /**
+     * Show create asset form.
+     */
     public function create()
     {
         return view('assets.create', [
-            'departments' => Department::where('status', 'active')->orderBy('name')->get(),
-            'categories' => Category::where('status', 'active')->orderBy('name')->get(),
-            'employees' => Employee::where('status', 'active')->orderBy('name')->get(),
+
+            'departments' =>
+                Department::query()
+                    ->where('status', 'active')
+                    ->orderBy('name')
+                    ->get(),
+
+            'categories' =>
+                Category::query()
+                    ->where('status', 'active')
+                    ->orderBy('name')
+                    ->get(),
+
+            'employees' =>
+                Employee::query()
+                    ->where('status', 'active')
+                    ->orderBy('name')
+                    ->get(),
+
         ]);
     }
 
+
+    /**
+     * Store a new asset.
+     */
     public function store(StoreAssetRequest $request)
     {
-        $this->assetService->create($request->validated());
+        $this->assetService->create(
+            $request->validated()
+        );
 
-        return redirect()->route('assets.index')->with('success', 'Asset created successfully.');
+        return redirect()
+            ->route('assets.index')
+            ->with(
+                'success',
+                'Asset created successfully.'
+            );
     }
 
+
+    /**
+     * Display a single asset.
+     */
     public function show(Asset $asset)
     {
-        $asset->load(['department', 'category', 'occupant', 'history']);
+        $asset->load([
+            'department',
+            'category',
+            'occupant',
+            'history',
+        ]);
 
-        return view('assets.show', compact('asset'));
+        return view(
+            'assets.show',
+            compact('asset')
+        );
     }
 
+
+    /**
+     * Show edit asset form.
+     */
     public function edit(Asset $asset)
     {
+        $asset->load([
+            'department',
+            'category',
+            'occupant',
+        ]);
+
         return view('assets.edit', [
-            'asset' => $asset,
-            'departments' => Department::where('status', 'active')->orderBy('name')->get(),
-            'categories' => Category::where('status', 'active')->orderBy('name')->get(),
-            'employees' => Employee::where('status', 'active')->orderBy('name')->get(),
+
+            'asset' =>
+                $asset,
+
+            'departments' =>
+                Department::query()
+                    ->where('status', 'active')
+                    ->orderBy('name')
+                    ->get(),
+
+            'categories' =>
+                Category::query()
+                    ->where('status', 'active')
+                    ->orderBy('name')
+                    ->get(),
+
+            'employees' =>
+                Employee::query()
+                    ->where('status', 'active')
+                    ->orderBy('name')
+                    ->get(),
+
         ]);
     }
 
-    public function update(UpdateAssetRequest $request, Asset $asset)
-    {
-        $this->assetService->update($asset, $request->validated());
 
-        return redirect()->route('assets.show', $asset)->with('success', 'Asset updated successfully.');
+    /**
+     * Update an existing asset.
+     */
+    public function update(
+        UpdateAssetRequest $request,
+        Asset $asset
+    ) {
+        $this->assetService->update(
+            $asset,
+            $request->validated()
+        );
+
+        return redirect()
+            ->route(
+                'assets.show',
+                $asset
+            )
+            ->with(
+                'success',
+                'Asset updated successfully.'
+            );
     }
 
+
+    /**
+     * Delete an asset.
+     */
     public function destroy(Asset $asset)
     {
         $asset->history()->create([
-            'action' => 'deleted',
-            'old_value' => json_encode($asset->toArray()),
-            'performed_by' => auth()->id(),
-            'ip_address' => request()->ip(),
-            'created_at' => now(),
+
+            'action' =>
+                'deleted',
+
+            'old_value' =>
+                json_encode(
+                    $asset->toArray()
+                ),
+
+            'performed_by' =>
+                auth()->id(),
+
+            'ip_address' =>
+                request()->ip(),
+
+            'created_at' =>
+                now(),
+
         ]);
 
         $asset->delete();
 
-        return redirect()->route('assets.index')->with('success', 'Asset deleted successfully.');
+        return redirect()
+            ->route('assets.index')
+            ->with(
+                'success',
+                'Asset deleted successfully.'
+            );
     }
 }

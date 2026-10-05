@@ -2,7 +2,9 @@
 
 <div class="row g-3">
 
-    {{-- Asset Code --}}
+    {{-- =========================================================
+         Asset Code
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Asset Code <span class="text-danger">*</span>
@@ -24,7 +26,9 @@
     </div>
 
 
-    {{-- Item Name --}}
+    {{-- =========================================================
+         Item Name
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Item Name <span class="text-danger">*</span>
@@ -46,7 +50,9 @@
     </div>
 
 
-    {{-- Department --}}
+    {{-- =========================================================
+         Department
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Department <span class="text-danger">*</span>
@@ -63,9 +69,9 @@
             </option>
 
             @foreach($departments as $department)
-
                 <option
                     value="{{ $department->id }}"
+                    data-department-name="{{ $department->name }}"
                     @selected(
                         old(
                             'department_id',
@@ -75,9 +81,7 @@
                 >
                     {{ $department->name }}
                 </option>
-
             @endforeach
-
         </select>
 
         @error('department_id')
@@ -88,7 +92,9 @@
     </div>
 
 
-    {{-- Category --}}
+    {{-- =========================================================
+         Category
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Category <span class="text-danger">*</span>
@@ -104,7 +110,6 @@
             </option>
 
             @foreach($categories as $category)
-
                 <option
                     value="{{ $category->id }}"
                     @selected(
@@ -116,9 +121,7 @@
                 >
                     {{ $category->name }}
                 </option>
-
             @endforeach
-
         </select>
 
         @error('category_id')
@@ -129,7 +132,9 @@
     </div>
 
 
-    {{-- Make --}}
+    {{-- =========================================================
+         Make
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Make
@@ -150,7 +155,9 @@
     </div>
 
 
-    {{-- Model --}}
+    {{-- =========================================================
+         Model
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Model
@@ -171,7 +178,9 @@
     </div>
 
 
-    {{-- Issued Quantity --}}
+    {{-- =========================================================
+         Issued Quantity
+    ========================================================== --}}
     <div class="col-md-3">
         <label class="form-label">
             Issued Quantity <span class="text-danger">*</span>
@@ -194,7 +203,9 @@
     </div>
 
 
-    {{-- Physically Verified --}}
+    {{-- =========================================================
+         Physically Verified
+    ========================================================== --}}
     <div class="col-md-3">
         <label class="form-label">
             Physically Verified <span class="text-danger">*</span>
@@ -220,7 +231,16 @@
     </div>
 
 
-    {{-- Present Occupant --}}
+    {{-- =========================================================
+         Present Occupant
+         
+         IMPORTANT:
+         - Department itself is NOT an employee.
+         - Department option has empty value.
+         - Employee option has employee ID.
+         - Therefore department selection results in
+           present_occupant_id = NULL.
+    ========================================================== --}}
     <div class="col-md-6">
 
         <label class="form-label">
@@ -233,8 +253,14 @@
             class="form-select @error('present_occupant_id') is-invalid @enderror"
         >
 
-            <option value="">
-                Unassigned
+            {{-- This option is dynamically replaced with
+                 the selected department name --}}
+            <option
+                value=""
+                id="departmentOccupantOption"
+                data-type="department"
+            >
+                Select Department First
             </option>
 
             @foreach($employees as $employee)
@@ -242,6 +268,7 @@
                 <option
                     value="{{ $employee->id }}"
                     data-department-id="{{ $employee->department_id }}"
+                    data-type="employee"
                     @selected(
                         old(
                             'present_occupant_id',
@@ -250,8 +277,9 @@
                     )
                 >
                     {{ $employee->name }}
-                    —
-                    {{ $employee->employee_code }}
+                    @if($employee->employee_code)
+                        — {{ $employee->employee_code }}
+                    @endif
                 </option>
 
             @endforeach
@@ -262,8 +290,7 @@
             id="occupantHelp"
             class="form-text"
         >
-            Select a department first. Only employees belonging
-            to that department can be selected.
+            Select a department first.
         </div>
 
         @error('present_occupant_id')
@@ -275,7 +302,9 @@
     </div>
 
 
-    {{-- Serial Number --}}
+    {{-- =========================================================
+         Serial Number
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Serial Number
@@ -299,7 +328,9 @@
     </div>
 
 
-    {{-- Barcode --}}
+    {{-- =========================================================
+         Barcode
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Barcode / Sticker No.
@@ -323,7 +354,9 @@
     </div>
 
 
-    {{-- Date of Issue --}}
+    {{-- =========================================================
+         Date of Issue
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Date of Issue
@@ -349,7 +382,9 @@
     </div>
 
 
-    {{-- Status --}}
+    {{-- =========================================================
+         Status
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Status <span class="text-danger">*</span>
@@ -360,7 +395,6 @@
             class="form-select @error('asset_status') is-invalid @enderror"
             required
         >
-
             @foreach([
                 'Active',
                 'Assigned',
@@ -386,7 +420,6 @@
                 </option>
 
             @endforeach
-
         </select>
 
         @error('asset_status')
@@ -397,7 +430,9 @@
     </div>
 
 
-    {{-- Condition --}}
+    {{-- =========================================================
+         Condition
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Condition <span class="text-danger">*</span>
@@ -408,7 +443,6 @@
             class="form-select @error('condition') is-invalid @enderror"
             required
         >
-
             @foreach([
                 'New',
                 'Good',
@@ -430,7 +464,6 @@
                 </option>
 
             @endforeach
-
         </select>
 
         @error('condition')
@@ -441,7 +474,9 @@
     </div>
 
 
-    {{-- Location --}}
+    {{-- =========================================================
+         Location
+    ========================================================== --}}
     <div class="col-md-4">
         <label class="form-label">
             Location
@@ -462,7 +497,9 @@
     </div>
 
 
-    {{-- Remarks --}}
+    {{-- =========================================================
+         Remarks
+    ========================================================== --}}
     <div class="col-12">
         <label class="form-label">
             Remarks
@@ -484,6 +521,9 @@
 </div>
 
 
+{{-- =============================================================
+     Buttons
+============================================================== --}}
 <div class="mt-4">
 
     <button
@@ -504,71 +544,193 @@
 </div>
 
 
-{{-- ========================================================= --}}
-{{-- Department → Employee Filtering --}}
-{{-- ========================================================= --}}
-
+{{-- =============================================================
+     Department → Present Occupant Filtering
+     
+     Rules:
+     
+     1. Department is always required.
+     2. Department itself appears as the first occupant option.
+     3. Department option has value="".
+     4. Therefore selecting the department stores
+        present_occupant_id = NULL.
+     5. Employees are filtered according to department_id.
+     6. Employees from other departments cannot be selected.
+     7. Changing department automatically selects the new
+        department as Present Occupant.
+============================================================== --}}
 <script>
 
-    document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
 
-        const departmentSelect =
-            document.getElementById('department_id');
+    const departmentSelect =
+        document.getElementById('department_id');
 
-        const occupantSelect =
-            document.getElementById('present_occupant_id');
+    const occupantSelect =
+        document.getElementById('present_occupant_id');
 
-        const occupantHelp =
-            document.getElementById('occupantHelp');
+    const departmentOccupantOption =
+        document.getElementById('departmentOccupantOption');
+
+    const occupantHelp =
+        document.getElementById('occupantHelp');
 
 
-        if (!departmentSelect || !occupantSelect) {
+    if (
+        !departmentSelect ||
+        !occupantSelect ||
+        !departmentOccupantOption
+    ) {
+        return;
+    }
+
+
+    /*
+     * Store the initial employee selection.
+     *
+     * This is important for EDIT mode.
+     *
+     * If an existing asset already has an employee assigned,
+     * we want to keep that employee selected when the page
+     * initially loads.
+     */
+    const initialOccupantValue =
+        occupantSelect.value;
+
+
+    /*
+     * Get the selected department name.
+     */
+    function getDepartmentName() {
+
+        const selectedOption =
+            departmentSelect.options[
+                departmentSelect.selectedIndex
+            ];
+
+        if (!selectedOption) {
+            return '';
+        }
+
+        return (
+            selectedOption.dataset.departmentName ||
+            selectedOption.textContent.trim()
+        );
+    }
+
+
+    /*
+     * Update the department option.
+     */
+    function updateDepartmentOccupantOption() {
+
+        const departmentId =
+            departmentSelect.value;
+
+        const departmentName =
+            getDepartmentName();
+
+
+        if (!departmentId) {
+
+            departmentOccupantOption.textContent =
+                'Select Department First';
+
+            departmentOccupantOption.disabled = false;
+
             return;
         }
 
 
-        function filterEmployees() {
-
-            const departmentId =
-                departmentSelect.value;
-
-            const currentValue =
-                occupantSelect.value;
+        departmentOccupantOption.textContent =
+            departmentName;
 
 
-            let matchingEmployees = 0;
+        /*
+         * The department option always represents
+         * "department itself" and therefore has no
+         * employee ID.
+         */
+        departmentOccupantOption.value = '';
 
-            /*
-            |--------------------------------------------------------------------------
-            | Filter employee options
-            |--------------------------------------------------------------------------
-            */
+        departmentOccupantOption.disabled = false;
+    }
+
+
+    /*
+     * Filter employees according to selected department.
+     */
+    function filterEmployees(resetToDepartment = false) {
+
+        const departmentId =
+            departmentSelect.value;
+
+        let matchingEmployees = 0;
+
+
+        updateDepartmentOccupantOption();
+
+
+        /*
+         * No department selected.
+         */
+        if (!departmentId) {
 
             Array.from(
                 occupantSelect.options
             ).forEach(function (option) {
 
-                /*
-                |--------------------------------------------------------------------------
-                | "Unassigned" is always available
-                |--------------------------------------------------------------------------
-                */
-
-                if (option.value === '') {
-
-                    option.hidden = false;
-                    option.disabled = false;
-
-                    return;
+                if (
+                    option.dataset.type === 'employee'
+                ) {
+                    option.hidden = true;
+                    option.disabled = true;
                 }
 
+            });
+
+
+            occupantSelect.value = '';
+
+            occupantHelp.textContent =
+                'Select a department first.';
+
+            return;
+        }
+
+
+        /*
+         * Filter employee options.
+         */
+        Array.from(
+            occupantSelect.options
+        ).forEach(function (option) {
+
+            /*
+             * Department option.
+             */
+            if (
+                option.dataset.type === 'department'
+            ) {
+
+                option.hidden = false;
+                option.disabled = false;
+
+                return;
+            }
+
+
+            /*
+             * Employee option.
+             */
+            if (
+                option.dataset.type === 'employee'
+            ) {
 
                 const employeeDepartmentId =
                     option.dataset.departmentId;
 
-
                 const matches =
-                    departmentId !== '' &&
                     employeeDepartmentId === departmentId;
 
 
@@ -580,57 +742,58 @@
                     matchingEmployees++;
                 }
 
-            });
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | If selected employee doesn't belong to selected department,
-            | clear the employee.
-            |--------------------------------------------------------------------------
-            */
-
-            const selectedOption =
-                occupantSelect.options[
-                    occupantSelect.selectedIndex
-                ];
-
-
-            if (
-                selectedOption &&
-                selectedOption.value !== '' &&
-                (
-                    selectedOption.disabled ||
-                    selectedOption.hidden
-                )
-            ) {
-
-                occupantSelect.value = '';
-
             }
 
+        });
 
-            /*
-            |--------------------------------------------------------------------------
-            | Help text
-            |--------------------------------------------------------------------------
-            */
 
-            if (!departmentId) {
+        /*
+         * If department was changed by the user,
+         * select the department itself.
+         */
+        if (resetToDepartment) {
 
-                occupantHelp.textContent =
-                    'Select a department first.';
+            occupantSelect.value = '';
 
-            } else if (matchingEmployees === 0) {
+        }
 
-                occupantHelp.textContent =
-                    'No active employees are currently assigned to this department.';
 
-            } else {
+        /*
+         * Initial page load / edit mode.
+         *
+         * If an existing employee belongs to this
+         * department, preserve that employee.
+         *
+         * Otherwise use the department option.
+         */
+        if (!resetToDepartment) {
 
-                occupantHelp.textContent =
-                    matchingEmployees +
-                    ' active employee(s) available for this department.';
+            const currentValue =
+                occupantSelect.value;
+
+
+            if (currentValue !== '') {
+
+                const selectedEmployee =
+                    Array.from(
+                        occupantSelect.options
+                    ).find(function (option) {
+
+                        return (
+                            option.value === currentValue &&
+                            option.dataset.type === 'employee' &&
+                            option.dataset.departmentId === departmentId &&
+                            !option.disabled
+                        );
+
+                    });
+
+
+                if (!selectedEmployee) {
+
+                    occupantSelect.value = '';
+
+                }
 
             }
 
@@ -638,25 +801,71 @@
 
 
         /*
-        |--------------------------------------------------------------------------
-        | Department changed
-        |--------------------------------------------------------------------------
-        */
+         * Help text.
+         */
+        if (matchingEmployees === 0) {
 
-        departmentSelect.addEventListener(
-            'change',
-            filterEmployees
-        );
+            occupantHelp.textContent =
+                departmentName() +
+                ' is selected as the Present Occupant. ' +
+                'No active employees are currently assigned to this department.';
+
+        } else {
+
+            occupantHelp.textContent =
+                'Select the department itself if the employee is unknown, ' +
+                'or select an employee belonging to this department.';
+        }
+
+    }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Initial page load
-        |--------------------------------------------------------------------------
-        */
+    /*
+     * Helper to get the current department name.
+     */
+    function departmentName() {
 
-        filterEmployees();
+        return getDepartmentName() || 'The department';
+    }
 
-    });
+
+    /*
+     * Department changed.
+     *
+     * Whenever the department changes, automatically
+     * select the department itself.
+     */
+    departmentSelect.addEventListener(
+        'change',
+        function () {
+
+            filterEmployees(true);
+
+        }
+    );
+
+
+    /*
+     * Initial page load.
+     *
+     * Preserve an existing employee during EDIT mode.
+     */
+    filterEmployees(false);
+
+
+    /*
+     * If there is no existing employee selected,
+     * explicitly select the department option.
+     */
+    if (
+        initialOccupantValue === '' &&
+        departmentSelect.value !== ''
+    ) {
+
+        occupantSelect.value = '';
+
+    }
+
+});
 
 </script>

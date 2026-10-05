@@ -25,7 +25,6 @@ Route::get('/dashboard', DashboardController::class)
 Route::resource('assets', AssetController::class);
 
 // Departments
-// Custom route for viewing department assets in a popup
 Route::get(
     '/departments/{department}/assets',
     [DepartmentController::class, 'assets']
@@ -39,22 +38,49 @@ Route::resource('categories', CategoryController::class);
 // Employees
 Route::resource('employees', EmployeeController::class);
 
-// Imports
+/*
+|--------------------------------------------------------------------------
+| Imports
+|--------------------------------------------------------------------------
+*/
+
+// Import history / upload page
 Route::get(
     '/imports',
     [ImportController::class, 'index']
 )->name('imports.index');
 
+// Upload import file
 Route::post(
     '/imports',
     [ImportController::class, 'store']
 )->name('imports.store');
 
+// Process uploaded document
+Route::post(
+    '/imports/{import}/process',
+    [ImportController::class, 'process']
+)->name('imports.process');
+
+// Validate / normalize extracted records
+Route::post(
+    '/imports/{import}/validate',
+    [ImportController::class, 'validateImport']
+)->name('imports.validate');
+
+// Confirm and create actual assets
+Route::post(
+    '/imports/{import}/confirm',
+    [ImportController::class, 'confirm']
+)->name('imports.confirm');
+
+// View import details
 Route::get(
     '/imports/{import}',
     [ImportController::class, 'show']
 )->name('imports.show');
 
+// Delete import
 Route::delete(
     '/imports/{import}',
     [ImportController::class, 'destroy']

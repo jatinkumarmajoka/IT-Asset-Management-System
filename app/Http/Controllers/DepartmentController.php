@@ -20,9 +20,11 @@ class DepartmentController extends Controller
             ->when(
                 $request->filled('search'),
                 function ($query) use ($request) {
+
                     $search = $request->string('search');
 
                     $query->where(function ($query) use ($search) {
+
                         $query->where(
                             'name',
                             'like',
@@ -32,7 +34,9 @@ class DepartmentController extends Controller
                             'like',
                             '%' . $search . '%'
                         );
+
                     });
+
                 }
             )
             ->orderBy('name')
@@ -45,6 +49,7 @@ class DepartmentController extends Controller
         );
     }
 
+
     /**
      * Show the create department form.
      */
@@ -53,12 +58,14 @@ class DepartmentController extends Controller
         return view('departments.create');
     }
 
+
     /**
      * Store a new department.
      */
     public function store(Request $request)
     {
         $data = $request->validate([
+
             'name' => [
                 'required',
                 'string',
@@ -84,6 +91,7 @@ class DepartmentController extends Controller
                     'inactive',
                 ]),
             ],
+
         ]);
 
         Department::create($data);
@@ -96,6 +104,7 @@ class DepartmentController extends Controller
             );
     }
 
+
     /**
      * Show the edit department form.
      */
@@ -107,6 +116,7 @@ class DepartmentController extends Controller
         );
     }
 
+
     /**
      * Update an existing department.
      */
@@ -115,6 +125,7 @@ class DepartmentController extends Controller
         Department $department
     ) {
         $data = $request->validate([
+
             'name' => [
                 'required',
                 'string',
@@ -143,6 +154,7 @@ class DepartmentController extends Controller
                     'inactive',
                 ]),
             ],
+
         ]);
 
         $department->update($data);
@@ -154,6 +166,7 @@ class DepartmentController extends Controller
                 'Department updated successfully.'
             );
     }
+
 
     /**
      * Delete a department.
@@ -181,6 +194,7 @@ class DepartmentController extends Controller
         );
     }
 
+
     /**
      * Return assets allocated to a department.
      *
@@ -190,21 +204,50 @@ class DepartmentController extends Controller
     public function assets(Department $department)
     {
         $assets = $department->assets()
-            ->with('occupant')
+            ->with([
+                'department',
+                'occupant',
+            ])
             ->orderBy('item_name')
             ->get();
 
         return response()->json([
+
             'department' => [
-                'id' => $department->id,
-                'name' => $department->name,
-                'code' => $department->code,
+
+                'id' =>
+                    $department->id,
+
+                'name' =>
+                    $department->name,
+
+                'code' =>
+                    $department->code,
+
             ],
 
             'assets' => $assets->map(
                 function ($asset) {
+
+                    /*
+                     * IMPORTANT:
+                     *
+                     * If an employee is assigned,
+                     * return employee name.
+                     *
+                     * Otherwise return the department name.
+                     *
+                     * We DO NOT create a fake employee.
+                     */
+                    $occupant =
+                        $asset->occupant?->name
+                        ?? $asset->department?->name;
+
+
                     return [
-                        'id' => $asset->id,
+
+                        'id' =>
+                            $asset->id,
 
                         'asset_code' =>
                             $asset->asset_code,
@@ -225,17 +268,19 @@ class DepartmentController extends Controller
                             $asset->physically_verified_quantity,
 
                         'occupant' =>
-                            $asset->occupant?->name
-                            ?? 'Unassigned',
+                            $occupant,
 
                         'barcode_number' =>
                             $asset->barcode_number,
 
                         'status' =>
                             $asset->asset_status,
+
                     ];
+
                 }
             ),
+
         ]);
     }
 }
