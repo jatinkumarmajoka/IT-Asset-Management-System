@@ -15,8 +15,7 @@
 
     <a
         href="{{ route('assets.create') }}"
-        class="btn btn-primary"
-    >
+        class="btn btn-primary">
         <i class="bi bi-plus-lg me-1"></i>
         Add Asset
     </a>
@@ -40,8 +39,7 @@
                     name="search"
                     class="form-control"
                     placeholder="Search asset, barcode, serial..."
-                    value="{{ request('search') }}"
-                >
+                    value="{{ request('search') }}">
 
             </div>
 
@@ -51,8 +49,7 @@
 
                 <select
                     name="department_id"
-                    class="form-select"
-                >
+                    class="form-select">
 
                     <option value="">
                         All Departments
@@ -60,14 +57,14 @@
 
                     @foreach($departments as $d)
 
-                        <option
-                            value="{{ $d->id }}"
-                            @selected(
-                                request('department_id') == $d->id
-                            )
+                    <option
+                        value="{{ $d->id }}"
+                        @selected(
+                        request('department_id')==$d->id
+                        )
                         >
-                            {{ $d->name }}
-                        </option>
+                        {{ $d->name }}
+                    </option>
 
                     @endforeach
 
@@ -81,8 +78,7 @@
 
                 <select
                     name="category_id"
-                    class="form-select"
-                >
+                    class="form-select">
 
                     <option value="">
                         All Categories
@@ -90,14 +86,14 @@
 
                     @foreach($categories as $c)
 
-                        <option
-                            value="{{ $c->id }}"
-                            @selected(
-                                request('category_id') == $c->id
-                            )
+                    <option
+                        value="{{ $c->id }}"
+                        @selected(
+                        request('category_id')==$c->id
+                        )
                         >
-                            {{ $c->name }}
-                        </option>
+                        {{ $c->name }}
+                    </option>
 
                     @endforeach
 
@@ -111,33 +107,31 @@
 
                 <select
                     name="asset_status"
-                    class="form-select"
-                >
+                    class="form-select">
 
                     <option value="">
                         All Status
                     </option>
 
                     @foreach([
-                        'Active',
-                        'Assigned',
-                        'Unassigned',
-                        'Missing',
-                        'Damaged',
-                        'Disposed',
-                        'Transferred',
-                        'Under Repair',
-                        'Retired'
+                    'Active',
+                    'Assigned',
+                    'Unassigned',
+                    'Missing',
+                    'Damaged',
+                    'Disposed',
+                    'Transferred',
+                    'Under Repair',
+                    'Retired'
                     ] as $s)
 
-                        <option
-                            value="{{ $s }}"
-                            @selected(
-                                request('asset_status') == $s
-                            )
-                        >
-                            {{ $s }}
-                        </option>
+                    <option
+                        value="{{ $s }}"
+                        @selected(
+                        request('asset_status')==$s
+                        )>
+                        {{ $s }}
+                    </option>
 
                     @endforeach
 
@@ -151,8 +145,7 @@
 
                 <button
                     type="submit"
-                    class="btn btn-dark w-100"
-                >
+                    class="btn btn-dark w-100">
                     Filter
                 </button>
 
@@ -218,66 +211,65 @@
 
                     @forelse($assets as $asset)
 
-                        <tr>
+                    <tr>
 
-                            {{-- S.No. --}}
-                            <td>
-                                {{ $assets->firstItem() + $loop->index }}
-                            </td>
-
-
-                            {{-- Asset --}}
-                            <td>
-
-                                <a
-                                    class="fw-semibold text-decoration-none"
-                                    href="{{ route('assets.show', $asset) }}"
-                                >
-                                    {{ $asset->item_name }}
-                                </a>
-
-                                <br>
-
-                                <small class="text-muted">
-                                    {{ $asset->asset_code }}
-                                </small>
-
-                            </td>
+                        {{-- S.No. --}}
+                        <td>
+                            {{ $assets->firstItem() + $loop->index }}
+                        </td>
 
 
-                            {{-- Make & Model --}}
-                            <td>
+                        {{-- Asset --}}
+                        <td>
 
-                                {{ trim(
+                            <a
+                                class="fw-semibold text-decoration-none"
+                                href="{{ route('assets.show', $asset) }}">
+                                {{ $asset->item_name }}
+                            </a>
+
+                            <br>
+
+                            <small class="text-muted">
+                                {{ $asset->asset_code }}
+                            </small>
+
+                        </td>
+
+
+                        {{-- Make & Model --}}
+                        <td>
+
+                            {{ trim(
                                     ($asset->make ?? '') .
                                     ' ' .
                                     ($asset->model ?? '')
                                 ) ?: '—' }}
 
-                            </td>
+                        </td>
 
 
-                            {{-- Department --}}
-                            <td>
+                        {{-- Department --}}
+                        <td>
 
-                                {{ $asset->department?->name ?? '—' }}
+                            {{ $asset->department?->name ?? '—' }}
 
-                            </td>
-
-
-                            {{-- Issued Quantity --}}
-                            <td>
-                                {{ $asset->issued_quantity }}
-                            </td>
+                        </td>
 
 
-                            {{-- Verified Quantity --}}
-                            <td>
-                                {{ $asset->physically_verified_quantity }}
-                            </td>
+                        {{-- Issued Quantity --}}
+                        <td>
+                            {{ $asset->issued_quantity }}
+                        </td>
 
 
-                            {{-- =================================================
+                        {{-- Verified Quantity --}}
+                        <td>
+                            {{ $asset->physically_verified_quantity }}
+                        </td>
+
+
+                        {{-- =================================================
                                  Present Occupant
 
                                  If employee exists:
@@ -290,88 +282,86 @@
                                  The department is NOT stored as an employee.
                                  present_occupant_id remains NULL.
                             ================================================== --}}
-                            <td>
+                        <td>
 
-                                @if($asset->occupant)
+                            @if($asset->occupant)
 
-                                    <span class="fw-semibold">
-                                        {{ $asset->occupant->name }}
-                                    </span>
+                            <span class="fw-semibold">
+                                {{ $asset->occupant->name }}
+                            </span>
 
-                                    @if($asset->occupant->employee_code)
+                            @if($asset->occupant->employee_code)
 
-                                        <br>
+                            <br>
 
-                                        <small class="text-muted">
-                                            {{ $asset->occupant->employee_code }}
-                                        </small>
+                            <small class="text-muted">
+                                {{ $asset->occupant->employee_code }}
+                            </small>
 
-                                    @endif
+                            @endif
 
-                                @elseif($asset->department)
+                            @elseif($asset->department)
 
-                                    <span class="fw-semibold">
-                                        {{ $asset->department->name }}
-                                    </span>
+                            <span class="fw-semibold">
+                                {{ $asset->department->name }}
+                            </span>
 
-                                    <br>
+                            <br>
 
-                                    <small class="text-muted">
-                                        Department
-                                    </small>
+                            <small class="text-muted">
+                                Department
+                            </small>
 
-                                @else
+                            @else
 
-                                    —
+                            —
 
-                                @endif
+                            @endif
 
-                            </td>
-
-
-                            {{-- Barcode --}}
-                            <td>
-                                {{ $asset->barcode_number ?? '—' }}
-                            </td>
+                        </td>
 
 
-                            {{-- Status --}}
-                            <td>
-
-                                <span class="badge text-bg-light">
-                                    {{ $asset->asset_status }}
-                                </span>
-
-                            </td>
+                        {{-- Barcode --}}
+                        <td>
+                            {{ $asset->barcode_number ?? '—' }}
+                        </td>
 
 
-                            {{-- Edit --}}
-                            <td>
+                        {{-- Status --}}
+                        <td>
 
-                                <a
-                                    href="{{ route('assets.edit', $asset) }}"
-                                    class="btn btn-sm btn-outline-secondary"
-                                    title="Edit Asset"
-                                >
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+                            <span class="badge text-bg-light">
+                                {{ $asset->asset_status }}
+                            </span>
 
-                            </td>
+                        </td>
 
-                        </tr>
+
+                        {{-- Edit --}}
+                        <td>
+
+                            <a
+                                href="{{ route('assets.edit', $asset) }}"
+                                class="btn btn-sm btn-outline-secondary"
+                                title="Edit Asset">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                        </td>
+
+                    </tr>
 
                     @empty
 
-                        <tr>
+                    <tr>
 
-                            <td
-                                colspan="10"
-                                class="text-center py-5 text-muted"
-                            >
-                                No assets found.
-                            </td>
+                        <td
+                            colspan="10"
+                            class="text-center py-5 text-muted">
+                            No assets found.
+                        </td>
 
-                        </tr>
+                    </tr>
 
                     @endforelse
 

@@ -8,6 +8,8 @@ use App\Models\ImportBatch;
 
 use App\Services\Imports\Parsers\DocxAssetParser;
 
+use App\Services\Imports\Parsers\ExcelAssetParser;
+
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\DB;
@@ -23,12 +25,10 @@ class AssetImportService
     public function __construct(
 
         private DocxAssetParser $docxParser,
-
+        private ExcelAssetParser $excelParser,
         private AssetImportNormalizer $normalizer
 
-    ) {
-
-    }
+    ) {}
 
     /**
 
@@ -98,12 +98,18 @@ class AssetImportService
 
                     'docx' => $this->docxParser->parse($path),
 
-                    default => throw new \RuntimeException(
-
-                        'This importer currently supports DOCX processing.'
-
+                    'xlsx', 'csv', 'ods' => $this->excelParser->parse(
+                        $path,
+                        $import->file_type
                     ),
 
+                    'xls' => throw new \RuntimeException(
+                        'Legacy .xls files are not supported. Please save the file as .xlsx and upload again.'
+                    ),
+
+                    default => throw new \RuntimeException(
+                        'Unsupported import file type: ' . $import->file_type
+                    ),
                 };
 
                 /*
@@ -147,7 +153,6 @@ class AssetImportService
                 ) {
 
                     $documents = [$documents];
-
                 }
 
                 $sourceRowNumber = 0;
@@ -177,7 +182,6 @@ class AssetImportService
                     ) {
 
                         continue;
-
                     }
 
                     /*
@@ -191,39 +195,21 @@ class AssetImportService
                     */
 
                     $headers = array_map(
+    function ($header) {
 
-                        function ($header) {
+        $header = (string) $header;
 
-                            $header = (string) $header;
+        // Replace line breaks and multiple spaces with one space.
+        $header = preg_replace(
+            '/\s+/',
+            ' ',
+            $header
+        );
 
-                            $header = preg_replace(
-
-                                "/**\r\n**|**\r**|**\n**/",
-
-                                ' ',
-
-                                $header
-
-                            );
-
-                            $header = preg_replace(
-
-                                '/**\s**+/',
-
-                                ' ',
-
-                                $header
-
-                            );
-
-                            return trim($header);
-
-                        },
-
-                        $headers
-
-                    );
-
+        return trim($header);
+    },
+    $headers
+);
                     /*
 
                     |--------------------------------------------------------------------------
@@ -249,35 +235,32 @@ class AssetImportService
                             $rowData[$header] =
 
                                 $row[$index] ?? '';
-
                         }
 
                         $import->rows()->create([
 
                             'row_number' =>
 
-                                $sourceRowNumber,
+                            $sourceRowNumber,
 
                             'raw_data' =>
 
-                                $rowData,
+                            $rowData,
 
                             'normalized_data' =>
 
-                                null,
+                            null,
 
                             'status' =>
 
-                                'pending',
+                            'pending',
 
                             'errors' =>
 
-                                null,
+                            null,
 
                         ]);
-
                     }
-
                 }
 
                 /*
@@ -294,36 +277,34 @@ class AssetImportService
 
                     'total_rows' =>
 
-                        $sourceRowNumber,
+                    $sourceRowNumber,
 
                     'valid_rows' =>
 
-                        0,
+                    0,
 
                     'invalid_rows' =>
 
-                        0,
+                    0,
 
                     'duplicate_rows' =>
 
-                        0,
+                    0,
 
                     'imported_rows' =>
 
-                        0,
+                    0,
 
                     'status' =>
 
-                        $sourceRowNumber > 0
+                    $sourceRowNumber > 0
 
-                            ? 'parsed'
+                        ? 'parsed'
 
-                            : 'failed',
+                        : 'failed',
 
                 ]);
-
             });
-
         } catch (\Throwable $e) {
 
             $import->update([
@@ -339,9 +320,7 @@ class AssetImportService
             ]);
 
             throw $e;
-
         }
-
     }
 
     /**
@@ -414,34 +393,32 @@ class AssetImportService
 
                     $result['status'] === 'valid'
 
-                        ? 'valid'
+                    ? 'valid'
 
-                        : 'invalid';
+                    : 'invalid';
 
                 $row->update([
 
                     'normalized_data' =>
 
-                        $result,
+                    $result,
 
                     'status' =>
 
-                        $rowStatus,
+                    $rowStatus,
 
                     'errors' =>
 
-                        $result['errors'] ?? null,
+                    $result['errors'] ?? null,
 
                 ]);
 
                 if ($result['status'] === 'valid') {
 
                     $validRows++;
-
                 } else {
 
                     $invalidRows++;
-
                 }
 
                 /*
@@ -468,20 +445,13 @@ class AssetImportService
 
                     ->contains(function ($asset) {
 
-                        return !empty(
-
-                            $asset['duplicate_of_asset_id'] ?? null
-
-                        );
-
+                        return !empty($asset['duplicate_of_asset_id'] ?? null);
                     });
 
                 if ($hasDuplicate) {
 
                     $duplicateRows++;
-
                 }
-
             }
 
             /*
@@ -498,28 +468,26 @@ class AssetImportService
 
                 'valid_rows' =>
 
-                    $validRows,
+                $validRows,
 
                 'invalid_rows' =>
 
-                    $invalidRows,
+                $invalidRows,
 
                 'duplicate_rows' =>
 
-                    $duplicateRows,
+                $duplicateRows,
 
                 'status' =>
 
-                    $invalidRows === 0
+                $invalidRows === 0
 
-                        ? 'validated'
+                    ? 'validated'
 
-                        : 'needs_review',
+                    : 'needs_review',
 
             ]);
-
         });
-
     }
 
     /**
@@ -601,7 +569,6 @@ class AssetImportService
                 'Imported asset is missing department_id.'
 
             );
-
         }
 
         if (empty($data['category_id'])) {
@@ -611,7 +578,6 @@ class AssetImportService
                 'Imported asset is missing category_id.'
 
             );
-
         }
 
         /*
@@ -628,77 +594,77 @@ class AssetImportService
 
             'asset_code' =>
 
-                $data['asset_code'] ?? null,
+            $data['asset_code'] ?? null,
 
             'department_id' =>
 
-                $data['department_id'],
+            $data['department_id'],
 
             'category_id' =>
 
-                $data['category_id'],
+            $data['category_id'],
 
             'item_name' =>
 
-                $data['item_name'] ?? null,
+            $data['item_name'] ?? null,
 
             'make' =>
 
-                $data['make'] ?? null,
+            $data['make'] ?? null,
 
             'model' =>
 
-                $data['model'] ?? null,
+            $data['model'] ?? null,
 
             'issued_quantity' =>
 
-                $data['issued_quantity'] ?? 0,
+            $data['issued_quantity'] ?? 0,
 
             'physically_verified_quantity' =>
 
-                $data['physically_verified_quantity'] ?? 0,
+            $data['physically_verified_quantity'] ?? 0,
 
             'present_occupant_id' =>
 
-                $data['present_occupant_id'] ?? null,
+            $data['present_occupant_id'] ?? null,
 
             'asset_serial_number' =>
 
-                $data['asset_serial_number'] ?? null,
+            $data['asset_serial_number'] ?? null,
 
             'barcode_number' =>
 
-                $data['barcode_number'] ?? null,
+            $data['barcode_number'] ?? null,
 
             'date_of_issue' =>
 
-                $data['date_of_issue'] ?? null,
+            $data['date_of_issue'] ?? null,
 
             'asset_status' =>
 
-                $data['asset_status'] ?? 'Active',
+            $data['asset_status'] ?? 'Active',
 
             'condition' =>
 
-                $data['condition'] ?? 'Good',
+            $data['condition'] ?? 'Good',
 
             'location' =>
 
-                $data['location'] ?? null,
+            $data['location'] ?? null,
 
             'remarks' =>
 
-                $data['remarks']
+            $data['remarks']
 
                 ?? 'Imported from departmental stock register.',
 
             'created_by' =>
 
-                $userId,
+            $userId,
 
             'updated_by' =>
 
-                $userId,
+            $userId,
 
         ];
 
@@ -738,54 +704,53 @@ class AssetImportService
 
             'action' =>
 
-                'imported',
+            'imported',
 
             'new_value' =>
 
-                json_encode(
+            json_encode(
 
-                    $asset->only([
+                $asset->only([
 
-                        'asset_code',
+                    'asset_code',
 
-                        'item_name',
+                    'item_name',
 
-                        'department_id',
+                    'department_id',
 
-                        'category_id',
+                    'category_id',
 
-                        'barcode_number',
+                    'barcode_number',
 
-                        'asset_serial_number',
+                    'asset_serial_number',
 
-                        'present_occupant_id',
+                    'present_occupant_id',
 
-                        'issued_quantity',
+                    'issued_quantity',
 
-                        'physically_verified_quantity',
+                    'physically_verified_quantity',
 
-                        'date_of_issue',
+                    'date_of_issue',
 
-                    ])
+                ])
 
-                ),
+            ),
 
             'performed_by' =>
 
-                $userId,
+            $userId,
 
             'ip_address' =>
 
-                Request::ip(),
+            Request::ip(),
 
             'created_at' =>
 
-                now(),
+            now(),
 
         ]);
 
         return $asset;
-
     }
 
     /**
@@ -819,7 +784,7 @@ class AssetImportService
         )) {
             throw new \RuntimeException(
                 'This import is not ready for confirmation. ' .
-                'Current status: ' . $import->status
+                    'Current status: ' . $import->status
             );
         }
 
@@ -854,7 +819,6 @@ class AssetImportService
                 ) {
 
                     continue;
-
                 }
 
                 /*
@@ -890,7 +854,6 @@ class AssetImportService
                     ) {
 
                         continue;
-
                     }
 
                     /*
@@ -956,7 +919,6 @@ class AssetImportService
                     );
 
                     $imported++;
-
                 }
 
                 /*
@@ -974,7 +936,6 @@ class AssetImportService
                     'status' => 'imported',
 
                 ]);
-
             }
 
             /*
@@ -991,18 +952,16 @@ class AssetImportService
 
                 'status' =>
 
-                    'imported',
+                'imported',
 
                 'imported_rows' =>
 
-                    $imported,
+                $imported,
 
             ]);
 
             return $imported;
-
         });
-
     }
 
     /**
@@ -1040,7 +999,5 @@ class AssetImportService
             $sequence
 
         );
-
     }
-
 }
