@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+
 class Asset extends Model
 {
     use HasFactory, SoftDeletes;
@@ -46,7 +47,7 @@ class Asset extends Model
     ];
 
     /**
-     * Department to which the asset belongs.
+     * Department to which the asset currently belongs.
      */
     public function department(): BelongsTo
     {
@@ -79,4 +80,18 @@ class Asset extends Model
     {
         return $this->hasMany(AssetHistory::class);
     }
+
+    /**
+     * Asset transfer records.
+     */
+    public function transfers(): HasMany
+    {
+        return $this->hasMany(AssetTransfer::class);
+    }
+
+
+    public function documents(): HasMany
+{
+    return $this->hasMany(AssetDocument::class);
+}
 }

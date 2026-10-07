@@ -1,566 +1,514 @@
+@php
+$isEdit = isset($asset) && $asset->exists;
+
+$selectedDepartmentId = old(
+'department_id',
+$asset->department_id ?? ''
+);
+
+$selectedOccupantId = old(
+'present_occupant_id',
+$asset->present_occupant_id ?? ''
+);
+@endphp
+
 @csrf
 
 <div class="row g-3">
 
-    {{-- =========================================================
-         Asset Code
-    ========================================================== --}}
+    {{-- =========================
+        ROW 1
+    ========================== --}}
+
+    {{-- Asset Code --}}
     <div class="col-md-4">
-        <label class="form-label">
+        <label for="asset_code" class="form-label">
             Asset Code <span class="text-danger">*</span>
         </label>
 
         <input
             type="text"
             name="asset_code"
+            id="asset_code"
             class="form-control @error('asset_code') is-invalid @enderror"
             value="{{ old('asset_code', $asset->asset_code ?? '') }}"
-            required
-        >
+            required>
 
         @error('asset_code')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
-
-    {{-- =========================================================
-         Item Name
-    ========================================================== --}}
+    {{-- Item Name --}}
     <div class="col-md-4">
-        <label class="form-label">
+        <label for="item_name" class="form-label">
             Item Name <span class="text-danger">*</span>
         </label>
 
         <input
             type="text"
             name="item_name"
+            id="item_name"
             class="form-control @error('item_name') is-invalid @enderror"
             value="{{ old('item_name', $asset->item_name ?? '') }}"
-            required
-        >
+            required>
 
         @error('item_name')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
-
-    {{-- =========================================================
-         Department
-    ========================================================== --}}
+    {{-- Category --}}
     <div class="col-md-4">
-        <label class="form-label">
-            Department <span class="text-danger">*</span>
-        </label>
-
-        <select
-            name="department_id"
-            id="department_id"
-            class="form-select @error('department_id') is-invalid @enderror"
-            required
-        >
-            <option value="">
-                Select Department
-            </option>
-
-            @foreach($departments as $department)
-                <option
-                    value="{{ $department->id }}"
-                    data-department-name="{{ $department->name }}"
-                    @selected(
-                        old(
-                            'department_id',
-                            $asset->department_id ?? ''
-                        ) == $department->id
-                    )
-                >
-                    {{ $department->name }}
-                </option>
-            @endforeach
-        </select>
-
-        @error('department_id')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
-        @enderror
-    </div>
-
-
-    {{-- =========================================================
-         Category
-    ========================================================== --}}
-    <div class="col-md-4">
-        <label class="form-label">
+        <label for="category_id" class="form-label">
             Category <span class="text-danger">*</span>
         </label>
 
         <select
             name="category_id"
+            id="category_id"
             class="form-select @error('category_id') is-invalid @enderror"
-            required
-        >
-            <option value="">
-                Select Category
-            </option>
+            required>
+            <option value="">Select Category</option>
 
             @foreach($categories as $category)
-                <option
-                    value="{{ $category->id }}"
-                    @selected(
-                        old(
-                            'category_id',
-                            $asset->category_id ?? ''
-                        ) == $category->id
-                    )
+            <option
+                value="{{ $category->id }}"
+                @selected(
+                old( 'category_id' ,
+                $asset->category_id ?? ''
+                ) == $category->id
+                )
                 >
-                    {{ $category->name }}
-                </option>
+                {{ $category->name }}
+            </option>
             @endforeach
         </select>
 
         @error('category_id')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
 
-    {{-- =========================================================
-         Make
-    ========================================================== --}}
+    {{-- =========================
+        ROW 2
+    ========================== --}}
+
+    {{-- Department --}}
     <div class="col-md-4">
         <label class="form-label">
+            Department <span class="text-danger">*</span>
+        </label>
+
+        @if($isEdit)
+
+        {{-- Department cannot be changed from Asset Edit --}}
+        <div class="form-control bg-light">
+            {{ $asset->department?->name ?? '—' }}
+        </div>
+
+        <div class="form-text">
+            Department can only be changed through Asset Transfer.
+        </div>
+
+        @else
+
+        <select
+            name="department_id"
+            id="department_id"
+            class="form-select @error('department_id') is-invalid @enderror"
+            required>
+            <option value="">Select Department</option>
+
+            @foreach($departments as $department)
+            <option
+                value="{{ $department->id }}"
+                @selected($selectedDepartmentId==$department->id)
+                >
+                {{ $department->name }}
+            </option>
+            @endforeach
+        </select>
+
+        @error('department_id')
+        <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+
+        @endif
+    </div>
+
+
+    {{-- Present Occupant --}}
+    <div class="col-md-4">
+        <label class="form-label">
+            Present Occupant
+        </label>
+
+        @if($isEdit)
+
+        {{-- Occupant cannot be changed from Asset Edit --}}
+        <div class="form-control bg-light">
+            @if($asset->occupant)
+            {{ $asset->occupant->name }}
+            @elseif($asset->department)
+            {{ $asset->department->name }}
+            @else
+            —
+            @endif
+        </div>
+
+        <div class="form-text">
+            Occupant can only be changed through Asset Transfer.
+        </div>
+
+        @else
+
+        <select
+            name="present_occupant_id"
+            id="present_occupant_id"
+            class="form-select @error('present_occupant_id') is-invalid @enderror">
+            <option value="">
+                Select department / employee
+            </option>
+
+            {{-- Employees are inserted dynamically by JavaScript --}}
+        </select>
+
+        @error('present_occupant_id')
+        <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+
+        <div class="form-text">
+            Select the department itself if the exact employee is unknown.
+        </div>
+
+        @endif
+    </div>
+
+
+    {{-- Make --}}
+    <div class="col-md-4">
+        <label for="make" class="form-label">
             Make
         </label>
 
         <input
             type="text"
             name="make"
+            id="make"
             class="form-control @error('make') is-invalid @enderror"
-            value="{{ old('make', $asset->make ?? '') }}"
-        >
+            value="{{ old('make', $asset->make ?? '') }}">
 
         @error('make')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
 
-    {{-- =========================================================
-         Model
-    ========================================================== --}}
+    {{-- =========================
+        ROW 3
+    ========================== --}}
+
+    {{-- Model --}}
     <div class="col-md-4">
-        <label class="form-label">
+        <label for="model" class="form-label">
             Model
         </label>
 
         <input
             type="text"
             name="model"
+            id="model"
             class="form-control @error('model') is-invalid @enderror"
-            value="{{ old('model', $asset->model ?? '') }}"
-        >
+            value="{{ old('model', $asset->model ?? '') }}">
 
         @error('model')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
 
-    {{-- =========================================================
-         Issued Quantity
-    ========================================================== --}}
-    <div class="col-md-3">
-        <label class="form-label">
-            Issued Quantity <span class="text-danger">*</span>
-        </label>
-
-        <input
-            type="number"
-            min="0"
-            name="issued_quantity"
-            class="form-control @error('issued_quantity') is-invalid @enderror"
-            value="{{ old('issued_quantity', $asset->issued_quantity ?? 1) }}"
-            required
-        >
-
-        @error('issued_quantity')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
-        @enderror
-    </div>
-
-
-    {{-- =========================================================
-         Physically Verified
-    ========================================================== --}}
-    <div class="col-md-3">
-        <label class="form-label">
-            Physically Verified <span class="text-danger">*</span>
-        </label>
-
-        <input
-            type="number"
-            min="0"
-            name="physically_verified_quantity"
-            class="form-control @error('physically_verified_quantity') is-invalid @enderror"
-            value="{{ old(
-                'physically_verified_quantity',
-                $asset->physically_verified_quantity ?? 0
-            ) }}"
-            required
-        >
-
-        @error('physically_verified_quantity')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
-        @enderror
-    </div>
-
-
-    {{-- =========================================================
-         Present Occupant
-         
-         IMPORTANT:
-         - Department itself is NOT an employee.
-         - Department option has empty value.
-         - Employee option has employee ID.
-         - Therefore department selection results in
-           present_occupant_id = NULL.
-    ========================================================== --}}
-    <div class="col-md-6">
-
-        <label class="form-label">
-            Present Occupant
-        </label>
-
-        <select
-            name="present_occupant_id"
-            id="present_occupant_id"
-            class="form-select @error('present_occupant_id') is-invalid @enderror"
-        >
-
-            {{-- This option is dynamically replaced with
-                 the selected department name --}}
-            <option
-                value=""
-                id="departmentOccupantOption"
-                data-type="department"
-            >
-                Select Department First
-            </option>
-
-            @foreach($employees as $employee)
-
-                <option
-                    value="{{ $employee->id }}"
-                    data-department-id="{{ $employee->department_id }}"
-                    data-type="employee"
-                    @selected(
-                        old(
-                            'present_occupant_id',
-                            $asset->present_occupant_id ?? ''
-                        ) == $employee->id
-                    )
-                >
-                    {{ $employee->name }}
-                    @if($employee->employee_code)
-                        — {{ $employee->employee_code }}
-                    @endif
-                </option>
-
-            @endforeach
-
-        </select>
-
-        <div
-            id="occupantHelp"
-            class="form-text"
-        >
-            Select a department first.
-        </div>
-
-        @error('present_occupant_id')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
-        @enderror
-
-    </div>
-
-
-    {{-- =========================================================
-         Serial Number
-    ========================================================== --}}
+    {{-- Serial Number --}}
     <div class="col-md-4">
-        <label class="form-label">
+        <label for="asset_serial_number" class="form-label">
             Serial Number
         </label>
 
         <input
             type="text"
             name="asset_serial_number"
+            id="asset_serial_number"
             class="form-control @error('asset_serial_number') is-invalid @enderror"
-            value="{{ old(
-                'asset_serial_number',
-                $asset->asset_serial_number ?? ''
-            ) }}"
-        >
+            value="{{ old('asset_serial_number', $asset->asset_serial_number ?? '') }}">
 
         @error('asset_serial_number')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
 
-    {{-- =========================================================
-         Barcode
-    ========================================================== --}}
+    {{-- Barcode --}}
     <div class="col-md-4">
-        <label class="form-label">
-            Barcode / Sticker No.
+        <label for="barcode_number" class="form-label">
+            Barcode Number
         </label>
 
         <input
             type="text"
             name="barcode_number"
+            id="barcode_number"
             class="form-control @error('barcode_number') is-invalid @enderror"
-            value="{{ old(
-                'barcode_number',
-                $asset->barcode_number ?? ''
-            ) }}"
-        >
+            value="{{ old('barcode_number', $asset->barcode_number ?? '') }}">
 
         @error('barcode_number')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
 
-    {{-- =========================================================
-         Date of Issue
-    ========================================================== --}}
+    {{-- =========================
+        ROW 4
+    ========================== --}}
+
+    {{-- Issued Quantity --}}
     <div class="col-md-4">
-        <label class="form-label">
+        <label for="issued_quantity" class="form-label">
+            Issued Quantity <span class="text-danger">*</span>
+        </label>
+
+        <input
+            type="number"
+            name="issued_quantity"
+            id="issued_quantity"
+            class="form-control @error('issued_quantity') is-invalid @enderror"
+            value="{{ old('issued_quantity', $asset->issued_quantity ?? 0) }}"
+            min="0"
+            required>
+
+        @error('issued_quantity')
+        <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+
+    {{-- Physically Verified --}}
+    <div class="col-md-4">
+        <label for="physically_verified_quantity" class="form-label">
+            Physically Verified <span class="text-danger">*</span>
+        </label>
+
+        <input
+            type="number"
+            name="physically_verified_quantity"
+            id="physically_verified_quantity"
+            class="form-control @error('physically_verified_quantity') is-invalid @enderror"
+            value="{{ old('physically_verified_quantity', $asset->physically_verified_quantity ?? 0) }}"
+            min="0"
+            required>
+
+        @error('physically_verified_quantity')
+        <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+
+    {{-- Date of Issue --}}
+    <div class="col-md-4">
+        <label for="date_of_issue" class="form-label">
             Date of Issue
         </label>
 
         <input
             type="date"
             name="date_of_issue"
+            id="date_of_issue"
             class="form-control @error('date_of_issue') is-invalid @enderror"
             value="{{ old(
                 'date_of_issue',
-                isset($asset) && $asset->date_of_issue
+                isset($asset->date_of_issue)
                     ? $asset->date_of_issue->format('Y-m-d')
                     : ''
-            ) }}"
-        >
+            ) }}">
 
         @error('date_of_issue')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
 
-    {{-- =========================================================
-         Status
-    ========================================================== --}}
+    {{-- =========================
+        ROW 5
+    ========================== --}}
+
+    {{-- Status --}}
     <div class="col-md-4">
-        <label class="form-label">
+        <label for="asset_status" class="form-label">
             Status <span class="text-danger">*</span>
         </label>
 
         <select
             name="asset_status"
+            id="asset_status"
             class="form-select @error('asset_status') is-invalid @enderror"
-            required
-        >
-            @foreach([
-                'Active',
-                'Assigned',
-                'Unassigned',
-                'Missing',
-                'Damaged',
-                'Disposed',
-                'Transferred',
-                'Under Repair',
-                'Retired'
-            ] as $status)
+            required>
+            @php
+            $statuses = [
+            'Active',
+            'Assigned',
+            'Unassigned',
+            'Missing',
+            'Damaged',
+            'Disposed',
+            'Transferred',
+            'Under Repair',
+            'Retired',
+            ];
+            @endphp
 
-                <option
-                    value="{{ $status }}"
-                    @selected(
-                        old(
-                            'asset_status',
-                            $asset->asset_status ?? 'Active'
-                        ) === $status
-                    )
+            <option value="">Select Status</option>
+
+            @foreach($statuses as $status)
+            <option
+                value="{{ $status }}"
+                @selected(
+                old( 'asset_status' ,
+                $asset->asset_status ?? ''
+                ) === $status
+                )
                 >
-                    {{ $status }}
-                </option>
-
+                {{ $status }}
+            </option>
             @endforeach
         </select>
 
         @error('asset_status')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
 
-    {{-- =========================================================
-         Condition
-    ========================================================== --}}
+    {{-- Condition --}}
     <div class="col-md-4">
-        <label class="form-label">
+        <label for="condition" class="form-label">
             Condition <span class="text-danger">*</span>
         </label>
 
         <select
             name="condition"
+            id="condition"
             class="form-select @error('condition') is-invalid @enderror"
-            required
-        >
-            @foreach([
-                'New',
-                'Good',
-                'Fair',
-                'Damaged',
-                'Critical'
-            ] as $condition)
+            required>
+            @php
+            $conditions = [
+            'New',
+            'Good',
+            'Fair',
+            'Damaged',
+            'Critical',
+            ];
+            @endphp
 
-                <option
-                    value="{{ $condition }}"
-                    @selected(
-                        old(
-                            'condition',
-                            $asset->condition ?? 'Good'
-                        ) === $condition
-                    )
+            <option value="">Select Condition</option>
+
+            @foreach($conditions as $condition)
+            <option
+                value="{{ $condition }}"
+                @selected(
+                old( 'condition' ,
+                $asset->condition ?? ''
+                ) === $condition
+                )
                 >
-                    {{ $condition }}
-                </option>
-
+                {{ $condition }}
+            </option>
             @endforeach
         </select>
 
         @error('condition')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
 
-    {{-- =========================================================
-         Location
-    ========================================================== --}}
+    {{-- Location --}}
     <div class="col-md-4">
-        <label class="form-label">
+        <label for="location" class="form-label">
             Location
         </label>
 
         <input
             type="text"
             name="location"
+            id="location"
             class="form-control @error('location') is-invalid @enderror"
-            value="{{ old('location', $asset->location ?? '') }}"
-        >
+            value="{{ old('location', $asset->location ?? '') }}">
 
         @error('location')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
 
-    {{-- =========================================================
-         Remarks
-    ========================================================== --}}
+    {{-- =========================
+        ROW 6
+    ========================== --}}
+
+    {{-- Remarks --}}
     <div class="col-12">
-        <label class="form-label">
+        <label for="remarks" class="form-label">
             Remarks
         </label>
 
         <textarea
             name="remarks"
-            class="form-control @error('remarks') is-invalid @enderror"
-            rows="3"
-        >{{ old('remarks', $asset->remarks ?? '') }}</textarea>
+            id="remarks"
+            rows="4"
+            class="form-control @error('remarks') is-invalid @enderror">{{ old('remarks', $asset->remarks ?? '') }}</textarea>
 
         @error('remarks')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
+        <div class="invalid-feedback">{{ $message }}</div>
         @enderror
+    </div>
+
+
+    {{-- =========================
+        BUTTONS
+    ========================== --}}
+
+    <div class="col-12">
+        <hr class="my-3">
+
+        <div class="d-flex justify-content-end gap-2">
+
+            <a
+                href="{{ route('assets.index') }}"
+                class="btn btn-outline-secondary">
+                Cancel
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary">
+                <i class="bi bi-check-lg me-1"></i>
+                {{ $buttonText ?? ($isEdit ? 'Save Changes' : 'Create Asset') }}
+            </button>
+
+        </div>
     </div>
 
 </div>
 
 
-{{-- =============================================================
-     Buttons
-============================================================== --}}
-<div class="mt-4">
+{{-- =========================================================
+    PRESENT OCCUPANT DYNAMIC FILTER
+    Only required on CREATE
+========================================================= --}}
 
-    <button
-        type="submit"
-        class="btn btn-primary"
-    >
-        <i class="bi bi-check-lg me-1"></i>
-        {{ $buttonText }}
-    </button>
+@if(!$isEdit)
 
-    <a
-        href="{{ route('assets.index') }}"
-        class="btn btn-light"
-    >
-        Cancel
-    </a>
-
-</div>
-
-
-{{-- =============================================================
-     Department → Present Occupant Filtering
-     
-     Rules:
-     
-     1. Department is always required.
-     2. Department itself appears as the first occupant option.
-     3. Department option has value="".
-     4. Therefore selecting the department stores
-        present_occupant_id = NULL.
-     5. Employees are filtered according to department_id.
-     6. Employees from other departments cannot be selected.
-     7. Changing department automatically selects the new
-        department as Present Occupant.
-============================================================== --}}
+@push('scripts')
 <script>
-
 document.addEventListener('DOMContentLoaded', function () {
 
     const departmentSelect =
@@ -569,38 +517,40 @@ document.addEventListener('DOMContentLoaded', function () {
     const occupantSelect =
         document.getElementById('present_occupant_id');
 
-    const departmentOccupantOption =
-        document.getElementById('departmentOccupantOption');
-
-    const occupantHelp =
-        document.getElementById('occupantHelp');
-
-
-    if (
-        !departmentSelect ||
-        !occupantSelect ||
-        !departmentOccupantOption
-    ) {
+    if (!departmentSelect || !occupantSelect) {
         return;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Employee data
+    |--------------------------------------------------------------------------
+    |
+    | Do not use PHP -> operators here.
+    | data_get() keeps this section safe from the formatting issue
+    | you currently have in VS Code.
+    |
+    */
+
+    const employees = [
+        @foreach($employees as $employee)
+        {
+            id: @json(data_get($employee, 'id')),
+            name: @json(data_get($employee, 'name')),
+            department_id: @json(data_get($employee, 'department_id'))
+        },
+        @endforeach
+    ];
+
+    const oldOccupantId =
+        @json(old('present_occupant_id', ''));
 
     /*
-     * Store the initial employee selection.
-     *
-     * This is important for EDIT mode.
-     *
-     * If an existing asset already has an employee assigned,
-     * we want to keep that employee selected when the page
-     * initially loads.
-     */
-    const initialOccupantValue =
-        occupantSelect.value;
+    |--------------------------------------------------------------------------
+    | Get department name
+    |--------------------------------------------------------------------------
+    */
 
-
-    /*
-     * Get the selected department name.
-     */
     function getDepartmentName() {
 
         const selectedOption =
@@ -612,260 +562,188 @@ document.addEventListener('DOMContentLoaded', function () {
             return '';
         }
 
-        return (
-            selectedOption.dataset.departmentName ||
-            selectedOption.textContent.trim()
-        );
+        return selectedOption.textContent.trim();
     }
 
-
     /*
-     * Update the department option.
-     */
-    function updateDepartmentOccupantOption() {
+    |--------------------------------------------------------------------------
+    | Build Present Occupant dropdown
+    |--------------------------------------------------------------------------
+    */
+
+    function rebuildOccupants() {
 
         const departmentId =
             departmentSelect.value;
 
-        const departmentName =
-            getDepartmentName();
+        /*
+        |--------------------------------------------------------------------------
+        | Reset dropdown
+        |--------------------------------------------------------------------------
+        */
 
+        occupantSelect.innerHTML = '';
+
+        /*
+        |--------------------------------------------------------------------------
+        | No department selected
+        |--------------------------------------------------------------------------
+        */
 
         if (!departmentId) {
 
-            departmentOccupantOption.textContent =
-                'Select Department First';
+            const option =
+                document.createElement('option');
 
-            departmentOccupantOption.disabled = false;
+            option.value = '';
+            option.textContent =
+                'Select department first';
+
+            occupantSelect.appendChild(option);
+
+            occupantSelect.disabled = true;
 
             return;
         }
 
-
-        departmentOccupantOption.textContent =
-            departmentName;
-
+        occupantSelect.disabled = false;
 
         /*
-         * The department option always represents
-         * "department itself" and therefore has no
-         * employee ID.
-         */
-        departmentOccupantOption.value = '';
+        |--------------------------------------------------------------------------
+        | Department itself
+        |--------------------------------------------------------------------------
+        |
+        | Empty value means:
+        |
+        | present_occupant_id = NULL
+        |
+        | Therefore the department becomes the fallback
+        | Present Occupant.
+        |
+        */
 
-        departmentOccupantOption.disabled = false;
-    }
+        const departmentOption =
+            document.createElement('option');
 
+        departmentOption.value = '';
 
-    /*
-     * Filter employees according to selected department.
-     */
-    function filterEmployees(resetToDepartment = false) {
+        departmentOption.textContent =
+            getDepartmentName() + ' (Department)';
 
-        const departmentId =
-            departmentSelect.value;
-
-        let matchingEmployees = 0;
-
-
-        updateDepartmentOccupantOption();
-
+        occupantSelect.appendChild(
+            departmentOption
+        );
 
         /*
-         * No department selected.
-         */
-        if (!departmentId) {
+        |--------------------------------------------------------------------------
+        | Employees belonging to selected department
+        |--------------------------------------------------------------------------
+        */
 
-            Array.from(
-                occupantSelect.options
-            ).forEach(function (option) {
+        const matchingEmployees =
+            employees.filter(function (employee) {
 
-                if (
-                    option.dataset.type === 'employee'
-                ) {
-                    option.hidden = true;
-                    option.disabled = true;
-                }
+                return String(employee.department_id) ===
+                    String(departmentId);
 
             });
 
+        matchingEmployees.forEach(function (employee) {
 
-            occupantSelect.value = '';
+            const option =
+                document.createElement('option');
 
-            occupantHelp.textContent =
-                'Select a department first.';
+            option.value = employee.id;
 
-            return;
-        }
+            option.textContent = employee.name;
 
-
-        /*
-         * Filter employee options.
-         */
-        Array.from(
-            occupantSelect.options
-        ).forEach(function (option) {
-
-            /*
-             * Department option.
-             */
-            if (
-                option.dataset.type === 'department'
-            ) {
-
-                option.hidden = false;
-                option.disabled = false;
-
-                return;
-            }
-
-
-            /*
-             * Employee option.
-             */
-            if (
-                option.dataset.type === 'employee'
-            ) {
-
-                const employeeDepartmentId =
-                    option.dataset.departmentId;
-
-                const matches =
-                    employeeDepartmentId === departmentId;
-
-
-                option.hidden = !matches;
-                option.disabled = !matches;
-
-
-                if (matches) {
-                    matchingEmployees++;
-                }
-
-            }
+            occupantSelect.appendChild(option);
 
         });
 
-
         /*
-         * If department was changed by the user,
-         * select the department itself.
-         */
-        if (resetToDepartment) {
+        |--------------------------------------------------------------------------
+        | Restore old selected employee after validation error
+        |--------------------------------------------------------------------------
+        */
+
+        if (oldOccupantId !== null &&
+            oldOccupantId !== '') {
+
+            const employeeOption =
+                Array.from(
+                    occupantSelect.options
+                ).find(function (option) {
+
+                    return String(option.value) ===
+                        String(oldOccupantId);
+
+                });
+
+            if (employeeOption) {
+
+                occupantSelect.value =
+                    oldOccupantId;
+
+            } else {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Employee does not belong to selected department.
+                | Fall back to department.
+                |--------------------------------------------------------------------------
+                */
+
+                occupantSelect.value = '';
+
+            }
+
+        } else {
+
+            /*
+            |--------------------------------------------------------------------------
+            | No employee selected.
+            | Department is the Present Occupant.
+            |--------------------------------------------------------------------------
+            */
 
             occupantSelect.value = '';
 
         }
-
-
-        /*
-         * Initial page load / edit mode.
-         *
-         * If an existing employee belongs to this
-         * department, preserve that employee.
-         *
-         * Otherwise use the department option.
-         */
-        if (!resetToDepartment) {
-
-            const currentValue =
-                occupantSelect.value;
-
-
-            if (currentValue !== '') {
-
-                const selectedEmployee =
-                    Array.from(
-                        occupantSelect.options
-                    ).find(function (option) {
-
-                        return (
-                            option.value === currentValue &&
-                            option.dataset.type === 'employee' &&
-                            option.dataset.departmentId === departmentId &&
-                            !option.disabled
-                        );
-
-                    });
-
-
-                if (!selectedEmployee) {
-
-                    occupantSelect.value = '';
-
-                }
-
-            }
-
-        }
-
-
-        /*
-         * Help text.
-         */
-        if (matchingEmployees === 0) {
-
-            occupantHelp.textContent =
-                departmentName() +
-                ' is selected as the Present Occupant. ' +
-                'No active employees are currently assigned to this department.';
-
-        } else {
-
-            occupantHelp.textContent =
-                'Select the department itself if the employee is unknown, ' +
-                'or select an employee belonging to this department.';
-        }
-
     }
 
-
     /*
-     * Helper to get the current department name.
-     */
-    function departmentName() {
+    |--------------------------------------------------------------------------
+    | Department changed
+    |--------------------------------------------------------------------------
+    */
 
-        return getDepartmentName() || 'The department';
-    }
-
-
-    /*
-     * Department changed.
-     *
-     * Whenever the department changes, automatically
-     * select the department itself.
-     */
     departmentSelect.addEventListener(
         'change',
         function () {
 
-            filterEmployees(true);
+            /*
+            | When department changes, automatically
+            | reset Present Occupant to department.
+            */
+
+            rebuildOccupants();
+
+            occupantSelect.value = '';
 
         }
     );
 
-
     /*
-     * Initial page load.
-     *
-     * Preserve an existing employee during EDIT mode.
-     */
-    filterEmployees(false);
+    |--------------------------------------------------------------------------
+    | Initial page load
+    |--------------------------------------------------------------------------
+    */
 
-
-    /*
-     * If there is no existing employee selected,
-     * explicitly select the department option.
-     */
-    if (
-        initialOccupantValue === '' &&
-        departmentSelect.value !== ''
-    ) {
-
-        occupantSelect.value = '';
-
-    }
+    rebuildOccupants();
 
 });
-
 </script>
+@endpush
+
+@endif

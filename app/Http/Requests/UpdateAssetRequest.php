@@ -9,7 +9,7 @@ class UpdateAssetRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return auth()->check();
     }
 
     public function rules(): array
@@ -17,6 +17,32 @@ class UpdateAssetRequest extends FormRequest
         $assetId = $this->route('asset')?->id;
 
         return [
+
+            /*
+            |--------------------------------------------------------------------------
+            | SECURITY
+            |--------------------------------------------------------------------------
+            |
+            | Department and Present Occupant can ONLY be changed
+            | through the Asset Transfer workflow.
+            |
+            */
+
+            'department_id' => [
+                'prohibited',
+            ],
+
+            'present_occupant_id' => [
+                'prohibited',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Asset Information
+            |--------------------------------------------------------------------------
+            */
+
             'asset_code' => [
                 'required',
                 'string',
@@ -25,11 +51,6 @@ class UpdateAssetRequest extends FormRequest
                     'assets',
                     'asset_code'
                 )->ignore($assetId),
-            ],
-
-            'department_id' => [
-                'required',
-                'exists:departments,id',
             ],
 
             'category_id' => [
@@ -67,23 +88,6 @@ class UpdateAssetRequest extends FormRequest
                 'min:0',
             ],
 
-            /*
-             * IMPORTANT:
-             *
-             * The selected occupant must belong to the
-             * department selected on this form.
-             */
-            'present_occupant_id' => [
-                'nullable',
-                Rule::exists('employees', 'id')
-                    ->where(function ($query) {
-                        $query->where(
-                            'department_id',
-                            $this->input('department_id')
-                        );
-                    }),
-            ],
-
             'asset_serial_number' => [
                 'nullable',
                 'string',
@@ -118,7 +122,7 @@ class UpdateAssetRequest extends FormRequest
                     'Missing',
                     'Damaged',
                     'Disposed',
-                    'Transferred',
+                    'Return to Store',
                     'Under Repair',
                     'Retired',
                 ]),
@@ -151,8 +155,11 @@ class UpdateAssetRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'present_occupant_id.exists' =>
-                'The selected occupant must belong to the selected department.',
+            'department_id.prohibited' =>
+                'The department can only be changed through the Asset Transfer workflow.',
+
+            'present_occupant_id.prohibited' =>
+                'The present occupant can only be changed through the Asset Transfer workflow.',
         ];
     }
 }

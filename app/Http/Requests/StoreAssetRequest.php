@@ -107,7 +107,7 @@ class StoreAssetRequest extends FormRequest
                     'Missing',
                     'Damaged',
                     'Disposed',
-                    'Transferred',
+                    'Return to Store',
                     'Under Repair',
                     'Retired',
                 ]),

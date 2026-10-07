@@ -199,62 +199,103 @@ class AssetController extends Controller
     }
 
 
-    /**
-     * Display a single asset.
-     */
-    public function show(Asset $asset)
-    {
-        $asset->load([
-            'department',
-            'category',
-            'occupant',
-            'history',
-        ]);
+ public function show(Asset $asset)
+{
+    $asset->load([
+        'department',
+        'category',
+        'occupant',
+        'history',
 
-        return view(
-            'assets.show',
-            compact('asset')
-        );
+        'transfers' => function ($query) {
+            $query->with([
+                'fromDepartment',
+                'toDepartment',
+                'fromOccupant',
+                'toOccupant',
+                'initiatedBy',
+                'approvedBy',
+                'completedBy',
+            ])
+            ->latest('transfer_date')
+            ->latest('id');
+        },
+    ]);
+
+    /*
+     * Latest completed transfer determines
+     * the Previous Occupant.
+     */
+    $lastCompletedTransfer = $asset->transfers
+        ->filter(fn ($transfer) => $transfer->status === 'completed')
+        ->first();
+
+    $previousOccupant = null;
+
+    if ($lastCompletedTransfer) {
+        $previousOccupant =
+            $lastCompletedTransfer->fromOccupant?->name
+            ?? $lastCompletedTransfer->fromDepartment?->name;
     }
 
+    return view(
+        'assets.show',
+        compact(
+            'asset',
+            'previousOccupant'
+        )
+    );
+}
 
-    /**
-     * Show edit asset form.
-     */
-    public function edit(Asset $asset)
-    {
-        $asset->load([
-            'department',
-            'category',
-            'occupant',
-        ]);
 
-        return view('assets.edit', [
+   public function edit(Asset $asset)
+{
+    $asset->load([
+        'department',
+        'category',
+        'occupant',
+        'transfers' => function ($query) {
+            $query->where('status', 'completed')
+                ->with([
+                    'fromDepartment',
+                    'fromOccupant',
+                ])
+                ->latest('transfer_date')
+                ->latest('id');
+        },
+    ]);
 
-            'asset' =>
-                $asset,
+    $lastCompletedTransfer = $asset->transfers->first();
 
-            'departments' =>
-                Department::query()
-                    ->where('status', 'active')
-                    ->orderBy('name')
-                    ->get(),
+    $previousOccupant = null;
 
-            'categories' =>
-                Category::query()
-                    ->where('status', 'active')
-                    ->orderBy('name')
-                    ->get(),
-
-            'employees' =>
-                Employee::query()
-                    ->where('status', 'active')
-                    ->orderBy('name')
-                    ->get(),
-
-        ]);
+    if ($lastCompletedTransfer) {
+        $previousOccupant =
+            $lastCompletedTransfer->fromOccupant?->name
+            ?? $lastCompletedTransfer->fromDepartment?->name;
     }
 
+    return view('assets.edit', [
+        'asset' => $asset,
+
+        'previousOccupant' => $previousOccupant,
+
+        'departments' => Department::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get(),
+
+        'categories' => Category::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get(),
+
+        'employees' => Employee::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get(),
+    ]);
+}
 
     /**
      * Update an existing asset.
