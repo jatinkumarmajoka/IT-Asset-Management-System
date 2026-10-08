@@ -1,1088 +1,1105 @@
 @extends('layouts.app')
 
-
 @section('page-title', 'Departments')
-
 
 @section('content')
 
 <style>
     /* Department index table */
+
     .departments-table-wrap {
+
         width: 100%;
+
         overflow-x: auto;
+
         overflow-y: hidden;
+
     }
 
     .departments-table {
+
         width: 100%;
-        min-width: 920px;
+
+        min-width: 0;
+
         table-layout: fixed;
+
         margin-bottom: 0 !important;
+
     }
 
     .departments-table th,
+
     .departments-table td {
+
         vertical-align: middle !important;
-        padding: 14px 16px !important;
+
+        padding: 10px 10px !important;
+
     }
 
     .departments-table thead th {
+
         white-space: nowrap !important;
+
         word-break: normal !important;
+
         overflow-wrap: normal !important;
+
         font-weight: 700;
+
     }
 
     .departments-table .col-name {
-        width: 25%;
+
+        width: 30%;
+
     }
 
     .departments-table .col-code {
-        width: 20%;
+
+        width: 16%;
+
     }
 
     .departments-table .col-assets {
+
         width: 9%;
+
         text-align: center;
+
     }
 
     .departments-table .col-employees {
+
         width: 11%;
+
         text-align: center;
+
     }
 
     .departments-table .col-status {
-        width: 13%;
+
+        width: 12%;
+
         text-align: center;
+
     }
 
     .departments-table .col-actions {
+
         width: 22%;
+
         text-align: center;
+
         white-space: nowrap !important;
+
     }
 
     .departments-table .department-name {
+
         font-weight: 600;
+
         line-height: 1.35;
+
         overflow-wrap: break-word;
+
         word-break: normal;
+
     }
 
     .departments-table .department-description {
+
         display: block;
+
         margin-top: 6px;
+
         color: #6c757d;
+
         font-size: .9rem;
+
         line-height: 1.45;
+
         overflow-wrap: break-word;
+
         word-break: normal;
+
     }
 
     .departments-table .code-badge {
+
         display: inline-block;
+
         max-width: 100%;
+
         padding: 6px 10px;
+
         border: 1px solid #dee2e6;
+
         border-radius: 8px;
+
         background: #f8f9fa;
+
         font-weight: 600;
+
         white-space: nowrap;
+
         overflow: hidden;
+
         text-overflow: ellipsis;
+
         vertical-align: middle;
+
     }
 
     .departments-table .count-badge {
+
         display: inline-flex;
+
         align-items: center;
+
         justify-content: center;
+
         min-width: 38px;
+
         height: 34px;
+
         padding: 0 10px;
+
         border-radius: 8px;
+
         font-weight: 700;
+
     }
 
     .departments-table .actions {
+
         display: inline-flex;
+
         align-items: center;
+
         justify-content: center;
+
         flex-wrap: nowrap;
+
         white-space: nowrap;
+
     }
 
     .departments-table .actions .btn {
+
+
+        white-space: nowrap;
+        font-size: 0.75rem;
+        line-height: 1.2;
+        padding: 5px 8px;
+    }
+
+    /* Compact status badges. */
+    .departments-table .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        line-height: 1.2;
+        padding: 5px 8px !important;
         white-space: nowrap;
     }
 
+    .departments-table .status-badge i {
+        margin-right: 4px !important;
+    }
+
     @media (max-width: 1100px) {
+
         .departments-table {
+
             min-width: 920px;
+
         }
+
     }
 </style>
 
+{{-- Page Header --}}
 
-    {{-- Page Header --}}
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
 
+        <h2 class="mb-1">Departments</h2>
 
-        <div>
+        <p class="text-muted mb-0">
 
-            <h2 class="mb-1">Departments</h2>
+            Manage departments and view allocated assets.
 
-            <p class="text-muted mb-0">
-
-                Manage departments and view allocated assets.
-
-            </p>
-
-        </div>
-
-
-        <a
-
-            href="{{ route('departments.create') }}"
-
-            class="btn btn-primary"
-
-        >
-
-            <i class="bi bi-plus-lg me-1"></i>
-
-            Add Department
-
-        </a>
-
+        </p>
 
     </div>
 
+    <a
 
-    {{-- Departments Card --}}
+        href="{{ route('departments.create') }}"
 
-    <div class="card shadow-sm border-0">
+        class="btn btn-primary">
 
+        <i class="bi bi-plus-lg me-1"></i>
 
-        <div class="card-body">
+        Add Department
 
+    </a>
 
-            {{-- Search --}}
-
-            <form
-
-                method="GET"
-
-                action="{{ route('departments.index') }}"
-
-                class="mb-4"
-
-            >
-
-
-                <div class="input-group">
-
-
-                    <span class="input-group-text bg-white">
-
-                        <i class="bi bi-search"></i>
-
-                    </span>
-
-
-                    <input
-
-                        type="text"
-
-                        name="search"
-
-                        class="form-control"
-
-                        placeholder="Search department name or code..."
-
-                        value="{{ request('search') }}"
-
-                    >
-
-
-                    <button
-
-                        type="submit"
-
-                        class="btn btn-dark"
-
-                    >
-
-                        Search
-
-                    </button>
-
-
-                    @if (request('search'))
-
-                        <a
-
-                            href="{{ route('departments.index') }}"
-
-                            class="btn btn-outline-secondary"
-
-                        >
-
-                            Clear
-
-                        </a>
-
-                    @endif
-
-
-                </div>
-
-
-            </form>
-
-
-            {{-- Departments Table --}}
-<div class="departments-table-wrap">
-    <table class="table table-hover align-middle departments-table">
-
-        <thead class="table-light">
-            <tr>
-                <th class="col-name">Name</th>
-                <th class="col-code">Code</th>
-                <th class="col-assets">Assets</th>
-                <th class="col-employees">Employees</th>
-                <th class="col-status">Status</th>
-                <th class="col-actions">Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @forelse ($departments as $department)
-                <tr>
-
-                    {{-- Name --}}
-                    <td class="col-name">
-                        <div class="department-name">
-                            {{ $department->name }}
-                        </div>
-
-                        @if ($department->description)
-                            <span class="department-description">
-                                {{ \Illuminate\Support\Str::limit($department->description, 60) }}
-                            </span>
-                        @endif
-                    </td>
-
-                    {{-- Code --}}
-                    <td class="col-code">
-                        <span
-                            class="code-badge"
-                            title="{{ $department->code }}"
-                        >
-                            {{ $department->code }}
-                        </span>
-                    </td>
-
-                    {{-- Assets --}}
-                    <td class="col-assets">
-                        <span class="count-badge bg-primary text-white">
-                            {{ $department->assets_count }}
-                        </span>
-                    </td>
-
-                    {{-- Employees --}}
-                    <td class="col-employees">
-                        <span class="count-badge bg-secondary text-white">
-                            {{ $department->employees_count }}
-                        </span>
-                    </td>
-
-                    {{-- Status --}}
-                    <td class="col-status">
-                        @if ($department->status === 'active')
-                            <span class="badge text-bg-success px-3 py-2">
-                                <i class="bi bi-check-circle me-1"></i>
-                                Active
-                            </span>
-                        @else
-                            <span class="badge text-bg-secondary px-3 py-2">
-                                <i class="bi bi-dash-circle me-1"></i>
-                                Inactive
-                            </span>
-                        @endif
-                    </td>
-
-                    {{-- Actions --}}
-                    <td class="col-actions">
-                        <div class="actions">
-
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-outline-primary view-assets-btn"
-                                data-assets-url="{{ route('departments.assets', $department) }}"
-                                data-department-name="{{ $department->name }}"
-                            >
-                                <i class="bi bi-box-seam me-1"></i>
-                                View Assets
-                            </button>
-
-                            <a
-                                href="{{ route('departments.edit', $department) }}"
-                                class="btn btn-sm btn-outline-secondary"
-                            >
-                                <i class="bi bi-pencil me-1"></i>
-                                Edit
-                            </a>
-
-                        </div>
-                    </td>
-
-                </tr>
-
-            @empty
-                <tr>
-                    <td colspan="6" class="text-center text-muted py-5">
-                        <i class="bi bi-building fs-1"></i>
-
-                        <h6 class="mt-3">
-                            No departments found
-                        </h6>
-
-                        <p class="mb-0">
-                            @if (request('search'))
-                                No departments match your search.
-                            @else
-                                No departments have been added yet.
-                            @endif
-                        </p>
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-
-    </table>
 </div>
 
-{{-- Pagination --}}
+{{-- Departments Card --}}
 
-            @if ($departments->hasPages())
+<div class="card shadow-sm border-0">
 
+    <div class="card-body">
 
-                <div class="mt-4">
+        {{-- Search --}}
 
-                    {{ $departments->links() }}
+        <form
 
-                </div>
+            method="GET"
 
+            action="{{ route('departments.index') }}"
 
-            @endif
+            class="mb-4">
 
+            <div class="input-group">
 
-        </div>
+                <span class="input-group-text bg-white">
 
+                    <i class="bi bi-search"></i>
 
-    </div>
+                </span>
 
+                <input
 
-    {{-- ========================================================= --}}
+                    type="text"
 
-    {{-- Department Assets Modal --}}
+                    name="search"
 
-    {{-- ========================================================= --}}
+                    class="form-control"
 
+                    placeholder="Search department name or code..."
 
-    <div
+                    value="{{ request('search') }}">
 
-        class="modal fade"
+                <button
 
-        id="departmentAssetsModal"
+                    type="submit"
 
-        tabindex="-1"
+                    class="btn btn-dark">
 
-        aria-labelledby="departmentAssetsModalLabel"
+                    Search
 
-        aria-hidden="true"
+                </button>
 
-    >
+                @if (request('search'))
 
+                <a
 
-        <div
+                    href="{{ route('departments.index') }}"
 
-            class="modal-dialog modal-xl modal-dialog-scrollable"
+                    class="btn btn-outline-secondary">
 
-        >
+                    Clear
 
+                </a>
 
-            <div class="modal-content">
-
-
-                {{-- Modal Header --}}
-
-                <div class="modal-header">
-
-
-                    <div>
-
-
-                        <h5
-
-                            class="modal-title"
-
-                            id="departmentAssetsModalLabel"
-
-                        >
-
-                            Department Assets
-
-                        </h5>
-
-
-                        <small
-
-                            class="text-muted"
-
-                            id="departmentAssetsModalSubtitle"
-
-                        >
-
-                            Loading...
-
-                        </small>
-
-
-                    </div>
-
-
-                    <button
-
-                        type="button"
-
-                        class="btn-close"
-
-                        data-bs-dismiss="modal"
-
-                        aria-label="Close"
-
-                    ></button>
-
-
-                </div>
-
-
-                {{-- Modal Body --}}
-
-                <div class="modal-body">
-
-
-                    {{-- Loading --}}
-
-                    <div
-
-                        id="assetsLoading"
-
-                        class="text-center py-5"
-
-                    >
-
-
-                        <div
-
-                            class="spinner-border text-primary mb-3"
-
-                            role="status"
-
-                        >
-
-                            <span class="visually-hidden">
-
-                                Loading...
-
-                            </span>
-
-                        </div>
-
-
-                        <p class="text-muted mb-0">
-
-                            Loading department assets...
-
-                        </p>
-
-
-                    </div>
-
-
-                    {{-- Error --}}
-
-                    <div
-
-                        id="assetsError"
-
-                        class="alert alert-danger d-none"
-
-                        role="alert"
-
-                    >
-
-
-                        <i class="bi bi-exclamation-triangle me-1"></i>
-
-
-                        <span id="assetsErrorMessage">
-
-                            Unable to load assets.
-
-                        </span>
-
-
-                    </div>
-
-
-                    {{-- Empty --}}
-
-                    <div
-
-                        id="assetsEmpty"
-
-                        class="text-center text-muted py-5 d-none"
-
-                    >
-
-
-                        <i class="bi bi-box-seam fs-1"></i>
-
-
-                        <h6 class="mt-3">
-
-                            No assets allocated
-
-                        </h6>
-
-
-                        <p class="mb-0">
-
-                            This department currently has no allocated assets.
-
-                        </p>
-
-
-                    </div>
-
-
-                    {{-- Assets Table --}}
-
-                    <div
-
-                        id="assetsTableContainer"
-
-                        class="table-responsive d-none"
-
-                    >
-
-
-                        <table
-
-                            class="table table-bordered table-hover align-middle"
-
-                        >
-
-
-                            <thead class="table-light">
-
-
-                                <tr>
-
-
-                                    <th>Asset Code</th>
-
-
-                                    <th>Item</th>
-
-
-                                    <th>Make</th>
-
-
-                                    <th>Model</th>
-
-
-                                    <th class="text-center">
-
-                                        Issued Qty
-
-                                    </th>
-
-
-                                    <th class="text-center">
-
-                                        Verified Qty
-
-                                    </th>
-
-
-                                    <th>
-
-                                        Present Occupant
-
-                                    </th>
-
-
-                                    <th>
-
-                                        Barcode
-
-                                    </th>
-
-
-                                    <th>
-
-                                        Status
-
-                                    </th>
-
-
-                                </tr>
-
-
-                            </thead>
-
-
-                            <tbody id="assetsTableBody"></tbody>
-
-
-                        </table>
-
-
-                    </div>
-
-
-                </div>
-
-
-                {{-- Modal Footer --}}
-
-                <div class="modal-footer">
-
-
-                    <button
-
-                        type="button"
-
-                        class="btn btn-secondary"
-
-                        data-bs-dismiss="modal"
-
-                    >
-
-                        Close
-
-                    </button>
-
-
-                </div>
-
+                @endif
 
             </div>
 
+        </form>
+
+        {{-- Departments Table --}}
+
+        <div class="departments-table-wrap">
+
+            <table class="table table-hover align-middle departments-table">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th class="col-name">Name</th>
+
+                        <th class="col-code">Code</th>
+
+                        <th class="col-assets">Assets</th>
+
+                        <th class="col-employees">Employees</th>
+
+                        <th class="col-status">Status</th>
+
+                        <th class="col-actions">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @forelse ($departments as $department)
+
+                    <tr>
+
+                        {{-- Name --}}
+
+                        <td class="col-name">
+
+                            <div class="department-name">
+
+                                {{ $department->name }}
+
+                            </div>
+
+                            @if ($department->description)
+
+                            <span class="department-description">
+
+                                {{ \Illuminate\Support\Str::limit($department->description, 60) }}
+
+                            </span>
+
+                            @endif
+
+                        </td>
+
+                        {{-- Code --}}
+
+                        <td class="col-code">
+
+                            <span
+
+                                class="code-badge"
+
+                                title="{{ $department->code }}">
+
+                                {{ $department->code }}
+
+                            </span>
+
+                        </td>
+
+                        {{-- Assets --}}
+
+                        <td class="col-assets">
+
+                            <span class="count-badge bg-primary text-white">
+
+                                {{ $department->assets_count }}
+
+                            </span>
+
+                        </td>
+
+                        {{-- Employees --}}
+
+                        <td class="col-employees">
+
+                            <span class="count-badge bg-secondary text-white">
+
+                                {{ $department->employees_count }}
+
+                            </span>
+
+                        </td>
+
+                        {{-- Status --}}
+
+                        <td class="col-status">
+
+                            @if ($department->status === 'active')
+
+                            <span class="badge text-bg-success status-badge">
+
+                                <i class="bi bi-check-circle me-1"></i>
+
+                                Active
+
+                            </span>
+
+                            @else
+
+                            <span class="badge text-bg-secondary status-badge">
+
+                                <i class="bi bi-dash-circle me-1"></i>
+
+                                Inactive
+
+                            </span>
+
+                            @endif
+
+                        </td>
+
+                        {{-- Actions --}}
+
+                        <td class="col-actions">
+
+                            <div class="actions">
+
+                                <button
+
+                                    type="button"
+
+                                    class="btn btn-outline-primary view-assets-btn"
+
+                                    data-assets-url="{{ route('departments.assets', $department) }}"
+
+                                    data-department-name="{{ $department->name }}">
+
+                                    <i class="bi bi-box-seam me-1"></i>
+
+                                    View Assets
+
+                                </button>
+
+                                <a
+
+                                    href="{{ route('departments.edit', $department) }}"
+
+                                    class="btn btn-outline-secondary">
+
+                                    <i class="bi bi-pencil me-1"></i>
+
+                                    Edit
+
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    @empty
+
+                    <tr>
+
+                        <td colspan="6" class="text-center text-muted py-5">
+
+                            <i class="bi bi-building fs-1"></i>
+
+                            <h6 class="mt-3">
+
+                                No departments found
+
+                            </h6>
+
+                            <p class="mb-0">
+
+                                @if (request('search'))
+
+                                No departments match your search.
+
+                                @else
+
+                                No departments have been added yet.
+
+                                @endif
+
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+                    @endforelse
+
+                </tbody>
+
+            </table>
 
         </div>
 
+        {{-- Pagination --}}
+
+        @if ($departments->hasPages())
+
+        <div class="mt-4">
+
+            {{ $departments->links() }}
+
+        </div>
+
+        @endif
 
     </div>
 
-    {{-- ========================================================= --}}
+</div>
 
-    {{-- Department Assets JavaScript --}}
+{{-- ========================================================= --}}
 
-    {{-- ========================================================= --}}
+{{-- Department Assets Modal --}}
 
+{{-- ========================================================= --}}
 
-    <script>
+<div
 
+    class="modal fade"
 
-        console.log('Department JavaScript loaded');
+    id="departmentAssetsModal"
 
+    tabindex="-1"
 
-        document.addEventListener('DOMContentLoaded', function () {
+    aria-labelledby="departmentAssetsModalLabel"
 
+    aria-hidden="true">
 
-            console.log('Department DOM loaded');
+    <div
 
+        class="modal-dialog modal-xl modal-dialog-scrollable">
 
-            const modalElement = document.getElementById(
+        <div class="modal-content">
 
-                'departmentAssetsModal'
+            {{-- Modal Header --}}
 
-            );
+            <div class="modal-header">
 
+                <div>
 
-            const modal = new bootstrap.Modal(
+                    <h5
 
-                modalElement
+                        class="modal-title"
 
-            );
+                        id="departmentAssetsModalLabel">
 
+                        Department Assets
 
-            const loading = document.getElementById(
+                    </h5>
 
-                'assetsLoading'
+                    <small
 
-            );
+                        class="text-muted"
 
+                        id="departmentAssetsModalSubtitle">
 
-            const error = document.getElementById(
+                        Loading...
 
-                'assetsError'
+                    </small>
 
-            );
+                </div>
 
+                <button
 
-            const errorMessage = document.getElementById(
+                    type="button"
 
-                'assetsErrorMessage'
+                    class="btn-close"
 
-            );
+                    data-bs-dismiss="modal"
 
+                    aria-label="Close"></button>
 
-            const empty = document.getElementById(
+            </div>
 
-                'assetsEmpty'
+            {{-- Modal Body --}}
 
-            );
+            <div class="modal-body">
 
+                {{-- Loading --}}
 
-            const tableContainer = document.getElementById(
+                <div
 
-                'assetsTableContainer'
+                    id="assetsLoading"
 
-            );
+                    class="text-center py-5">
 
+                    <div
 
-            const tableBody = document.getElementById(
+                        class="spinner-border text-primary mb-3"
 
-                'assetsTableBody'
+                        role="status">
 
-            );
+                        <span class="visually-hidden">
 
+                            Loading...
 
-            const modalTitle = document.getElementById(
+                        </span>
 
-                'departmentAssetsModalLabel'
+                    </div>
 
-            );
+                    <p class="text-muted mb-0">
 
+                        Loading department assets...
 
-            const modalSubtitle = document.getElementById(
+                    </p>
 
-                'departmentAssetsModalSubtitle'
+                </div>
 
-            );
+                {{-- Error --}}
 
+                <div
 
-            function escapeHtml(value) {
+                    id="assetsError"
 
+                    class="alert alert-danger d-none"
 
-                if (
+                    role="alert">
 
-                    value === null ||
+                    <i class="bi bi-exclamation-triangle me-1"></i>
 
-                    value === undefined
+                    <span id="assetsErrorMessage">
 
-                ) {
+                        Unable to load assets.
 
-                    return '';
+                    </span>
+
+                </div>
+
+                {{-- Empty --}}
+
+                <div
+
+                    id="assetsEmpty"
+
+                    class="text-center text-muted py-5 d-none">
+
+                    <i class="bi bi-box-seam fs-1"></i>
+
+                    <h6 class="mt-3">
+
+                        No assets allocated
+
+                    </h6>
+
+                    <p class="mb-0">
+
+                        This department currently has no allocated assets.
+
+                    </p>
+
+                </div>
+
+                {{-- Assets Table --}}
+
+                <div
+
+                    id="assetsTableContainer"
+
+                    class="table-responsive d-none">
+
+                    <table
+
+                        class="table table-bordered table-hover align-middle">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>Asset Code</th>
+
+                                <th>Item</th>
+
+                                <th>Make</th>
+
+                                <th>Model</th>
+
+                                <th class="text-center">
+
+                                    Issued Qty
+
+                                </th>
+
+                                <th class="text-center">
+
+                                    Verified Qty
+
+                                </th>
+
+                                <th>
+
+                                    Present Occupant
+
+                                </th>
+
+                                <th>
+
+                                    Barcode
+
+                                </th>
+
+                                <th>
+
+                                    Status
+
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="assetsTableBody"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            {{-- Modal Footer --}}
+
+            <div class="modal-footer">
+
+                <button
+
+                    type="button"
+
+                    class="btn btn-secondary"
+
+                    data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{{-- ========================================================= --}}
+
+{{-- Department Assets JavaScript --}}
+
+{{-- ========================================================= --}}
+
+<script>
+    console.log('Department JavaScript loaded');
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+                console.log('Department DOM loaded');
+
+                const modalElement = document.getElementById(
+
+                    'departmentAssetsModal'
+
+                );
+
+                const modal = new bootstrap.Modal(
+
+                    modalElement
+
+                );
+
+                const loading = document.getElementById(
+
+                    'assetsLoading'
+
+                );
+
+                const error = document.getElementById(
+
+                    'assetsError'
+
+                );
+
+                const errorMessage = document.getElementById(
+
+                    'assetsErrorMessage'
+
+                );
+
+                const empty = document.getElementById(
+
+                    'assetsEmpty'
+
+                );
+
+                const tableContainer = document.getElementById(
+
+                    'assetsTableContainer'
+
+                );
+
+                const tableBody = document.getElementById(
+
+                    'assetsTableBody'
+
+                );
+
+                const modalTitle = document.getElementById(
+
+                    'departmentAssetsModalLabel'
+
+                );
+
+                const modalSubtitle = document.getElementById(
+
+                    'departmentAssetsModalSubtitle'
+
+                );
+
+                function escapeHtml(value) {
+
+                    if (
+
+                        value === null ||
+
+                        value === undefined
+
+                    ) {
+
+                        return '';
+
+                    }
+
+                    return String(value)
+
+                        .replace(/&/g, '&amp;')
+
+                        .replace(/</g, '&lt;')
+
+                        .replace(/>/g, '&gt;')
+
+                        .replace(/"/g, '&quot;')
+
+                        .replace(/'/g, '&#039;');
 
                 }
 
+                document
 
-                return String(value)
+                    .querySelectorAll('.view-assets-btn')
 
-                    .replace(/&/g, '&amp;')
+                    .forEach(function(button) {
 
-                    .replace(/</g, '&lt;')
+                            button.addEventListener(
 
-                    .replace(/>/g, '&gt;')
+                                    'click',
 
-                    .replace(/"/g, '&quot;')
+                                    async function() {
 
-                    .replace(/'/g, '&#039;');
+                                            console.log(
 
-            }
+                                                'View Assets clicked'
 
+                                            );
 
-            document
+                                            const assetsUrl =
 
-                .querySelectorAll('.view-assets-btn')
+                                                this.dataset.assetsUrl;
 
-                .forEach(function (button) {
+                                            const departmentName =
 
+                                                this.dataset.departmentName;
 
-                    button.addEventListener(
+                                            console.log(
 
-                        'click',
+                                                'Assets URL:',
 
-                        async function () {
+                                                assetsUrl
 
+                                            );
 
-                            console.log(
+                                            /*
 
-                                'View Assets clicked'
+                                            |--------------------------------------------------------------------------
 
-                            );
+                                            | Reset
 
+                                            |--------------------------------------------------------------------------
 
-                            const assetsUrl =
+                                            */
 
-                                this.dataset.assetsUrl;
+                                            loading.classList.remove(
 
+                                                'd-none'
 
-                            const departmentName =
+                                            );
 
-                                this.dataset.departmentName;
+                                            error.classList.add(
 
+                                                'd-none'
 
-                            console.log(
+                                            );
 
-                                'Assets URL:',
+                                            empty.classList.add(
 
-                                assetsUrl
+                                                'd-none'
 
-                            );
+                                            );
 
+                                            tableContainer.classList.add(
 
-                            /*
+                                                'd-none'
 
-                            |--------------------------------------------------------------------------
+                                            );
 
-                            | Reset
+                                            tableBody.innerHTML = '';
 
-                            |--------------------------------------------------------------------------
+                                            /*
 
-                            */
+                                            |--------------------------------------------------------------------------
 
+                                            | Modal Title
 
-                            loading.classList.remove(
+                                            |--------------------------------------------------------------------------
 
-                                'd-none'
+                                            */
 
-                            );
+                                            modalTitle.textContent =
 
+                                                departmentName + ' - Assets';
 
-                            error.classList.add(
+                                            modalSubtitle.textContent =
 
-                                'd-none'
+                                                'Loading allocated assets...';
 
-                            );
+                                            /*
 
+                                            |--------------------------------------------------------------------------
 
-                            empty.classList.add(
+                                            | Open Modal
 
-                                'd-none'
+                                            |--------------------------------------------------------------------------
 
-                            );
+                                            */
 
+                                            modal.show();
 
-                            tableContainer.classList.add(
+                                            /*
 
-                                'd-none'
+                                            |--------------------------------------------------------------------------
 
-                            );
+                                            | Fetch Assets
 
+                                            |--------------------------------------------------------------------------
 
-                            tableBody.innerHTML = '';
+                                            */
 
+                                            try {
 
-                            /*
+                                                const response =
 
-                            |--------------------------------------------------------------------------
+                                                    await fetch(
 
-                            | Modal Title
+                                                        assetsUrl,
 
-                            |--------------------------------------------------------------------------
+                                                        {
 
-                            */
+                                                            method: 'GET',
 
+                                                            headers: {
 
-                            modalTitle.textContent =
+                                                                'Accept':
 
-                                departmentName + ' - Assets';
+                                                                    'application/json',
 
+                                                                'X-Requested-With':
 
-                            modalSubtitle.textContent =
+                                                                    'XMLHttpRequest'
 
-                                'Loading allocated assets...';
+                                                            }
 
+                                                        }
 
-                            /*
+                                                    );
 
-                            |--------------------------------------------------------------------------
+                                                console.log(
 
-                            | Open Modal
+                                                    'Response status:',
 
-                            |--------------------------------------------------------------------------
+                                                    response.status
 
-                            */
+                                                );
 
+                                                if (!response.ok) {
 
-                            modal.show();
+                                                    throw new Error(
 
+                                                        'HTTP ' +
 
-                            /*
+                                                        response.status
 
-                            |--------------------------------------------------------------------------
+                                                    );
 
-                            | Fetch Assets
+                                                }
 
-                            |--------------------------------------------------------------------------
+                                                const data =
 
-                            */
+                                                    await response.json();
 
+                                                console.log(
 
-                            try {
+                                                    'API response:',
 
+                                                    data
 
-                                const response =
+                                                );
 
-                                    await fetch(
+                                                loading.classList.add(
 
-                                        assetsUrl,
+                                                    'd-none'
 
-                                        {
+                                                );
 
-                                            method: 'GET',
+                                                /*
 
+                                                |--------------------------------------------------------------------------
 
-                                            headers: {
+                                                | No Assets
 
-                                                'Accept':
+                                                |--------------------------------------------------------------------------
 
-                                                    'application/json',
+                                                */
 
+                                                if (
 
-                                                'X-Requested-With':
+                                                    !data.assets ||
 
-                                                    'XMLHttpRequest'
+                                                    data.assets.length === 0
 
-                                            }
+                                                ) {
 
-                                        }
+                                                    empty.classList.remove(
 
-                                    );
+                                                        'd-none'
 
+                                                    );
 
-                                console.log(
+                                                    modalSubtitle.textContent =
 
-                                    'Response status:',
+                                                        'No assets allocated to this department.';
 
-                                    response.status
+                                                    return;
 
-                                );
+                                                }
 
+                                                /*
 
-                                if (!response.ok) {
+                                                |--------------------------------------------------------------------------
 
+                                                | Render Assets
 
-                                    throw new Error(
+                                                |--------------------------------------------------------------------------
 
-                                        'HTTP ' +
+                                                */
 
-                                        response.status
+                                                modalSubtitle.textContent =
 
-                                    );
+                                                    data.assets.length +
 
+                                                    ' asset(s) allocated';
 
-                                }
+                                                tableBody.innerHTML =
 
+                                                    data.assets
 
-                                const data =
+                                                    .map(function(asset) {
 
-                                    await response.json();
-
-
-                                console.log(
-
-                                    'API response:',
-
-                                    data
-
-                                );
-
-
-                                loading.classList.add(
-
-                                    'd-none'
-
-                                );
-
-
-                                /*
-
-                                |--------------------------------------------------------------------------
-
-                                | No Assets
-
-                                |--------------------------------------------------------------------------
-
-                                */
-
-
-                                if (
-
-                                    !data.assets ||
-
-                                    data.assets.length === 0
-
-                                ) {
-
-
-                                    empty.classList.remove(
-
-                                        'd-none'
-
-                                    );
-
-
-                                    modalSubtitle.textContent =
-
-                                        'No assets allocated to this department.';
-
-
-                                    return;
-
-                                }
-
-
-                                /*
-
-                                |--------------------------------------------------------------------------
-
-                                | Render Assets
-
-                                |--------------------------------------------------------------------------
-
-                                */
-
-
-                                modalSubtitle.textContent =
-
-                                    data.assets.length +
-
-                                    ' asset(s) allocated';
-
-
-                                tableBody.innerHTML =
-
-                                    data.assets
-
-                                        .map(function (asset) {
-
-
-                                            return `
-
+                                                            return\ `
 
                                                 <tr>
-
 
                                                     <td>
 
@@ -1098,7 +1115,6 @@
 
                                                     </td>
 
-
                                                     <td>
 
                                                         ${escapeHtml(
@@ -1108,7 +1124,6 @@
                                                         )}
 
                                                     </td>
-
 
                                                     <td>
 
@@ -1120,7 +1135,6 @@
 
                                                     </td>
 
-
                                                     <td>
 
                                                         ${escapeHtml(
@@ -1130,7 +1144,6 @@
                                                         )}
 
                                                     </td>
-
 
                                                     <td>
 
@@ -1142,7 +1155,6 @@
 
                                                     </td>
 
-
                                                     <td>
 
                                                         ${escapeHtml(
@@ -1152,7 +1164,6 @@
                                                         )}
 
                                                     </td>
-
 
                                                     <td>
 
@@ -1166,7 +1177,6 @@
 
                                                     </td>
 
-
                                                     <td>
 
                                                         ${escapeHtml(
@@ -1178,7 +1188,6 @@
                                                         )}
 
                                                     </td>
-
 
                                                     <td>
 
@@ -1192,17 +1201,13 @@
 
                                                     </td>
 
-
                                                 </tr>
 
-
-                                            `;
-
+                                            \`;
 
                                         })
 
                                         .join('');
-
 
                                 tableContainer.classList.remove(
 
@@ -1210,12 +1215,9 @@
 
                                 );
 
-
                             }
 
-
                             catch (exception) {
-
 
                                 console.error(
 
@@ -1225,13 +1227,11 @@
 
                                 );
 
-
                                 loading.classList.add(
 
                                     'd-none'
 
                                 );
-
 
                                 error.classList.remove(
 
@@ -1239,29 +1239,19 @@
 
                                 );
 
-
                                 errorMessage.textContent =
 
                                     'Unable to load department assets.';
 
-
                             }
-
 
                         }
 
                     );
 
-
                 });
 
-
         });
-
-
-    </script>
-
+</script>
 
 @endsection
-
-

@@ -202,12 +202,11 @@ class AssetController extends Controller
  public function show(Asset $asset)
 {
     $asset->load([
-        'department',
-        'category',
-        'occupant',
-        'history',
-
-        'transfers' => function ($query) {
+    'department',
+    'category',
+    'occupant',
+    'documents',
+    'transfers' => function ($query) {
             $query->with([
                 'fromDepartment',
                 'toDepartment',
@@ -336,8 +335,7 @@ class AssetController extends Controller
                     $asset->toArray()
                 ),
 
-            'performed_by' =>
-                auth()->id(),
+            'performed_by' => auth()->user()?->getAuthIdentifier(),
 
             'ip_address' =>
                 request()->ip(),

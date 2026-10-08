@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class AssetTransfer extends Model
 {
@@ -40,7 +42,10 @@ class AssetTransfer extends Model
 
     public function asset(): BelongsTo
     {
-        return $this->belongsTo(Asset::class);
+        return $this->belongsTo(
+            Asset::class,
+            'asset_id'
+        );
     }
 
     /*
@@ -138,6 +143,37 @@ class AssetTransfer extends Model
         return $this->belongsTo(
             User::class,
             'completed_by'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Transfer Documents
+    |--------------------------------------------------------------------------
+    */
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(
+            AssetTransferDocument::class,
+            'asset_transfer_id'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Transfer Image
+    |--------------------------------------------------------------------------
+    */
+
+    public function transferImage(): HasOne
+    {
+        return $this->hasOne(
+            AssetTransferDocument::class,
+            'asset_transfer_id'
+        )->where(
+            'document_type',
+            AssetTransferDocument::TYPE_TRANSFER_IMAGE
         );
     }
 }

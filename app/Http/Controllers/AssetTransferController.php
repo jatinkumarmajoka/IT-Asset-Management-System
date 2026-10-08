@@ -33,50 +33,60 @@ class AssetTransferController extends Controller
                 'initiatedBy',
                 'approvedBy',
                 'completedBy',
+                'documents',
             ])
             ->latest('id')
             ->paginate(20);
 
-        return view('transfers.index', compact('transfers'));
+        return view(
+            'transfers.index',
+            compact('transfers')
+        );
     }
 
     /**
-     * Show transfer form.
+     * Show transfer creation form.
      */
     public function create(): View
-{
-    $assets = Asset::query()
-        ->with([
-            'department',
-            'occupant',
-        ])
-        ->orderBy('asset_code')
-        ->get();
+    {
+        $assets = Asset::query()
+            ->with([
+                'department',
+                'occupant',
+            ])
+            ->orderBy('asset_code')
+            ->get();
 
-    $departments = Department::query()
-        ->orderBy('name')
-        ->get();
+        $departments = Department::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
 
-    $employees = Employee::query()
-        ->where('status', 'active')
-        ->orderBy('name')
-        ->get();
+        $employees = Employee::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
 
-    $employeeData = $employees->map(function ($employee) {
-        return [
-            'id' => $employee->id,
-            'name' => $employee->name,
-            'department_id' => $employee->department_id,
-        ];
-    })->values();
+        $employeeData = $employees
+            ->map(function ($employee) {
+                return [
+                    'id' => $employee->id,
+                    'name' => $employee->name,
+                    'department_id' => $employee->department_id,
+                ];
+            })
+            ->values();
 
-    return view('transfers.create', compact(
-        'assets',
-        'departments',
-        'employees',
-        'employeeData'
-    ));
-}
+        return view(
+            'transfers.create',
+            compact(
+                'assets',
+                'departments',
+                'employees',
+                'employeeData'
+            )
+        );
+    }
 
     /**
      * Create a pending transfer.
@@ -88,8 +98,22 @@ class AssetTransferController extends Controller
             $request->validated()
         );
 
+        /*
+         * Transfer image is handled separately because
+         * the transfer record must exist first.
+         */
+        if ($request->hasFile('transfer_image')) {
+    app(AssetTransferDocumentController::class)->store(
+        $request,
+        $transfer
+    );
+}
+
         return redirect()
-            ->route('transfers.show', $transfer)
+            ->route(
+                'transfers.show',
+                $transfer
+            )
             ->with(
                 'success',
                 'Transfer request created successfully.'
@@ -113,6 +137,7 @@ class AssetTransferController extends Controller
             'initiatedBy',
             'approvedBy',
             'completedBy',
+            'documents',
         ]);
 
         return view(
@@ -122,7 +147,7 @@ class AssetTransferController extends Controller
     }
 
     /**
-     * Approve pending transfer.
+     * Approve a pending transfer.
      */
     public function approve(
         AssetTransfer $transfer
@@ -130,7 +155,10 @@ class AssetTransferController extends Controller
         $this->transferService->approve($transfer);
 
         return redirect()
-            ->route('transfers.show', $transfer)
+            ->route(
+                'transfers.show',
+                $transfer
+            )
             ->with(
                 'success',
                 'Transfer approved successfully.'
@@ -138,10 +166,7 @@ class AssetTransferController extends Controller
     }
 
     /**
-     * Complete approved transfer.
-     *
-     * This is the point where the asset's
-     * current department is actually changed.
+     * Complete an approved transfer.
      */
     public function complete(
         AssetTransfer $transfer
@@ -149,15 +174,18 @@ class AssetTransferController extends Controller
         $this->transferService->complete($transfer);
 
         return redirect()
-            ->route('transfers.show', $transfer)
+            ->route(
+                'transfers.show',
+                $transfer
+            )
             ->with(
                 'success',
-                'Transfer completed. Asset department updated successfully.'
+                'Transfer completed. Asset department and occupant updated successfully.'
             );
     }
 
     /**
-     * Cancel pending/approved transfer.
+     * Cancel a pending or approved transfer.
      */
     public function cancel(
         AssetTransfer $transfer
@@ -165,7 +193,10 @@ class AssetTransferController extends Controller
         $this->transferService->cancel($transfer);
 
         return redirect()
-            ->route('transfers.show', $transfer)
+            ->route(
+                'transfers.show',
+                $transfer
+            )
             ->with(
                 'success',
                 'Transfer cancelled successfully.'

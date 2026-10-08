@@ -6,7 +6,6 @@
 
 <div class="container-fluid">
 
-
     {{-- Header --}}
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
 
@@ -23,17 +22,15 @@
 
         </div>
 
-
-        <a href="{{ route('transfers.index') }}"
-           class="btn btn-outline-secondary">
-
+        <a
+            href="{{ route('transfers.index') }}"
+            class="btn btn-outline-secondary"
+        >
             <i class="bi bi-arrow-left me-1"></i>
             Back to Transfers
-
         </a>
 
     </div>
-
 
 
     {{-- Success --}}
@@ -45,15 +42,15 @@
 
             {{ session('success') }}
 
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert">
-            </button>
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+            ></button>
 
         </div>
 
     @endif
-
 
 
     {{-- Errors --}}
@@ -61,7 +58,9 @@
 
         <div class="alert alert-danger">
 
-            <strong>Operation failed.</strong>
+            <strong>
+                Operation failed.
+            </strong>
 
             <ul class="mb-0 mt-2">
 
@@ -76,13 +75,25 @@
     @endif
 
 
+    @php
+        /*
+        |--------------------------------------------------------------------------
+        | Transfer Image
+        |--------------------------------------------------------------------------
+        */
+
+        $transferImage = $transfer->documents
+            ->firstWhere(
+                'document_type',
+                \App\Models\AssetTransferDocument::TYPE_TRANSFER_IMAGE
+            );
+    @endphp
+
 
     <div class="row g-4">
 
-
         {{-- Main --}}
         <div class="col-lg-8">
-
 
             {{-- Transfer Status --}}
             <div class="card shadow-sm border-0 mb-4">
@@ -108,9 +119,7 @@
                             @endphp
 
                             <span class="badge text-bg-{{ $statusClass }} fs-6 mt-1">
-
                                 {{ ucfirst($transfer->status) }}
-
                             </span>
 
                         </div>
@@ -133,7 +142,6 @@
                 </div>
 
             </div>
-
 
 
             {{-- Asset --}}
@@ -211,7 +219,6 @@
             </div>
 
 
-
             {{-- Movement --}}
             <div class="card shadow-sm border-0 mb-4">
 
@@ -229,7 +236,6 @@
 
                     <div class="row g-4">
 
-
                         {{-- From --}}
                         <div class="col-md-5">
 
@@ -238,9 +244,7 @@
                             </div>
 
                             <div class="fw-semibold fs-5">
-
                                 {{ $transfer->fromDepartment?->name ?? '—' }}
-
                             </div>
 
 
@@ -251,11 +255,10 @@
                                 </div>
 
                                 <div>
-
                                     {{ $transfer->fromOccupant?->name
                                         ?? $transfer->fromDepartment?->name
-                                        ?? '—' }}
-
+                                        ?? '—'
+                                    }}
                                 </div>
 
                             </div>
@@ -279,9 +282,7 @@
                             </div>
 
                             <div class="fw-semibold fs-5">
-
                                 {{ $transfer->toDepartment?->name ?? '—' }}
-
                             </div>
 
 
@@ -292,11 +293,10 @@
                                 </div>
 
                                 <div>
-
                                     {{ $transfer->toOccupant?->name
                                         ?? $transfer->toDepartment?->name
-                                        ?? '—' }}
-
+                                        ?? '—'
+                                    }}
                                 </div>
 
                             </div>
@@ -310,9 +310,8 @@
             </div>
 
 
-
-            {{-- Details --}}
-            <div class="card shadow-sm border-0">
+            {{-- Transfer Information --}}
+            <div class="card shadow-sm border-0 mb-4">
 
                 <div class="card-header bg-white">
 
@@ -327,7 +326,6 @@
                 <div class="card-body">
 
                     <div class="row g-3">
-
 
                         <div class="col-md-6">
 
@@ -399,13 +397,185 @@
 
             </div>
 
-        </div>
 
+            {{-- Transfer Image --}}
+            <div class="card shadow-sm border-0 mb-4">
+
+                <div class="card-header bg-white">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <h6 class="mb-0">
+                            <i class="bi bi-image me-2"></i>
+                            Transfer Image
+                        </h6>
+
+                        @if($transferImage)
+                            <span class="badge text-bg-success">
+                                Uploaded
+                            </span>
+                        @else
+                            <span class="badge text-bg-secondary">
+                                Not Uploaded
+                            </span>
+                        @endif
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    @if($transferImage)
+
+                        <div class="row g-4 align-items-center">
+
+                            {{-- Preview --}}
+                            <div class="col-md-6">
+
+                                <div
+                                    class="border rounded bg-light p-2 text-center"
+                                    style="min-height: 260px;"
+                                >
+
+                                    <img
+                                        src="{{ route(
+                                            'transfer-documents.show',
+                                            [
+                                                'transfer' => $transfer,
+                                                'document' => $transferImage
+                                            ]
+                                        ) }}"
+                                        alt="Transfer Image"
+                                        class="img-fluid rounded"
+                                        style="max-height: 350px; object-fit: contain;"
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- Information --}}
+                            <div class="col-md-6">
+
+                                <div class="mb-3">
+
+                                    <div class="text-muted small">
+                                        File Name
+                                    </div>
+
+                                    <div class="fw-semibold text-break">
+                                        {{ $transferImage->original_name }}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="mb-3">
+
+                                    <div class="text-muted small">
+                                        File Type
+                                    </div>
+
+                                    <div>
+                                        {{ $transferImage->mime_type }}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="mb-3">
+
+                                    <div class="text-muted small">
+                                        File Size
+                                    </div>
+
+                                    <div>
+                                        {{ number_format($transferImage->file_size / 1024, 2) }}
+                                        KB
+                                    </div>
+
+                                </div>
+
+
+                                <div class="mb-3">
+
+                                    <div class="text-muted small">
+                                        Uploaded
+                                    </div>
+
+                                    <div>
+                                        {{ $transferImage->created_at?->format('d-m-Y H:i') ?? '—' }}
+                                    </div>
+
+                                </div>
+
+
+                                <a
+                                    href="{{ route(
+                                        'transfer-documents.show',
+                                        [
+                                            'transfer' => $transfer,
+                                            'document' => $transferImage
+                                        ]
+                                    ) }}"
+                                    target="_blank"
+                                    class="btn btn-outline-primary"
+                                >
+                                    <i class="bi bi-eye me-1"></i>
+                                    View Image
+                                </a>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="alert alert-info mt-4 mb-0">
+
+                            <i class="bi bi-lock me-1"></i>
+
+                            This transfer image is part of the transfer
+                            record and cannot be replaced or deleted.
+
+                        </div>
+
+                    @else
+
+                        <div class="text-center py-4">
+
+                            <div class="mb-3">
+
+                                <i
+                                    class="bi bi-image text-muted"
+                                    style="font-size: 3rem;"
+                                ></i>
+
+                            </div>
+
+                            <div class="fw-semibold mb-1">
+                                No transfer image uploaded
+                            </div>
+
+                            <div class="text-muted small">
+                                No image was attached to this transfer request.
+                            </div>
+
+                        </div>
+
+                    @endif
+
+                </div>
+
+            </div>
+
+        </div>
 
 
         {{-- Sidebar --}}
         <div class="col-lg-4">
-
 
             {{-- Workflow --}}
             <div class="card shadow-sm border-0 mb-4">
@@ -422,23 +592,27 @@
 
                 <div class="card-body">
 
-
                     {{-- Pending --}}
                     <div class="d-flex align-items-start mb-3">
 
                         <div class="me-3">
 
                             @if($transfer->status === 'pending')
+
                                 <span class="badge rounded-pill text-bg-warning">
                                     1
                                 </span>
+
                             @else
+
                                 <span class="badge rounded-pill text-bg-success">
                                     <i class="bi bi-check"></i>
                                 </span>
+
                             @endif
 
                         </div>
+
 
                         <div>
 
@@ -460,7 +634,12 @@
 
                         <div class="me-3">
 
-                            @if(in_array($transfer->status, ['approved', 'completed']))
+                            @if(
+                                in_array(
+                                    $transfer->status,
+                                    ['approved', 'completed']
+                                )
+                            )
 
                                 <span class="badge rounded-pill text-bg-success">
                                     <i class="bi bi-check"></i>
@@ -476,6 +655,7 @@
 
                         </div>
 
+
                         <div>
 
                             <div class="fw-semibold">
@@ -485,9 +665,14 @@
                             <div class="small text-muted">
 
                                 @if($transfer->approvedBy)
-                                    Approved by {{ $transfer->approvedBy->name }}
+
+                                    Approved by
+                                    {{ $transfer->approvedBy->name }}
+
                                 @else
+
                                     Waiting for approval
+
                                 @endif
 
                             </div>
@@ -518,6 +703,7 @@
 
                         </div>
 
+
                         <div>
 
                             <div class="fw-semibold">
@@ -527,9 +713,13 @@
                             <div class="small text-muted">
 
                                 @if($transfer->status === 'completed')
+
                                     Asset department updated
+
                                 @else
+
                                     Asset has not moved yet
+
                                 @endif
 
                             </div>
@@ -543,10 +733,11 @@
             </div>
 
 
-
             {{-- Actions --}}
-            @if($transfer->status !== 'cancelled'
-                && $transfer->status !== 'completed')
+            @if(
+                $transfer->status !== 'cancelled'
+                && $transfer->status !== 'completed'
+            )
 
                 <div class="card shadow-sm border-0 mb-4">
 
@@ -562,23 +753,24 @@
 
                     <div class="card-body">
 
-
                         {{-- Approve --}}
                         @if($transfer->status === 'pending')
 
-                            <form method="POST"
-                                  action="{{ route('transfers.approve', $transfer) }}"
-                                  class="mb-2">
+                            <form
+                                method="POST"
+                                action="{{ route('transfers.approve', $transfer) }}"
+                                class="mb-2"
+                            >
 
                                 @csrf
 
-                                <button type="submit"
-                                        class="btn btn-primary w-100"
-                                        onclick="return confirm('Approve this transfer?')">
-
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary w-100"
+                                    onclick="return confirm('Approve this transfer?')"
+                                >
                                     <i class="bi bi-check-circle me-1"></i>
                                     Approve Transfer
-
                                 </button>
 
                             </form>
@@ -589,19 +781,21 @@
                         {{-- Complete --}}
                         @if($transfer->status === 'approved')
 
-                            <form method="POST"
-                                  action="{{ route('transfers.complete', $transfer) }}"
-                                  class="mb-2">
+                            <form
+                                method="POST"
+                                action="{{ route('transfers.complete', $transfer) }}"
+                                class="mb-2"
+                            >
 
                                 @csrf
 
-                                <button type="submit"
-                                        class="btn btn-success w-100"
-                                        onclick="return confirm('Complete this transfer? The asset department will be updated.')">
-
+                                <button
+                                    type="submit"
+                                    class="btn btn-success w-100"
+                                    onclick="return confirm('Complete this transfer? The asset department will be updated.')"
+                                >
                                     <i class="bi bi-check2-all me-1"></i>
                                     Complete Transfer
-
                                 </button>
 
                             </form>
@@ -610,18 +804,20 @@
 
 
                         {{-- Cancel --}}
-                        <form method="POST"
-                              action="{{ route('transfers.cancel', $transfer) }}">
+                        <form
+                            method="POST"
+                            action="{{ route('transfers.cancel', $transfer) }}"
+                        >
 
                             @csrf
 
-                            <button type="submit"
-                                    class="btn btn-outline-danger w-100"
-                                    onclick="return confirm('Cancel this transfer?')">
-
+                            <button
+                                type="submit"
+                                class="btn btn-outline-danger w-100"
+                                onclick="return confirm('Cancel this transfer?')"
+                            >
                                 <i class="bi bi-x-circle me-1"></i>
                                 Cancel Transfer
-
                             </button>
 
                         </form>
@@ -631,7 +827,6 @@
                 </div>
 
             @endif
-
 
 
             {{-- Completed --}}
@@ -656,7 +851,6 @@
                 </div>
 
             @endif
-
 
 
             {{-- Cancelled --}}

@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Asset;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -10,16 +9,18 @@ class StoreAssetTransferRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+         return true;
     }
 
     public function rules(): array
     {
         return [
             /*
-             * The asset is the only source of truth for the
-             * current department and current occupant.
-             */
+            |--------------------------------------------------------------------------
+            | Asset
+            |--------------------------------------------------------------------------
+            */
+
             'asset_id' => [
                 'required',
                 'integer',
@@ -27,8 +28,11 @@ class StoreAssetTransferRequest extends FormRequest
             ],
 
             /*
-             * Destination department.
-             */
+            |--------------------------------------------------------------------------
+            | Destination Department
+            |--------------------------------------------------------------------------
+            */
+
             'to_department_id' => [
                 'required',
                 'integer',
@@ -36,28 +40,47 @@ class StoreAssetTransferRequest extends FormRequest
             ],
 
             /*
-             * Destination occupant is optional.
-             *
-             * If null:
-             * the destination department itself is treated
-             * as the occupant.
-             */
+            |--------------------------------------------------------------------------
+            | Destination Occupant
+            |--------------------------------------------------------------------------
+            |
+            | If an employee is selected, that employee MUST belong
+            | to the selected destination department.
+            |
+            | NULL means the department itself is the occupant.
+            |
+            */
+
             'to_occupant_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('employees', 'id')
-                    ->where(function ($query) {
-                        $query->where(
-                            'department_id',
-                            $this->input('to_department_id')
-                        );
-                    }),
+                Rule::exists(
+                    'employees',
+                    'id'
+                )->where(function ($query) {
+                    $query->where(
+                        'department_id',
+                        $this->input('to_department_id')
+                    );
+                }),
             ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Transfer Date
+            |--------------------------------------------------------------------------
+            */
 
             'transfer_date' => [
                 'required',
                 'date',
             ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reason
+            |--------------------------------------------------------------------------
+            */
 
             'reason' => [
                 'nullable',
@@ -65,17 +88,42 @@ class StoreAssetTransferRequest extends FormRequest
                 'max:500',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Remarks
+            |--------------------------------------------------------------------------
+            */
+
             'remarks' => [
                 'nullable',
                 'string',
                 'max:5000',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Reference Number
+            |--------------------------------------------------------------------------
+            */
+
             'reference_number' => [
                 'nullable',
                 'string',
                 'max:50',
                 'unique:asset_transfers,reference_number',
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Transfer Image
+            |--------------------------------------------------------------------------
+            */
+
+            'transfer_image' => [
+                'nullable',
+                'file',
+                'max:10240',
+                'mimes:jpg,jpeg,png,webp',
             ],
         ];
     }
@@ -106,27 +154,33 @@ class StoreAssetTransferRequest extends FormRequest
 
             'reference_number.unique' =>
                 'This transfer reference number already exists.',
+
+            'transfer_image.file' =>
+                'The transfer image must be a valid file.',
+
+            'transfer_image.max' =>
+                'The transfer image must not be larger than 10 MB.',
+
+            'transfer_image.mimes' =>
+                'The transfer image must be JPG, JPEG, PNG or WEBP.',
         ];
     }
 
-    /**
-     * Never trust the current department or current occupant
-     * coming from the browser.
-     *
-     * The Transfer Service will read both directly from
-     * the locked asset record.
-     */
     protected function prepareForValidation(): void
     {
         /*
-         * Intentionally do NOT accept:
-         *
-         * from_department_id
-         * from_occupant_id
-         *
-         * from the request.
-         *
-         * They are determined server-side.
-         */
+        |--------------------------------------------------------------------------
+        | Security
+        |--------------------------------------------------------------------------
+        |
+        | Do NOT accept these values from the browser:
+        |
+        | from_department_id
+        | from_occupant_id
+        |
+        | They must always be taken from the asset's
+        | actual current state on the server.
+        |
+        */
     }
 }

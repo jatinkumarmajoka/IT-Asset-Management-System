@@ -47,7 +47,6 @@
 
 
     <style>
-
         /* =========================================================
 
            GLOBAL PAGE
@@ -192,17 +191,17 @@
 
         .app-main {
 
-    min-width: 0;
+            min-width: 0;
 
-    flex: 1 1 auto;
+            flex: 1 1 auto;
 
-    width: calc(100% - 250px);
+            width: calc(100% - 250px);
 
-}
+        }
 
 
 
-.app-content {
+        .app-content {
             min-width: 0;
             width: 100%;
             max-width: 100%;
@@ -211,103 +210,140 @@
 
 
 
-/* =========================================================
+        /* =========================================================
    RESPONSIVE TABLE SYSTEM
    ========================================================= */
 
-.table-responsive {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
-}
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+        }
 
-.table-responsive > .table {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin-bottom: 0;
-    table-layout: fixed;
-}
+        .table-responsive>.table {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            margin-bottom: 0;
+            table-layout: fixed;
+        }
 
-.table {
-    width: 100%;
-    max-width: 100%;
-    margin-bottom: 0;
-    vertical-align: middle;
-}
+        .table {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 0;
+            vertical-align: middle;
+        }
 
-.table thead th {
-    white-space: nowrap !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
-    vertical-align: middle;
-    font-weight: 600;
-}
+        .table thead th {
+            white-space: nowrap !important;
+            word-break: normal !important;
+            overflow-wrap: normal !important;
+            vertical-align: middle;
+            font-weight: 600;
+        }
 
-.table tbody td {
-    vertical-align: middle;
-    white-space: normal;
-    word-break: normal;
-    overflow-wrap: anywhere;
-}
+        .table tbody td {
+            vertical-align: middle;
+            white-space: normal;
+            word-break: normal;
+            overflow-wrap: anywhere;
+        }
 
-.table th,
-.table td {
-    padding: 12px 10px;
-}
+        .table th,
+        .table td {
+            padding: 12px 10px;
+        }
 
-.table .text-truncate {
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+        .table .text-truncate {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
-.table .table-long-text {
-    display: block;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+        .table .table-long-text {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
-.table .table-actions {
-    white-space: nowrap !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
-}
+        .table .table-actions {
+            white-space: nowrap !important;
+            word-break: normal !important;
+            overflow-wrap: normal !important;
+        }
 
-.table .table-actions .btn,
-.table .badge,
-.table .btn {
-    white-space: nowrap;
-}
+        .table .table-actions .btn,
+        .table .badge,
+        .table .btn {
+            white-space: nowrap;
+        }
 
-/* Assets table: all 10 columns fit the available content width. */
-.assets-table {
-    table-layout: fixed !important;
-    width: 100% !important;
-}
+        /* Assets table: all 10 columns fit the available content width. */
+        .assets-table {
+            table-layout: fixed !important;
+            width: 100% !important;
+        }
 
-.assets-table th:nth-child(1), .assets-table td:nth-child(1) { width: 5%; }
-.assets-table th:nth-child(2), .assets-table td:nth-child(2) { width: 16%; }
-.assets-table th:nth-child(3), .assets-table td:nth-child(3) { width: 12%; }
-.assets-table th:nth-child(4), .assets-table td:nth-child(4) { width: 17%; }
-.assets-table th:nth-child(5), .assets-table td:nth-child(5) { width: 8%; }
-.assets-table th:nth-child(6), .assets-table td:nth-child(6) { width: 8%; }
-.assets-table th:nth-child(7), .assets-table td:nth-child(7) { width: 14%; }
-.assets-table th:nth-child(8), .assets-table td:nth-child(8) { width: 7%; }
-.assets-table th:nth-child(9), .assets-table td:nth-child(9) { width: 7%; }
-.assets-table th:nth-child(10), .assets-table td:nth-child(10) {
-    width: 6%;
-    white-space: nowrap;
-}
+        .assets-table th:nth-child(1),
+        .assets-table td:nth-child(1) {
+            width: 5%;
+        }
 
-@media (max-width: 992px) {
+        .assets-table th:nth-child(2),
+        .assets-table td:nth-child(2) {
+            width: 16%;
+        }
+
+        .assets-table th:nth-child(3),
+        .assets-table td:nth-child(3) {
+            width: 12%;
+        }
+
+        .assets-table th:nth-child(4),
+        .assets-table td:nth-child(4) {
+            width: 17%;
+        }
+
+        .assets-table th:nth-child(5),
+        .assets-table td:nth-child(5) {
+            width: 8%;
+        }
+
+        .assets-table th:nth-child(6),
+        .assets-table td:nth-child(6) {
+            width: 8%;
+        }
+
+        .assets-table th:nth-child(7),
+        .assets-table td:nth-child(7) {
+            width: 14%;
+        }
+
+        .assets-table th:nth-child(8),
+        .assets-table td:nth-child(8) {
+            width: 7%;
+        }
+
+        .assets-table th:nth-child(9),
+        .assets-table td:nth-child(9) {
+            width: 7%;
+        }
+
+        .assets-table th:nth-child(10),
+        .assets-table td:nth-child(10) {
+            width: 6%;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 992px) {
 
 
 
@@ -330,7 +366,6 @@
 
 
         }
-
     </style>
 
 
@@ -539,76 +574,34 @@
 
 
 
+            {{-- Transfers --}}
+            <a
+                href="{{ route('transfers.index') }}"
+                class="{{ request()->routeIs('transfers.*') ? 'active' : '' }}">
+                <i class="bi bi-arrow-left-right me-2"></i>
+                Transfers
+            </a>
+
+
             <hr class="border-secondary">
 
 
-
-
-
             <div class="small text-uppercase text-secondary mb-2">
-
                 Coming Next
-
             </div>
 
 
-
-
-
             {{-- Verification --}}
-
             <a href="#">
-
-
-
                 <i class="bi bi-check2-square me-2"></i>
-
-
-
                 Verification
-
-
-
             </a>
-
-
-
-
-
-            {{-- Transfers --}}
-
-            <a href="#">
-
-
-
-                <i class="bi bi-arrow-left-right me-2"></i>
-
-
-
-                Transfers
-
-
-
-            </a>
-
-
-
 
 
             {{-- Reports --}}
-
             <a href="#">
-
-
-
                 <i class="bi bi-bar-chart me-2"></i>
-
-
-
                 Reports
-
-
-
             </a>
 
 

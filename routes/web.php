@@ -1,14 +1,15 @@
 <?php
 
 use App\Http\Controllers\AssetController;
+use App\Http\Controllers\AssetDocumentController;
 use App\Http\Controllers\AssetTransferController;
+use App\Http\Controllers\AssetTransferDocumentController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ImportController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AssetDocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +52,7 @@ Route::delete(
     '/assets/{asset}/documents/image',
     [AssetDocumentController::class, 'destroyImage']
 )->name('asset-documents.image.destroy');
+
 /*
 |--------------------------------------------------------------------------
 | Departments
@@ -148,6 +150,21 @@ Route::post(
     '/transfers/{transfer}/cancel',
     [AssetTransferController::class, 'cancel']
 )->name('transfers.cancel');
+
+
+Route::post(
+    '/transfers/{transfer}/documents',
+    [AssetTransferDocumentController::class, 'store']
+)->name('transfer-documents.store');
+
+Route::get(
+    '/transfers/{transfer}/documents/{document}',
+    [AssetTransferDocumentController::class, 'show']
+)->name('transfer-documents.show');
+
+
+
+
 
 
 /*
