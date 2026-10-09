@@ -14,6 +14,7 @@
         overflow-x: auto;
 
         overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
 
     }
 
@@ -21,7 +22,7 @@
 
         width: 100%;
 
-        min-width: 0;
+        min-width: 760px;
 
         table-layout: fixed;
 
@@ -189,36 +190,64 @@
 
     .departments-table .actions .btn {
 
-
         white-space: nowrap;
+
         font-size: 0.75rem;
+
         line-height: 1.2;
+
         padding: 5px 8px;
+
     }
 
     /* Compact status badges. */
+
     .departments-table .status-badge {
+
         display: inline-flex;
+
         align-items: center;
+
         justify-content: center;
+
         font-size: 0.72rem;
+
         line-height: 1.2;
+
         padding: 5px 8px !important;
+
         white-space: nowrap;
+
     }
 
     .departments-table .status-badge i {
+
         margin-right: 4px !important;
+
     }
 
     @media (max-width: 1100px) {
-
         .departments-table {
+            min-width: 760px;
+        }
+    }
 
-            min-width: 920px;
+    @media (max-width: 576px) {
 
+        .departments-table th,
+        .departments-table td {
+            padding: 8px 7px !important;
         }
 
+        .departments-table .actions .btn {
+            padding: 4px 6px;
+            font-size: .72rem;
+        }
+
+        .departments-table .status-badge {
+            padding: 4px 6px !important;
+            font-size: .68rem;
+        }
     }
 </style>
 
@@ -777,327 +806,327 @@
 
     document.addEventListener('DOMContentLoaded', function() {
 
-                console.log('Department DOM loaded');
+        console.log('Department DOM loaded');
 
-                const modalElement = document.getElementById(
+        const modalElement = document.getElementById(
 
-                    'departmentAssetsModal'
+            'departmentAssetsModal'
 
-                );
+        );
 
-                const modal = new bootstrap.Modal(
+        const modal = new bootstrap.Modal(
 
-                    modalElement
+            modalElement
 
-                );
+        );
 
-                const loading = document.getElementById(
+        const loading = document.getElementById(
 
-                    'assetsLoading'
+            'assetsLoading'
 
-                );
+        );
 
-                const error = document.getElementById(
+        const error = document.getElementById(
 
-                    'assetsError'
+            'assetsError'
 
-                );
+        );
 
-                const errorMessage = document.getElementById(
+        const errorMessage = document.getElementById(
 
-                    'assetsErrorMessage'
+            'assetsErrorMessage'
 
-                );
+        );
 
-                const empty = document.getElementById(
+        const empty = document.getElementById(
 
-                    'assetsEmpty'
+            'assetsEmpty'
 
-                );
+        );
 
-                const tableContainer = document.getElementById(
+        const tableContainer = document.getElementById(
 
-                    'assetsTableContainer'
+            'assetsTableContainer'
 
-                );
+        );
 
-                const tableBody = document.getElementById(
+        const tableBody = document.getElementById(
 
-                    'assetsTableBody'
+            'assetsTableBody'
 
-                );
+        );
 
-                const modalTitle = document.getElementById(
+        const modalTitle = document.getElementById(
 
-                    'departmentAssetsModalLabel'
+            'departmentAssetsModalLabel'
 
-                );
+        );
 
-                const modalSubtitle = document.getElementById(
+        const modalSubtitle = document.getElementById(
 
-                    'departmentAssetsModalSubtitle'
+            'departmentAssetsModalSubtitle'
 
-                );
+        );
 
-                function escapeHtml(value) {
+        function escapeHtml(value) {
 
-                    if (
+            if (
 
-                        value === null ||
+                value === null ||
 
-                        value === undefined
+                value === undefined
 
-                    ) {
+            ) {
 
-                        return '';
+                return '';
 
-                    }
+            }
 
-                    return String(value)
+            return String(value)
 
-                        .replace(/&/g, '&amp;')
+                .replace(/&/g, '&amp;')
 
-                        .replace(/</g, '&lt;')
+                .replace(/</g, '&lt;')
 
-                        .replace(/>/g, '&gt;')
+                .replace(/>/g, '&gt;')
 
-                        .replace(/"/g, '&quot;')
+                .replace(/"/g, '&quot;')
 
-                        .replace(/'/g, '&#039;');
+                .replace(/'/g, '&#039;');
 
-                }
+        }
 
-                document
+        document
 
-                    .querySelectorAll('.view-assets-btn')
+            .querySelectorAll('.view-assets-btn')
 
-                    .forEach(function(button) {
+            .forEach(function(button) {
 
-                            button.addEventListener(
+                button.addEventListener(
 
-                                    'click',
+                    'click',
 
-                                    async function() {
+                    async function() {
 
-                                            console.log(
+                        console.log(
 
-                                                'View Assets clicked'
+                            'View Assets clicked'
 
-                                            );
+                        );
 
-                                            const assetsUrl =
+                        const assetsUrl =
 
-                                                this.dataset.assetsUrl;
+                            this.dataset.assetsUrl;
 
-                                            const departmentName =
+                        const departmentName =
 
-                                                this.dataset.departmentName;
+                            this.dataset.departmentName;
 
-                                            console.log(
+                        console.log(
 
-                                                'Assets URL:',
+                            'Assets URL:',
 
-                                                assetsUrl
+                            assetsUrl
 
-                                            );
+                        );
 
-                                            /*
+                        /*
 
-                                            |--------------------------------------------------------------------------
+                        |--------------------------------------------------------------------------
 
-                                            | Reset
+                        | Reset
 
-                                            |--------------------------------------------------------------------------
+                        |--------------------------------------------------------------------------
 
-                                            */
+                        */
 
-                                            loading.classList.remove(
+                        loading.classList.remove(
 
-                                                'd-none'
+                            'd-none'
 
-                                            );
+                        );
 
-                                            error.classList.add(
+                        error.classList.add(
 
-                                                'd-none'
+                            'd-none'
 
-                                            );
+                        );
 
-                                            empty.classList.add(
+                        empty.classList.add(
 
-                                                'd-none'
+                            'd-none'
 
-                                            );
+                        );
 
-                                            tableContainer.classList.add(
+                        tableContainer.classList.add(
 
-                                                'd-none'
+                            'd-none'
 
-                                            );
+                        );
 
-                                            tableBody.innerHTML = '';
+                        tableBody.innerHTML = '';
 
-                                            /*
+                        /*
 
-                                            |--------------------------------------------------------------------------
+                        |--------------------------------------------------------------------------
 
-                                            | Modal Title
+                        | Modal Title
 
-                                            |--------------------------------------------------------------------------
+                        |--------------------------------------------------------------------------
 
-                                            */
+                        */
 
-                                            modalTitle.textContent =
+                        modalTitle.textContent =
 
-                                                departmentName + ' - Assets';
+                            departmentName + ' - Assets';
 
-                                            modalSubtitle.textContent =
+                        modalSubtitle.textContent =
 
-                                                'Loading allocated assets...';
+                            'Loading allocated assets...';
 
-                                            /*
+                        /*
 
-                                            |--------------------------------------------------------------------------
+                        |--------------------------------------------------------------------------
 
-                                            | Open Modal
+                        | Open Modal
 
-                                            |--------------------------------------------------------------------------
+                        |--------------------------------------------------------------------------
 
-                                            */
+                        */
 
-                                            modal.show();
+                        modal.show();
 
-                                            /*
+                        /*
 
-                                            |--------------------------------------------------------------------------
+                        |--------------------------------------------------------------------------
 
-                                            | Fetch Assets
+                        | Fetch Assets
 
-                                            |--------------------------------------------------------------------------
+                        |--------------------------------------------------------------------------
 
-                                            */
+                        */
 
-                                            try {
+                        try {
 
-                                                const response =
+                            const response =
 
-                                                    await fetch(
+                                await fetch(
 
-                                                        assetsUrl,
+                                    assetsUrl,
 
-                                                        {
+                                    {
 
-                                                            method: 'GET',
+                                        method: 'GET',
 
-                                                            headers: {
+                                        headers: {
 
-                                                                'Accept':
+                                            'Accept':
 
-                                                                    'application/json',
+                                                'application/json',
 
-                                                                'X-Requested-With':
+                                            'X-Requested-With':
 
-                                                                    'XMLHttpRequest'
+                                                'XMLHttpRequest'
 
-                                                            }
+                                        }
 
-                                                        }
+                                    }
 
-                                                    );
+                                );
 
-                                                console.log(
+                            console.log(
 
-                                                    'Response status:',
+                                'Response status:',
 
-                                                    response.status
+                                response.status
 
-                                                );
+                            );
 
-                                                if (!response.ok) {
+                            if (!response.ok) {
 
-                                                    throw new Error(
+                                throw new Error(
 
-                                                        'HTTP ' +
+                                    'HTTP ' +
 
-                                                        response.status
+                                    response.status
 
-                                                    );
+                                );
 
-                                                }
+                            }
 
-                                                const data =
+                            const data =
 
-                                                    await response.json();
+                                await response.json();
 
-                                                console.log(
+                            console.log(
 
-                                                    'API response:',
+                                'API response:',
 
-                                                    data
+                                data
 
-                                                );
+                            );
 
-                                                loading.classList.add(
+                            loading.classList.add(
 
-                                                    'd-none'
+                                'd-none'
 
-                                                );
+                            );
 
-                                                /*
+                            /*
 
-                                                |--------------------------------------------------------------------------
+                            |--------------------------------------------------------------------------
 
-                                                | No Assets
+                            | No Assets
 
-                                                |--------------------------------------------------------------------------
+                            |--------------------------------------------------------------------------
 
-                                                */
+                            */
 
-                                                if (
+                            if (
 
-                                                    !data.assets ||
+                                !data.assets ||
 
-                                                    data.assets.length === 0
+                                data.assets.length === 0
 
-                                                ) {
+                            ) {
 
-                                                    empty.classList.remove(
+                                empty.classList.remove(
 
-                                                        'd-none'
+                                    'd-none'
 
-                                                    );
+                                );
 
-                                                    modalSubtitle.textContent =
+                                modalSubtitle.textContent =
 
-                                                        'No assets allocated to this department.';
+                                    'No assets allocated to this department.';
 
-                                                    return;
+                                return;
 
-                                                }
+                            }
 
-                                                /*
+                            /*
 
-                                                |--------------------------------------------------------------------------
+                            |--------------------------------------------------------------------------
 
-                                                | Render Assets
+                            | Render Assets
 
-                                                |--------------------------------------------------------------------------
+                            |--------------------------------------------------------------------------
 
-                                                */
+                            */
 
-                                                modalSubtitle.textContent =
+                            modalSubtitle.textContent =
 
-                                                    data.assets.length +
+                                data.assets.length +
 
-                                                    ' asset(s) allocated';
+                                ' asset(s) allocated';
 
-                                                tableBody.innerHTML =
+                            tableBody.innerHTML =
 
-                                                    data.assets
+                                data.assets
 
-                                                    .map(function(asset) {
+                                .map(function(asset) {
 
-                                                            return\ `
+                                    return `
 
                                                 <tr>
 
@@ -1203,55 +1232,53 @@
 
                                                 </tr>
 
-                                            \`;
+                                            `;
 
-                                        })
+                                })
 
-                                        .join('');
+                                .join('');
 
-                                tableContainer.classList.remove(
+                            tableContainer.classList.remove(
 
-                                    'd-none'
+                                'd-none'
 
-                                );
+                            );
 
-                            }
+                        } catch (exception) {
 
-                            catch (exception) {
+                            console.error(
 
-                                console.error(
+                                'Department assets error:',
 
-                                    'Department assets error:',
+                                exception
 
-                                    exception
+                            );
 
-                                );
+                            loading.classList.add(
 
-                                loading.classList.add(
+                                'd-none'
 
-                                    'd-none'
+                            );
 
-                                );
+                            error.classList.remove(
 
-                                error.classList.remove(
+                                'd-none'
 
-                                    'd-none'
+                            );
 
-                                );
+                            errorMessage.textContent =
 
-                                errorMessage.textContent =
-
-                                    'Unable to load department assets.';
-
-                            }
+                                'Unable to load department assets.';
 
                         }
 
-                    );
+                    }
 
-                });
+                );
 
-        });
+            });
+
+    });
 </script>
 
 @endsection

@@ -2,13 +2,9 @@
 
 <html lang="en">
 
-
-
 <head>
 
     <meta charset="utf-8">
-
-
 
     <meta
 
@@ -16,15 +12,11 @@
 
         content="width=device-width, initial-scale=1">
 
-
-
     <title>
 
         {{ $title ?? 'IT Asset Management' }}
 
     </title>
-
-
 
     {{-- Bootstrap CSS --}}
 
@@ -34,8 +26,6 @@
 
         rel="stylesheet">
 
-
-
     {{-- Bootstrap Icons --}}
 
     <link
@@ -44,8 +34,6 @@
 
         rel="stylesheet">
 
-
-
     <style>
         /* =========================================================
 
@@ -53,19 +41,15 @@
 
            ========================================================= */
 
-
-
         html,
 
         body {
 
             max-width: 100%;
 
-            overflow-x: hidden;
+            overflow-x: clip;
 
         }
-
-
 
         body {
 
@@ -73,17 +57,11 @@
 
         }
 
-
-
-
-
         /* =========================================================
 
            SIDEBAR
 
            ========================================================= */
-
-
 
         .sidebar {
 
@@ -96,8 +74,6 @@
             width: 250px;
 
         }
-
-
 
         .sidebar a {
 
@@ -115,8 +91,6 @@
 
         }
 
-
-
         .sidebar a:hover,
 
         .sidebar a.active {
@@ -127,8 +101,6 @@
 
         }
 
-
-
         .brand {
 
             font-weight: 700;
@@ -137,17 +109,11 @@
 
         }
 
-
-
-
-
         /* =========================================================
 
            COMMON UI
 
            ========================================================= */
-
-
 
         .card-stat {
 
@@ -157,8 +123,6 @@
 
         }
 
-
-
         .table-card {
 
             border: 0;
@@ -166,8 +130,6 @@
             border-radius: 14px;
 
         }
-
-
 
         .navbar {
 
@@ -177,17 +139,11 @@
 
         }
 
-
-
-
-
         /* =========================================================
 
            MAIN CONTENT
 
            ========================================================= */
-
-
 
         .app-main {
 
@@ -199,192 +155,282 @@
 
         }
 
-
-
         .app-content {
+
             min-width: 0;
+
             width: 100%;
+
             max-width: 100%;
+
             box-sizing: border-box;
+
         }
 
-
-
         /* =========================================================
+
    RESPONSIVE TABLE SYSTEM
+
    ========================================================= */
 
         .table-responsive {
+
             width: 100%;
+
             max-width: 100%;
+
             overflow-x: auto;
+
             overflow-y: visible;
+
             -webkit-overflow-scrolling: touch;
+
         }
 
         .table-responsive>.table {
-            width: 100% !important;
-            max-width: 100% !important;
-            min-width: 0 !important;
+            width: max-content;
+            min-width: 100%;
+            max-width: none;
             margin-bottom: 0;
-            table-layout: fixed;
+            table-layout: auto;
         }
 
         .table {
+
             width: 100%;
+
             max-width: 100%;
+
             margin-bottom: 0;
+
             vertical-align: middle;
+
         }
 
         .table thead th {
+
             white-space: nowrap !important;
+
             word-break: normal !important;
+
             overflow-wrap: normal !important;
+
             vertical-align: middle;
+
             font-weight: 600;
+
         }
 
         .table tbody td {
+
             vertical-align: middle;
+
             white-space: normal;
+
             word-break: normal;
+
             overflow-wrap: anywhere;
+
         }
 
         .table th,
+
         .table td {
+
             padding: 12px 10px;
+
         }
 
         .table .text-truncate {
+
             display: block;
+
             width: 100%;
+
             max-width: 100%;
+
             overflow: hidden;
+
             text-overflow: ellipsis;
+
             white-space: nowrap;
+
         }
 
         .table .table-long-text {
+
             display: block;
+
             max-width: 100%;
+
             overflow: hidden;
+
             text-overflow: ellipsis;
+
             white-space: nowrap;
+
         }
 
         .table .table-actions {
+
             white-space: nowrap !important;
+
             word-break: normal !important;
+
             overflow-wrap: normal !important;
+
         }
 
         .table .table-actions .btn,
+
         .table .badge,
+
         .table .btn {
+
             white-space: nowrap;
+
         }
 
         /* Assets table: all 10 columns fit the available content width. */
+
         .assets-table {
+
             table-layout: fixed !important;
+
             width: 100% !important;
+
         }
 
         .assets-table th:nth-child(1),
+
         .assets-table td:nth-child(1) {
+
             width: 5%;
+
         }
 
         .assets-table th:nth-child(2),
+
         .assets-table td:nth-child(2) {
+
             width: 16%;
+
         }
 
         .assets-table th:nth-child(3),
+
         .assets-table td:nth-child(3) {
+
             width: 12%;
+
         }
 
         .assets-table th:nth-child(4),
+
         .assets-table td:nth-child(4) {
+
             width: 17%;
+
         }
 
         .assets-table th:nth-child(5),
+
         .assets-table td:nth-child(5) {
+
             width: 8%;
+
         }
 
         .assets-table th:nth-child(6),
+
         .assets-table td:nth-child(6) {
+
             width: 8%;
+
         }
 
         .assets-table th:nth-child(7),
+
         .assets-table td:nth-child(7) {
+
             width: 14%;
+
         }
 
         .assets-table th:nth-child(8),
+
         .assets-table td:nth-child(8) {
+
             width: 7%;
+
         }
 
         .assets-table th:nth-child(9),
+
         .assets-table td:nth-child(9) {
+
             width: 7%;
+
         }
 
         .assets-table th:nth-child(10),
+
         .assets-table td:nth-child(10) {
+
             width: 6%;
+
             white-space: nowrap;
+
         }
 
         @media (max-width: 992px) {
+            .app-content {
+                padding: 1rem !important;
+            }
+        }
 
-
+        /* On phones, stack navigation above the page instead of squeezing content. */
+        @media (max-width: 767.98px) {
+            .app-shell {
+                flex-direction: column;
+            }
 
             .sidebar {
-
-                flex-basis: 220px;
-
-                width: 220px;
-
+                width: 100%;
+                min-height: auto;
+                flex: 0 0 auto;
             }
 
+            .sidebar .brand {
+                margin-bottom: 1rem !important;
+            }
 
+            .sidebar a {
+                display: inline-block;
+                margin: 2px 4px 2px 0;
+            }
+
+            .app-main {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .navbar {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
 
             .app-content {
-
                 padding: 1rem !important;
-
             }
-
-
-
         }
     </style>
 
-
-
 </head>
-
-
-
-
 
 <body>
 
-
-
-    <div class="d-flex w-100">
-
-
-
-
+    <div class="d-flex w-100 app-shell">
 
         {{-- =========================================================
 
@@ -392,43 +438,25 @@
 
          ========================================================= --}}
 
-
-
         <aside
 
             class="sidebar p-3"
 
             style="width: 250px;">
 
-
-
             <div class="brand fs-5 mb-4">
-
-
 
                 <i class="bi bi-pc-display me-2"></i>
 
-
-
                 IT Asset Manager
 
-
-
             </div>
-
-
-
-
 
             <div class="small text-uppercase text-secondary mb-2">
 
                 Main
 
             </div>
-
-
-
-
 
             {{-- Dashboard --}}
 
@@ -438,21 +466,11 @@
 
                 class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
 
-
-
                 <i class="bi bi-grid me-2"></i>
-
-
 
                 Dashboard
 
-
-
             </a>
-
-
-
-
 
             {{-- Assets --}}
 
@@ -462,21 +480,11 @@
 
                 class="{{ request()->routeIs('assets.*') ? 'active' : '' }}">
 
-
-
                 <i class="bi bi-box-seam me-2"></i>
-
-
 
                 Assets
 
-
-
             </a>
-
-
-
-
 
             {{-- Departments --}}
 
@@ -486,21 +494,11 @@
 
                 class="{{ request()->routeIs('departments.*') ? 'active' : '' }}">
 
-
-
                 <i class="bi bi-building me-2"></i>
-
-
 
                 Departments
 
-
-
             </a>
-
-
-
-
 
             {{-- Categories --}}
 
@@ -510,21 +508,11 @@
 
                 class="{{ request()->routeIs('categories.*') ? 'active' : '' }}">
 
-
-
                 <i class="bi bi-tags me-2"></i>
-
-
 
                 Categories
 
-
-
             </a>
-
-
-
-
 
             {{-- Employees --}}
 
@@ -534,21 +522,11 @@
 
                 class="{{ request()->routeIs('employees.*') ? 'active' : '' }}">
 
-
-
                 <i class="bi bi-people me-2"></i>
-
-
 
                 Employees
 
-
-
             </a>
-
-
-
-
 
             {{-- Imports --}}
 
@@ -558,59 +536,72 @@
 
                 class="{{ request()->routeIs('imports.*') ? 'active' : '' }}">
 
-
-
                 <i class="bi bi-file-earmark-arrow-up me-2"></i>
-
-
 
                 Imports
 
-
-
             </a>
-
-
-
-
 
             {{-- Transfers --}}
+
             <a
+
                 href="{{ route('transfers.index') }}"
+
                 class="{{ request()->routeIs('transfers.*') ? 'active' : '' }}">
+
                 <i class="bi bi-arrow-left-right me-2"></i>
+
                 Transfers
+
             </a>
+
+            {{-- Super Admin --}}
+            @if (auth()->check() && auth()->user()->isSuperAdmin())
+            <hr class="border-secondary">
+
+            <div class="small text-uppercase text-secondary mb-2">
+                Administration
+            </div>
+
+            <a href="{{ route('admin.index') }}"
+                class="{{ request()->routeIs('admin.*') ? 'active' : '' }}">
+                <i class="bi bi-shield-lock me-2"></i>
+                Super Admin
+            </a>
+            @endif
+
 
 
             <hr class="border-secondary">
 
-
             <div class="small text-uppercase text-secondary mb-2">
+
                 Coming Next
+
             </div>
 
-
             {{-- Verification --}}
-            <a href="#">
-                <i class="bi bi-check2-square me-2"></i>
-                Verification
-            </a>
 
+            <a href="#">
+
+                <i class="bi bi-check2-square me-2"></i>
+
+                Verification
+
+            </a>
 
             {{-- Reports --}}
+
             <a href="#">
+
                 <i class="bi bi-bar-chart me-2"></i>
+
                 Reports
+
             </a>
 
-
-
         </aside>
-
-
-
-
 
         {{-- =========================================================
 
@@ -618,69 +609,72 @@
 
          ========================================================= --}}
 
-
-
         <main class="app-main">
-
-
-
-
 
             {{-- Top Navbar --}}
 
             <nav class="navbar px-4 py-3">
 
-
-
                 <span class="fw-semibold">
-
-
 
                     @yield('page-title', 'Dashboard')
 
-
-
                 </span>
 
 
+                <div class="dropdown">
+                    <button
+                        class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 border-0"
+                        type="button"
+                        id="userDropdown"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        <i class="bi bi-person-circle fs-5"></i>
 
+                        <span class="text-muted">
+                            {{ auth()->user()->name }}
+                        </span>
+                    </button>
 
+                    <ul class="dropdown-menu dropdown-menu-end shadow"
+                        aria-labelledby="userDropdown">
 
-                <span class="text-muted">
+                        <li>
+                            <div class="dropdown-item-text">
+                                <strong>{{ auth()->user()->name }}</strong>
+                                <br>
+                                <small class="text-muted text-capitalize">
+                                    {{ str_replace('_', ' ', auth()->user()->role) }}
+                                </small>
+                            </div>
+                        </li>
 
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
 
-
-                    <i class="bi bi-person-circle me-1"></i>
-
-
-
-                    Administrator
-
-
-
-                </span>
-
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="bi bi-box-arrow-right me-2"></i>
+                                    Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
 
 
             </nav>
-
-
-
-
 
             {{-- Page Content --}}
 
             <div class="app-content p-4">
 
-
-
-
-
                 {{-- Success --}}
 
                 @if (session('success'))
-
-
 
                 <div
 
@@ -688,15 +682,9 @@
 
                     role="alert">
 
-
-
                     <i class="bi bi-check-circle me-1"></i>
 
-
-
                     {{ session('success') }}
-
-
 
                     <button
 
@@ -708,39 +696,23 @@
 
                         aria-label="Close"></button>
 
-
-
                 </div>
 
-
-
                 @endif
-
-
-
-
 
                 {{-- Error --}}
 
                 @if (session('error'))
 
-
-
                 <div
 
                     class="alert alert-danger alert-dismissible fade show"
 
                     role="alert">
 
-
-
                     <i class="bi bi-exclamation-triangle me-1"></i>
 
-
-
                     {{ session('error') }}
-
-
 
                     <button
 
@@ -752,31 +724,19 @@
 
                         aria-label="Close"></button>
 
-
-
                 </div>
 
-
-
                 @endif
-
-
-
-
 
                 {{-- Validation Errors --}}
 
                 @if ($errors->any())
-
-
 
                 <div
 
                     class="alert alert-danger alert-dismissible fade show"
 
                     role="alert">
-
-
 
                     <strong>
 
@@ -784,15 +744,9 @@
 
                     </strong>
 
-
-
                     <ul class="mb-0 mt-2">
 
-
-
                         @foreach ($errors->all() as $error)
-
-
 
                         <li>
 
@@ -800,15 +754,9 @@
 
                         </li>
 
-
-
                         @endforeach
 
-
-
                     </ul>
-
-
 
                     <button
 
@@ -820,35 +768,17 @@
 
                         aria-label="Close"></button>
 
-
-
                 </div>
-
-
 
                 @endif
 
-
-
-
-
                 @yield('content')
-
-
 
             </div>
 
-
-
         </main>
 
-
-
     </div>
-
-
-
-
 
     {{-- Bootstrap JavaScript --}}
 
@@ -856,16 +786,11 @@
 
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-
-
-
-
     @stack('scripts')
-
-
 
 </body>
 
-
-
 </html>
+
+
+{{-- Responsive table behaviour: wide data tables scroll inside their own wrappers. --}}
