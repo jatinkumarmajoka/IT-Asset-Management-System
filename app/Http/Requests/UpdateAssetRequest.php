@@ -2,60 +2,32 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Asset;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateAssetRequest extends FormRequest
 {
     public function authorize(): bool
-{
-    return true;
-}
+    {
+        return true;
+    }
 
     public function rules(): array
     {
-        $assetId = $this->route('asset')?->id;
+        $assetRoute = $this->route('asset');
+
+        $assetId = $assetRoute instanceof Asset
+            ? $assetRoute->id
+            : $assetRoute;
 
         return [
-
-            /*
-            |--------------------------------------------------------------------------
-            | SECURITY
-            |--------------------------------------------------------------------------
-            |
-            | Department and Present Occupant can ONLY be changed
-            | through the Asset Transfer workflow.
-            |
-            */
-
-            'department_id' => [
-                'prohibited',
-            ],
-
-            'present_occupant_id' => [
-                'prohibited',
-            ],
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Asset Information
-            |--------------------------------------------------------------------------
-            */
-
             'asset_code' => [
                 'required',
                 'string',
                 'max:100',
-                Rule::unique(
-                    'assets',
-                    'asset_code'
-                )->ignore($assetId),
-            ],
-
-            'category_id' => [
-                'required',
-                'exists:categories,id',
+                Rule::unique('assets', 'asset_code')
+                    ->ignore($assetId),
             ],
 
             'item_name' => [
@@ -64,16 +36,38 @@ class UpdateAssetRequest extends FormRequest
                 'max:255',
             ],
 
-            'make' => [
-                'nullable',
-                'string',
-                'max:150',
+            // Assignment changes must use the asset transfer workflow.
+            'department_id' => [
+                'prohibited',
             ],
 
-            'model' => [
+            'present_occupant_id' => [
+                'prohibited',
+            ],
+
+            'category_id' => [
+                'required',
+                'integer',
+                'exists:categories,id',
+            ],
+
+            'present_sub_department_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('sub_departments', 'id')
+                    ->where(
+                        fn ($query) => $query->where(
+                            'department_id',
+                            Asset::whereKey($assetId)
+                                ->value('department_id')
+                        )
+                    ),
+            ],
+
+            'present_occupant_name' => [
                 'nullable',
                 'string',
-                'max:150',
+                'max:255',
             ],
 
             'issued_quantity' => [
@@ -88,29 +82,48 @@ class UpdateAssetRequest extends FormRequest
                 'min:0',
             ],
 
+            'condition' => [
+                'required',
+                Rule::in([
+                    'New',
+                    'Good',
+                    'Fair',
+                    'Damaged',
+                    'Critical',
+                ]),
+            ],
+
             'asset_serial_number' => [
                 'nullable',
                 'string',
-                'max:150',
-                Rule::unique(
-                    'assets',
-                    'asset_serial_number'
-                )->ignore($assetId),
+                'max:255',
+                Rule::unique('assets', 'asset_serial_number')
+                    ->ignore($assetId),
             ],
 
             'barcode_number' => [
                 'nullable',
                 'string',
-                'max:150',
-                Rule::unique(
-                    'assets',
-                    'barcode_number'
-                )->ignore($assetId),
+                'max:255',
+                Rule::unique('assets', 'barcode_number')
+                    ->ignore($assetId),
             ],
 
             'date_of_issue' => [
                 'nullable',
                 'date',
+            ],
+
+            'make' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'model' => [
+                'nullable',
+                'string',
+                'max:255',
             ],
 
             'asset_status' => [
@@ -128,26 +141,46 @@ class UpdateAssetRequest extends FormRequest
                 ]),
             ],
 
-            'condition' => [
-                'required',
-                Rule::in([
-                    'New',
-                    'Good',
-                    'Fair',
-                    'Damaged',
-                    'Critical',
-                ]),
-            ],
-
             'location' => [
                 'nullable',
                 'string',
                 'max:255',
             ],
 
+            'previous_department_name' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'previous_location' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'previous_room_number' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'present_location' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'present_room_number' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
             'remarks' => [
                 'nullable',
                 'string',
+                'max:5000',
             ],
         ];
     }
@@ -155,11 +188,23 @@ class UpdateAssetRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'asset_code.unique' =>
+                'This asset code already exists.',
+
+            'asset_serial_number.unique' =>
+                'This serial number is already registered.',
+
+            'barcode_number.unique' =>
+                'This barcode is already registered.',
+
             'department_id.prohibited' =>
-                'The department can only be changed through the Asset Transfer workflow.',
+                'Department can only be changed through Asset Transfer.',
 
             'present_occupant_id.prohibited' =>
-                'The present occupant can only be changed through the Asset Transfer workflow.',
+                'Present occupant can only be changed through Asset Transfer.',
+
+            'present_sub_department_id.exists' =>
+                'Select a sub-department belonging to the asset department.',
         ];
     }
 }

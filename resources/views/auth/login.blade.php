@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,7 +37,6 @@
                        class="mb-1 block text-sm font-medium text-slate-700">
                     Email
                 </label>
-
                 <input
                     id="email"
                     name="email"
@@ -58,7 +56,6 @@
                        class="mb-1 block text-sm font-medium text-slate-700">
                     Password
                 </label>
-
                 <input
                     id="password"
                     name="password"
@@ -91,14 +88,6 @@
                 Sign in
             </button>
         </form>
-
-        <p class="mt-5 text-center text-sm text-slate-600">
-            Need an account?
-            <a href="{{ route('register') }}"
-               class="font-medium text-blue-700 hover:underline">
-                Request access
-            </a>
-        </p>
     </main>
 </body>
 </html>

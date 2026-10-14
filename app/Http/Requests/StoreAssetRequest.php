@@ -9,6 +9,7 @@ class StoreAssetRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        // Module permissions are checked by the controller/middleware.
         return true;
     }
 
@@ -22,32 +23,52 @@ class StoreAssetRequest extends FormRequest
                 'unique:assets,asset_code',
             ],
 
-            'department_id' => [
-                'required',
-                'exists:departments,id',
-            ],
-
-            'category_id' => [
-                'required',
-                'exists:categories,id',
-            ],
-
             'item_name' => [
                 'required',
                 'string',
                 'max:255',
             ],
 
-            'make' => [
-                'nullable',
-                'string',
-                'max:150',
+            'department_id' => [
+                'required',
+                'integer',
+                'exists:departments,id',
             ],
 
-            'model' => [
+            'category_id' => [
+                'required',
+                'integer',
+                'exists:categories,id',
+            ],
+
+            'present_occupant_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('employees', 'id')
+                    ->where(
+                        fn ($query) => $query->where(
+                            'department_id',
+                            $this->input('department_id')
+                        )
+                    ),
+            ],
+
+            'present_sub_department_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('sub_departments', 'id')
+                    ->where(
+                        fn ($query) => $query->where(
+                            'department_id',
+                            $this->input('department_id')
+                        )
+                    ),
+            ],
+
+            'present_occupant_name' => [
                 'nullable',
                 'string',
-                'max:150',
+                'max:255',
             ],
 
             'issued_quantity' => [
@@ -62,40 +83,46 @@ class StoreAssetRequest extends FormRequest
                 'min:0',
             ],
 
-            /*
-             * IMPORTANT:
-             *
-             * If an occupant is selected, that employee MUST
-             * belong to the selected department.
-             */
-            'present_occupant_id' => [
-                'nullable',
-                Rule::exists('employees', 'id')
-                    ->where(function ($query) {
-                        $query->where(
-                            'department_id',
-                            $this->input('department_id')
-                        );
-                    }),
+            'condition' => [
+                'required',
+                Rule::in([
+                    'New',
+                    'Good',
+                    'Fair',
+                    'Damaged',
+                    'Critical',
+                ]),
             ],
 
             'asset_serial_number' => [
                 'nullable',
                 'string',
-                'max:150',
+                'max:255',
                 'unique:assets,asset_serial_number',
             ],
 
             'barcode_number' => [
                 'nullable',
                 'string',
-                'max:150',
+                'max:255',
                 'unique:assets,barcode_number',
             ],
 
             'date_of_issue' => [
                 'nullable',
                 'date',
+            ],
+
+            'make' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'model' => [
+                'nullable',
+                'string',
+                'max:255',
             ],
 
             'asset_status' => [
@@ -113,26 +140,62 @@ class StoreAssetRequest extends FormRequest
                 ]),
             ],
 
-            'condition' => [
-                'required',
-                Rule::in([
-                    'New',
-                    'Good',
-                    'Fair',
-                    'Damaged',
-                    'Critical',
-                ]),
-            ],
-
             'location' => [
                 'nullable',
                 'string',
                 'max:255',
             ],
 
+            'previous_department_name' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'previous_location' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'previous_room_number' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'present_location' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'present_room_number' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
             'remarks' => [
                 'nullable',
                 'string',
+                'max:5000',
+            ],
+
+            // Optional uploads are validated here but are not asset-table columns.
+            'asset_image' => [
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:10240',
+            ],
+
+            'bill_invoice' => [
+                'nullable',
+                'file',
+                'mimes:jpg,jpeg,png,webp,pdf',
+                'max:10240',
             ],
         ];
     }
@@ -140,8 +203,38 @@ class StoreAssetRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'asset_code.unique' =>
+                'This asset code already exists.',
+
+            'asset_serial_number.unique' =>
+                'This serial number is already registered.',
+
+            'barcode_number.unique' =>
+                'This barcode is already registered.',
+
             'present_occupant_id.exists' =>
-                'The selected occupant must belong to the selected department.',
+                'Select an employee belonging to the selected department.',
+
+            'present_sub_department_id.exists' =>
+                'Select a sub-department belonging to the selected department.',
+
+            'asset_image.image' =>
+                'The asset image must be a valid image file.',
+
+            'asset_image.mimes' =>
+                'The asset image must be JPG, JPEG, PNG, or WEBP.',
+
+            'asset_image.max' =>
+                'The asset image must not exceed 10 MB.',
+
+            'bill_invoice.file' =>
+                'The bill/invoice must be a valid file.',
+
+            'bill_invoice.mimes' =>
+                'The bill/invoice must be JPG, JPEG, PNG, WEBP, or PDF.',
+
+            'bill_invoice.max' =>
+                'The bill/invoice must not exceed 10 MB.',
         ];
     }
 }

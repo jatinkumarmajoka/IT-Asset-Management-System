@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -34,35 +35,29 @@ class User extends Authenticatable
     }
 
     /**
-     * Check whether the user is an approved Super Admin.
+     * Department assigned to this login account.
      */
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->role === 'super_admin'
             && $this->account_status === 'approved';
     }
 
-    /**
-     * Check whether the user's account is approved.
-     */
     public function isApproved(): bool
     {
         return $this->account_status === 'approved';
     }
 
-    /**
-     * Check whether the user can access a module.
-     * Approved staff can view modules.
-     */
     public function hasModuleAccess(string $module): bool
     {
         return $this->isApproved();
     }
 
-    /**
-     * Check whether the user can create, edit, or delete
-     * records in a specific module.
-     */
     public function canManageModule(string $module): bool
     {
         if (!$this->isApproved()) {

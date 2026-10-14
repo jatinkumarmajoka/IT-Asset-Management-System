@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('page-title', 'Edit Department')
@@ -11,56 +10,84 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <h3>Edit Department</h3>
+            <h3 class="mb-3">Edit Department</h3>
 
             @if (!$canManageDepartments)
                 <div class="alert alert-info">
-                    You have view-only access to Departments.
-                    You cannot edit departments.
+                    You have view-only access to Departments. You cannot edit departments.
                 </div>
 
-                <a href="{{ route('departments.index') }}"
-                   class="btn btn-secondary">
+                <a href="{{ route('departments.index') }}" class="btn btn-secondary">
                     Back to Departments
                 </a>
             @else
-                <form method="POST"
-                      action="{{ route('departments.update', $department) }}">
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <strong>Please correct the following errors:</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('departments.update', $department) }}">
                     @csrf
                     @method('PUT')
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="name" class="form-label">Name</label>
+                            <label for="name" class="form-label">Department Name</label>
                             <input
                                 id="name"
                                 name="name"
+                                type="text"
                                 class="form-control"
                                 value="{{ old('name', $department->name) }}"
+                                maxlength="150"
                                 required
+                                autofocus
                             >
                             @error('name')
-                                <div class="text-danger small">{{ $message }}</div>
+                                <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="col-md-3">
-                            <label for="code" class="form-label">Code</label>
+                            <label for="code" class="form-label">Department Code</label>
                             <input
                                 id="code"
                                 name="code"
+                                type="text"
                                 class="form-control"
                                 value="{{ old('code', $department->code) }}"
+                                maxlength="50"
                                 required
                             >
                             @error('code')
-                                <div class="text-danger small">{{ $message }}</div>
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="type" class="form-label">Department Type</label>
+                            <select id="type" name="type" class="form-select" required>
+                                <option value="academic" @selected(old('type', $department->type ?? 'academic') === 'academic')>
+                                    Teaching / Academic
+                                </option>
+                                <option value="non_teaching" @selected(old('type', $department->type) === 'non_teaching')>
+                                    Non-Teaching / Administrative
+                                </option>
+                            </select>
+                            @error('type')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="col-md-3">
                             <label for="status" class="form-label">Status</label>
-                            <select id="status" name="status" class="form-select">
+                            <select id="status" name="status" class="form-select" required>
                                 <option value="active" @selected(old('status', $department->status) === 'active')>
                                     Active
                                 </option>
@@ -69,12 +96,12 @@
                                 </option>
                             </select>
                             @error('status')
-                                <div class="text-danger small">{{ $message }}</div>
+                                <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="col-12">
-                            <label for="description" class="form-label">Description</label>
+                            <label for="description" class="form-label">Description (Optional)</label>
                             <textarea
                                 id="description"
                                 name="description"
@@ -82,14 +109,17 @@
                                 rows="3"
                             >{{ old('description', $department->description) }}</textarea>
                             @error('description')
-                                <div class="text-danger small">{{ $message }}</div>
+                                <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary mt-3">
-                        Save
-                    </button>
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{{ route('departments.index') }}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
                 </form>
             @endif
         </div>

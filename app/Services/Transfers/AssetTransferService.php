@@ -4,7 +4,10 @@ namespace App\Services\Transfers;
 
 use App\Models\Asset;
 use App\Models\AssetHistory;
+use App\Models\AssetOccupancyHistory;
 use App\Models\AssetTransfer;
+use App\Models\Department;
+use App\Models\Employee;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
@@ -15,27 +18,22 @@ class AssetTransferService
     /**
      * Create a pending transfer.
      *
-     * Source department and source occupant are always
-     * taken from the asset's current database state.
+     * Source department and occupant are taken from
+     * the asset's current database state.
      */
     public function create(array $data): AssetTransfer
     {
         return DB::transaction(function () use ($data) {
-
             $asset = Asset::query()
                 ->lockForUpdate()
                 ->findOrFail($data['asset_id']);
 
             /*
-             * Prevent creating another active transfer
-             * for the same asset.
+             * Prevent another active transfer for this asset.
              */
             $activeTransferExists = AssetTransfer::query()
                 ->where('asset_id', $asset->id)
-                ->whereIn('status', [
-                    'pending',
-                    'approved',
-                ])
+                ->whereIn('status', ['pending', 'approved'])
                 ->exists();
 
             if ($activeTransferExists) {
@@ -46,8 +44,7 @@ class AssetTransferService
             }
 
             /*
-             * Destination must be different from
-             * the asset's current department.
+             * Destination must differ from the current department.
              */
             if (
                 (int) $asset->department_id ===
@@ -60,11 +57,10 @@ class AssetTransferService
             }
 
             /*
-             * Verify destination occupant belongs
-             * to destination department.
+             * Verify that the destination occupant belongs
+             * to the destination department.
              */
             if (!empty($data['to_occupant_id'])) {
-
                 $validOccupant = DB::table('employees')
                     ->where('id', $data['to_occupant_id'])
                     ->where(
@@ -81,51 +77,22 @@ class AssetTransferService
                 }
             }
 
-            /*
-             * Source values are taken directly
-             * from the current asset.
-             */
-            $fromDepartmentId = $asset->department_id;
-            $fromOccupantId = $asset->present_occupant_id ?: null;
-
             $transfer = AssetTransfer::create([
                 'asset_id' => $asset->id,
-
-                'from_department_id' =>
-                    $fromDepartmentId,
-
-                'to_department_id' =>
-                    $data['to_department_id'],
-
-                'from_occupant_id' =>
-                    $fromOccupantId,
-
-                'to_occupant_id' =>
-                    $data['to_occupant_id'] ?? null,
-
-                'transfer_date' =>
-                    $data['transfer_date']
+                'from_department_id' => $asset->department_id,
+                'to_department_id' => $data['to_department_id'],
+                'from_occupant_id' => $asset->present_occupant_id ?: null,
+                'to_occupant_id' => $data['to_occupant_id'] ?? null,
+                'transfer_date' => $data['transfer_date']
                     ?? now()->toDateString(),
-
                 'received_date' => null,
-
                 'status' => 'pending',
-
-                'reason' =>
-                    $data['reason'] ?? null,
-
-                'remarks' =>
-                    $data['remarks'] ?? null,
-
-                'reference_number' =>
-                    $data['reference_number']
+                'reason' => $data['reason'] ?? null,
+                'remarks' => $data['remarks'] ?? null,
+                'reference_number' => $data['reference_number']
                     ?? $this->generateReferenceNumber(),
-
-                'initiated_by' =>
-                    Auth::id(),
-
+                'initiated_by' => Auth::id(),
                 'approved_by' => null,
-
                 'completed_by' => null,
             ]);
 
@@ -142,11 +109,9 @@ class AssetTransferService
     /**
      * Approve a pending transfer.
      */
-    public function approve(
-        AssetTransfer $transfer
-    ): AssetTransfer {
+    public function approve(AssetTransfer $transfer): AssetTransfer
+    {
         return DB::transaction(function () use ($transfer) {
-
             $transfer = AssetTransfer::query()
                 ->lockForUpdate()
                 ->findOrFail($transfer->id);
@@ -176,14 +141,12 @@ class AssetTransferService
     /**
      * Complete an approved transfer.
      *
-     * This is the only point where the asset's
-     * department and occupant are changed.
+     * Saves the previous and present assignment snapshots
+     * before committing the transfer.
      */
-    public function complete(
-        AssetTransfer $transfer
-    ): AssetTransfer {
+    public function complete(AssetTransfer $transfer): AssetTransfer
+    {
         return DB::transaction(function () use ($transfer) {
-
             $transfer = AssetTransfer::query()
                 ->lockForUpdate()
                 ->findOrFail($transfer->id);
@@ -196,16 +159,14 @@ class AssetTransferService
             }
 
             /*
-             * Lock the asset so another request cannot
-             * modify it simultaneously.
+             * Lock the asset to prevent concurrent changes.
              */
             $asset = Asset::query()
                 ->lockForUpdate()
                 ->findOrFail($transfer->asset_id);
 
             /*
-             * Verify the asset's current department
-             * has not changed since this transfer began.
+             * Verify that the source department has not changed.
              */
             if (
                 (int) $asset->department_id !==
@@ -218,18 +179,18 @@ class AssetTransferService
             }
 
             /*
-             * Verify the current occupant has not changed.
+             * Verify that the source occupant has not changed.
+             * Normalize both IDs to avoid integer/string mismatches.
              */
-            $currentOccupantId =
-                $asset->present_occupant_id ?: null;
+            $currentOccupantId = $asset->present_occupant_id
+                ? (int) $asset->present_occupant_id
+                : null;
 
-            $transferOccupantId =
-                $transfer->from_occupant_id ?: null;
+            $transferOccupantId = $transfer->from_occupant_id
+                ? (int) $transfer->from_occupant_id
+                : null;
 
-            if (
-                $currentOccupantId !==
-                $transferOccupantId
-            ) {
+            if ($currentOccupantId !== $transferOccupantId) {
                 throw ValidationException::withMessages([
                     'transfer' =>
                         'The asset occupant has changed since this transfer was created. Review the transfer before completing it.',
@@ -237,73 +198,127 @@ class AssetTransferService
             }
 
             /*
-             * Save old state for immutable history.
+             * Load the OLD assignment before updating the asset.
              */
-            $oldDepartmentId =
-                $asset->department_id;
+            $asset->load([
+                'department',
+                'occupant',
+                'presentSubDepartment',
+            ]);
 
-            $oldOccupantId =
-                $asset->present_occupant_id;
+            $oldDepartmentId = $asset->department_id;
+            $oldDepartmentName = $asset->department?->name;
+
+            $oldSubDepartmentId = $asset->present_sub_department_id;
+            $oldSubDepartmentName =
+                $asset->presentSubDepartment?->name;
+
+            $oldOccupantName = $asset->occupant?->name
+                ?? $asset->present_occupant_name;
+
+            $oldLocation = $asset->present_location
+                ?? $asset->location;
+
+            $oldRoomNumber = $asset->present_room_number;
 
             /*
-             * Update the asset's CURRENT state.
+             * Resolve the destination department and occupant.
+             */
+            $newDepartment = Department::findOrFail(
+                $transfer->to_department_id
+            );
+
+            $newOccupant = $transfer->to_occupant_id
+                ? Employee::findOrFail($transfer->to_occupant_id)
+                : null;
+
+            /*
+             * The existing transfer fields do not specify a new
+             * location, room, or sub-department. Preserve the current
+             * values rather than inventing destination values.
+             */
+            $newLocation = $asset->present_location
+                ?? $asset->location;
+
+            $newRoomNumber = $asset->present_room_number;
+            $newSubDepartmentId = $asset->present_sub_department_id;
+            $newSubDepartmentName =
+                $asset->presentSubDepartment?->name;
+
+            /*
+             * Update the asset's current assignment.
+             * Preserve the old assignment in the asset fields too.
              */
             $asset->update([
-                'department_id' =>
-                    $transfer->to_department_id,
+                'previous_department_name' => $oldDepartmentName,
+                'previous_location' => $oldLocation,
+                'previous_room_number' => $oldRoomNumber,
 
-                'present_occupant_id' =>
-                    $transfer->to_occupant_id,
+                'department_id' => $transfer->to_department_id,
+                'present_occupant_id' => $transfer->to_occupant_id,
+                'present_occupant_name' => $newOccupant?->name,
+                'present_location' => $newLocation,
+                'present_room_number' => $newRoomNumber,
 
-                'updated_by' =>
-                    Auth::id(),
+                'updated_by' => Auth::id(),
             ]);
 
             /*
-             * Mark transfer as completed.
+             * Record a permanent snapshot of the previous and
+             * present assignment for the Occupancy History section.
+             */
+            AssetOccupancyHistory::create([
+                'asset_id' => $asset->id,
+
+                'previous_department_id' => $oldDepartmentId,
+                'previous_department_name' => $oldDepartmentName,
+                'previous_sub_department_id' => $oldSubDepartmentId,
+                'previous_sub_department_name' => $oldSubDepartmentName,
+                'previous_occupant_name' => $oldOccupantName,
+                'previous_location' => $oldLocation,
+                'previous_room_number' => $oldRoomNumber,
+
+                'present_department_id' => $newDepartment->id,
+                'present_department_name' => $newDepartment->name,
+                'present_sub_department_id' => $newSubDepartmentId,
+                'present_sub_department_name' => $newSubDepartmentName,
+                'present_occupant_name' => $newOccupant?->name,
+                'present_location' => $newLocation,
+                'present_room_number' => $newRoomNumber,
+
+                'effective_at' => now(),
+                'recorded_by' => Auth::id(),
+            ]);
+
+            /*
+             * Mark the transfer as completed.
              */
             $transfer->update([
                 'status' => 'completed',
-
-                'received_date' =>
-                    now()->toDateString(),
-
-                'completed_by' =>
-                    Auth::id(),
+                'received_date' => now()->toDateString(),
+                'completed_by' => Auth::id(),
             ]);
 
             /*
-             * Create permanent asset history.
+             * Preserve the existing general asset audit history.
              */
             AssetHistory::create([
                 'asset_id' => $asset->id,
-
                 'action' => 'transferred',
 
                 'old_value' => json_encode([
-                    'department_id' =>
-                        $oldDepartmentId,
-
-                    'present_occupant_id' =>
-                        $oldOccupantId,
+                    'department_id' => $oldDepartmentId,
+                    'present_occupant_id' => $currentOccupantId,
                 ]),
 
                 'new_value' => json_encode([
-                    'department_id' =>
-                        $transfer->to_department_id,
-
-                    'present_occupant_id' =>
-                        $transfer->to_occupant_id,
+                    'department_id' => $transfer->to_department_id,
+                    'present_occupant_id' => $transfer->to_occupant_id,
                 ]),
 
-                'performed_by' =>
-                    Auth::id(),
-
-                'ip_address' =>
-                    Request::ip(),
-
-                'created_at' =>
-                    now(),
+                'performed_by' => Auth::id(),
+                'ip_address' => Request::ip(),
+                'created_at' => now(),
             ]);
 
             return $transfer->fresh([
@@ -319,11 +334,9 @@ class AssetTransferService
     /**
      * Cancel a pending or approved transfer.
      */
-    public function cancel(
-        AssetTransfer $transfer
-    ): AssetTransfer {
+    public function cancel(AssetTransfer $transfer): AssetTransfer
+    {
         return DB::transaction(function () use ($transfer) {
-
             $transfer = AssetTransfer::query()
                 ->lockForUpdate()
                 ->findOrFail($transfer->id);
@@ -359,23 +372,15 @@ class AssetTransferService
     private function generateReferenceNumber(): string
     {
         do {
-            $reference =
-                'TRF-' .
-                now()->format('YmdHis') .
-                '-' .
-                strtoupper(
-                    substr(
-                        bin2hex(random_bytes(3)),
-                        0,
-                        6
-                    )
+            $reference = 'TRF-'
+                . now()->format('YmdHis')
+                . '-'
+                . strtoupper(
+                    substr(bin2hex(random_bytes(3)), 0, 6)
                 );
         } while (
             AssetTransfer::query()
-                ->where(
-                    'reference_number',
-                    $reference
-                )
+                ->where('reference_number', $reference)
                 ->exists()
         );
 

@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\AssetDocument;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -13,163 +14,156 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class AssetDocumentController extends Controller
 {
     /**
-     * Upload an asset document.
+     * Check permission for an asset document action.
+     */
+    private function authorizeDocumentAction(string $type): void
+    {
+        $user = auth()->user();
+
+        abort_unless($user, 401);
+
+        if ($user->isSuperAdmin()) {
+            return;
+        }
+
+        $permission = match ($type) {
+            AssetDocument::TYPE_ASSET_IMAGE => 'assets',
+            AssetDocument::TYPE_BILL_INVOICE => 'bills',
+            default => null,
+        };
+
+        abort_unless(
+            $permission && $user->canManageModule($permission),
+            403,
+            'You do not have permission to manage this document.'
+        );
+    }
+
+    /**
+     * Validate uploaded documents.
+     */
+    private function validateDocument(
+        Request $request,
+        bool $imageOnly = false
+    ): void {
+        $request->validate([
+            'file' => [
+                'required',
+                'file',
+                'max:10240',
+                $imageOnly
+                    ? 'mimes:jpg,jpeg,png,webp'
+                    : 'mimes:jpg,jpeg,png,webp,pdf',
+            ],
+        ]);
+    }
+
+    /**
+     * Store a file on the private disk.
+     */
+    private function storePrivateFile(
+        Request $request,
+        Asset $asset
+    ): array {
+        $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        $filename = Str::uuid()->toString() . '.' . $extension;
+
+        $path = $file->storeAs(
+            'assets/' . $asset->id,
+            $filename,
+            'private'
+        );
+
+        if (!$path) {
+            abort(500, 'The uploaded file could not be stored.');
+        }
+
+        return [
+            'file' => $file,
+            'path' => $path,
+        ];
+    }
+
+    /**
+     * Upload an asset image or bill/invoice when no document of
+     * that type already exists.
      */
     public function store(
         Request $request,
         Asset $asset
     ): RedirectResponse {
-
         $request->validate([
             'document_type' => [
                 'required',
                 'in:asset_image,bill_invoice',
             ],
-
-            'file' => [
-                'required',
-                'file',
-                'max:10240',
-                'mimes:jpg,jpeg,png,webp,pdf',
-            ],
         ]);
 
-        $type = $request
-            ->string('document_type')
-            ->toString();
+        $type = $request->input('document_type');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Asset Image
-        |--------------------------------------------------------------------------
-        |
-        | Asset images CAN be replaced/deleted.
-        |
-        */
+        $this->authorizeDocumentAction($type);
 
-        if ($type === AssetDocument::TYPE_ASSET_IMAGE) {
-
-            $existing = $asset->documents()
-                ->where(
-                    'document_type',
-                    AssetDocument::TYPE_ASSET_IMAGE
-                )
-                ->first();
-
-            if ($existing) {
-                return back()->withErrors([
-                    'file' =>
-                        'An asset image already exists. Use Replace Image instead.',
-                ]);
-            }
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Bill / Invoice
-        |--------------------------------------------------------------------------
-        |
-        | Bill / Invoice is permanently locked after upload.
-        |
-        */
-
-        if ($type === AssetDocument::TYPE_BILL_INVOICE) {
-
-            $existing = $asset->documents()
-                ->where(
-                    'document_type',
-                    AssetDocument::TYPE_BILL_INVOICE
-                )
-                ->first();
-
-            if ($existing) {
-                return back()->withErrors([
-                    'file' =>
-                        'This Bill / Invoice has already been uploaded and is locked.',
-                ]);
-            }
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Store file
-        |--------------------------------------------------------------------------
-        */
-
-        $file = $request->file('file');
-
-        $extension = strtolower(
-            $file->getClientOriginalExtension()
+        $this->validateDocument(
+            $request,
+            $type === AssetDocument::TYPE_ASSET_IMAGE
         );
 
-        $filename =
-            Str::uuid()->toString() .
-            '.' .
-            $extension;
+        $existing = $asset->documents()
+            ->where('document_type', $type)
+            ->first();
 
-        $directory =
-            'assets/' .
-            $asset->id;
+        if ($existing) {
+            return back()->withErrors([
+                'file' => $type === AssetDocument::TYPE_ASSET_IMAGE
+                    ? 'An asset image already exists. Use Replace Image.'
+                    : 'A bill already exists. Use Replace Bill to upload a new version.',
+            ]);
+        }
 
-        $storedPath = $file->storeAs(
-            $directory,
-            $filename,
-            'private'
-        );
+        $stored = $this->storePrivateFile($request, $asset);
+        $file = $stored['file'];
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Create database record
-        |--------------------------------------------------------------------------
-        */
-
-        $document = $asset->documents()->create([
-            'document_type' => $type,
-            'original_name' => $file->getClientOriginalName(),
-            'stored_path' => $storedPath,
-            'mime_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
-            'uploaded_by' => auth()->id(),
-
-            /*
-             * Only Bill / Invoice is locked.
-             */
-            'locked_at' =>
-                $type === AssetDocument::TYPE_BILL_INVOICE
+        try {
+            $asset->documents()->create([
+                'document_type' => $type,
+                'original_name' => $file->getClientOriginalName(),
+                'stored_path' => $stored['path'],
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+                'uploaded_by' => auth()->id(),
+                'locked_at' => $type === AssetDocument::TYPE_BILL_INVOICE
                     ? now()
                     : null,
-        ]);
-
+            ]);
+        } catch (\Throwable $exception) {
+            Storage::disk('private')->delete($stored['path']);
+            throw $exception;
+        }
 
         return back()->with(
             'success',
             $type === AssetDocument::TYPE_ASSET_IMAGE
                 ? 'Asset image uploaded successfully.'
-                : 'Bill / Invoice uploaded successfully and locked.'
+                : 'Bill/invoice uploaded successfully.'
         );
     }
 
-
     /**
-     * Replace the current asset image.
+     * Upload or replace the asset image.
      */
     public function replaceImage(
         Request $request,
         Asset $asset
     ): RedirectResponse {
+        $this->authorizeDocumentAction(
+            AssetDocument::TYPE_ASSET_IMAGE
+        );
 
-        $request->validate([
-            'file' => [
-                'required',
-                'file',
-                'max:10240',
-                'mimes:jpg,jpeg,png,webp',
-            ],
-        ]);
+        $this->validateDocument($request, true);
 
+        $stored = $this->storePrivateFile($request, $asset);
+        $file = $stored['file'];
 
         $document = $asset->documents()
             ->where(
@@ -178,104 +172,120 @@ class AssetDocumentController extends Controller
             )
             ->first();
 
+        $oldPath = $document?->stored_path;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Store new image first
-        |--------------------------------------------------------------------------
-        */
-
-        $file = $request->file('file');
-
-        $extension = strtolower(
-            $file->getClientOriginalExtension()
-        );
-
-        $filename =
-            Str::uuid()->toString() .
-            '.' .
-            $extension;
-
-        $directory =
-            'assets/' .
-            $asset->id;
-
-        $newPath = $file->storeAs(
-            $directory,
-            $filename,
-            'private'
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | If old image exists, delete old physical file
-        |--------------------------------------------------------------------------
-        */
-
-        if ($document) {
-
-            if (
-                Storage::disk('private')
-                    ->exists($document->stored_path)
-            ) {
-                Storage::disk('private')
-                    ->delete($document->stored_path);
+        try {
+            if ($document) {
+                $document->update([
+                    'original_name' => $file->getClientOriginalName(),
+                    'stored_path' => $stored['path'],
+                    'mime_type' => $file->getMimeType(),
+                    'file_size' => $file->getSize(),
+                    'uploaded_by' => auth()->id(),
+                    'locked_at' => null,
+                ]);
+            } else {
+                $asset->documents()->create([
+                    'document_type' => AssetDocument::TYPE_ASSET_IMAGE,
+                    'original_name' => $file->getClientOriginalName(),
+                    'stored_path' => $stored['path'],
+                    'mime_type' => $file->getMimeType(),
+                    'file_size' => $file->getSize(),
+                    'uploaded_by' => auth()->id(),
+                    'locked_at' => null,
+                ]);
             }
-
-            $document->update([
-                'original_name' =>
-                    $file->getClientOriginalName(),
-
-                'stored_path' =>
-                    $newPath,
-
-                'mime_type' =>
-                    $file->getMimeType(),
-
-                'file_size' =>
-                    $file->getSize(),
-
-                'uploaded_by' =>
-                    auth()->id(),
-
-                'locked_at' =>
-                    null,
-            ]);
-
-        } else {
-
-            $document = $asset->documents()->create([
-                'document_type' =>
-                    AssetDocument::TYPE_ASSET_IMAGE,
-
-                'original_name' =>
-                    $file->getClientOriginalName(),
-
-                'stored_path' =>
-                    $newPath,
-
-                'mime_type' =>
-                    $file->getMimeType(),
-
-                'file_size' =>
-                    $file->getSize(),
-
-                'uploaded_by' =>
-                    auth()->id(),
-
-                'locked_at' =>
-                    null,
-            ]);
+        } catch (\Throwable $exception) {
+            Storage::disk('private')->delete($stored['path']);
+            throw $exception;
         }
 
+        if (
+            $oldPath &&
+            $oldPath !== $stored['path'] &&
+            Storage::disk('private')->exists($oldPath)
+        ) {
+            Storage::disk('private')->delete($oldPath);
+        }
 
         return back()->with(
             'success',
-            'Asset image replaced successfully.'
+            'Asset image uploaded/replaced successfully.'
         );
     }
 
+    /**
+     * Upload or replace the bill/invoice.
+     * Requires Super Admin or Bills module permission.
+     */
+    public function replaceBill(
+        Request $request,
+        Asset $asset
+    ): RedirectResponse {
+        $this->authorizeDocumentAction(
+            AssetDocument::TYPE_BILL_INVOICE
+        );
+
+        $this->validateDocument($request);
+
+        $stored = $this->storePrivateFile($request, $asset);
+        $file = $stored['file'];
+
+        $document = $asset->documents()
+            ->where(
+                'document_type',
+                AssetDocument::TYPE_BILL_INVOICE
+            )
+            ->first();
+
+        $oldPath = $document?->stored_path;
+
+        try {
+            DB::transaction(function () use (
+                $asset,
+                $document,
+                $file,
+                $stored
+            ) {
+                if ($document) {
+                    $document->update([
+                        'original_name' => $file->getClientOriginalName(),
+                        'stored_path' => $stored['path'],
+                        'mime_type' => $file->getMimeType(),
+                        'file_size' => $file->getSize(),
+                        'uploaded_by' => auth()->id(),
+                        'locked_at' => now(),
+                    ]);
+                } else {
+                    $asset->documents()->create([
+                        'document_type' => AssetDocument::TYPE_BILL_INVOICE,
+                        'original_name' => $file->getClientOriginalName(),
+                        'stored_path' => $stored['path'],
+                        'mime_type' => $file->getMimeType(),
+                        'file_size' => $file->getSize(),
+                        'uploaded_by' => auth()->id(),
+                        'locked_at' => now(),
+                    ]);
+                }
+            });
+        } catch (\Throwable $exception) {
+            Storage::disk('private')->delete($stored['path']);
+            throw $exception;
+        }
+
+        if (
+            $oldPath &&
+            $oldPath !== $stored['path'] &&
+            Storage::disk('private')->exists($oldPath)
+        ) {
+            Storage::disk('private')->delete($oldPath);
+        }
+
+        return back()->with(
+            'success',
+            'Bill/invoice uploaded or replaced successfully.'
+        );
+    }
 
     /**
      * Delete the asset image.
@@ -283,6 +293,9 @@ class AssetDocumentController extends Controller
     public function destroyImage(
         Asset $asset
     ): RedirectResponse {
+        $this->authorizeDocumentAction(
+            AssetDocument::TYPE_ASSET_IMAGE
+        );
 
         $document = $asset->documents()
             ->where(
@@ -291,39 +304,18 @@ class AssetDocumentController extends Controller
             )
             ->first();
 
-
         if (!$document) {
-
             return back()->withErrors([
-                'file' =>
-                    'No asset image exists for this asset.',
+                'file' => 'No asset image exists for this asset.',
             ]);
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Delete physical file
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            Storage::disk('private')
-                ->exists($document->stored_path)
-        ) {
-            Storage::disk('private')
-                ->delete($document->stored_path);
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Delete database record
-        |--------------------------------------------------------------------------
-        */
-
+        $path = $document->stored_path;
         $document->delete();
 
+        if (Storage::disk('private')->exists($path)) {
+            Storage::disk('private')->delete($path);
+        }
 
         return back()->with(
             'success',
@@ -331,41 +323,97 @@ class AssetDocumentController extends Controller
         );
     }
 
-
     /**
-     * View document.
+     * View an asset document through an authorized route.
      */
     public function show(
         Asset $asset,
         AssetDocument $document
     ): StreamedResponse {
-
         abort_unless(
-            $document->asset_id === $asset->id,
+            (int) $document->asset_id === (int) $asset->id,
             404
         );
 
+        $user = auth()->user();
+
+        abort_unless($user, 401);
+
+        if (!$user->isSuperAdmin()) {
+            $canManageAssets = $user->canManageModule('assets');
+            $canManageBills = $user->canManageModule('bills');
+
+            if (
+                $document->document_type ===
+                AssetDocument::TYPE_ASSET_IMAGE
+            ) {
+                abort_unless($canManageAssets, 403);
+            } elseif (
+                $document->document_type ===
+                AssetDocument::TYPE_BILL_INVOICE
+            ) {
+                abort_unless($canManageBills, 403);
+            } else {
+                abort(404);
+            }
+        }
+
         abort_unless(
-            Storage::disk('private')
-                ->exists($document->stored_path),
+            Storage::disk('private')->exists($document->stored_path),
             404
         );
-
 
         return Storage::disk('private')->response(
             $document->stored_path,
             $document->original_name,
             [
-                'Content-Type' =>
-                    $document->mime_type,
-
-                'Content-Disposition' =>
-                    'inline; filename="' .
-                    addslashes(
-                        $document->original_name
-                    ) .
-                    '"',
+                'Content-Type' => $document->mime_type,
+                'X-Content-Type-Options' => 'nosniff',
+                'Content-Disposition' => 'inline; filename="' .
+                    addslashes($document->original_name) . '"',
             ]
+        );
+    }
+
+    /**
+     * Delete a bill/invoice when the user has permission.
+     */
+    public function destroyBill(
+        Asset $asset
+    ): RedirectResponse {
+        $this->authorizeDocumentAction(
+            AssetDocument::TYPE_BILL_INVOICE
+        );
+
+        $document = $asset->documents()
+            ->where(
+                'document_type',
+                AssetDocument::TYPE_BILL_INVOICE
+            )
+            ->first();
+
+        if (!$document) {
+            return back()->withErrors([
+                'file' => 'No bill or invoice exists for this asset.',
+            ]);
+        }
+
+        $path = $document->stored_path;
+
+        DB::transaction(function () use ($document) {
+            $document->delete();
+        });
+
+        if (
+            $path &&
+            Storage::disk('private')->exists($path)
+        ) {
+            Storage::disk('private')->delete($path);
+        }
+
+        return back()->with(
+            'success',
+            'Bill/invoice deleted successfully.'
         );
     }
 }
