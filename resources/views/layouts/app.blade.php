@@ -34,6 +34,9 @@
 
         rel="stylesheet">
 
+    {{-- Mobile-first responsive CSS --}}
+    <link href="{{ asset('css/mobile-first.css') }}" rel="stylesheet">
+
     <style>
         /* =========================================================
 
@@ -441,7 +444,7 @@
         <aside
 
             class="sidebar p-3"
-
+            id="sidebar"
             style="width: 250px;">
 
             <div class="brand fs-5 mb-4">
@@ -603,6 +606,9 @@
 
         </aside>
 
+        {{-- Sidebar backdrop for mobile --}}
+        <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()" hidden></div>
+
         {{-- =========================================================
 
          MAIN
@@ -614,6 +620,11 @@
             {{-- Top Navbar --}}
 
             <nav class="navbar px-4 py-3">
+
+                {{-- Mobile sidebar toggle --}}
+                <button class="sidebar-toggle d-lg-none me-3" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="sidebar" onclick="toggleSidebar()">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
 
                 <span class="fw-semibold">
 
@@ -787,6 +798,73 @@
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     @stack('scripts')
+
+
+    {{-- Mobile Sidebar Toggle Script --}}
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            const toggle = document.querySelector('.sidebar-toggle');
+
+            if (sidebar && backdrop) {
+                const isOpen = sidebar.classList.toggle('open');
+                backdrop.hidden = !isOpen;
+                backdrop.classList.toggle('show', isOpen);
+
+                if (toggle) {
+                    toggle.setAttribute('aria-expanded', isOpen);
+                    toggle.innerHTML = isOpen ? '<i class="bi bi-x-lg fs-4"></i>' : '<i class="bi bi-list fs-4"></i>';
+                }
+
+                // Prevent body scroll when sidebar is open
+                document.body.style.overflow = isOpen ? 'hidden' : '';
+            }
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            const toggle = document.querySelector('.sidebar-toggle');
+
+            if (sidebar && backdrop) {
+                sidebar.classList.remove('open');
+                backdrop.hidden = true;
+                backdrop.classList.remove('show');
+
+                if (toggle) {
+                    toggle.setAttribute('aria-expanded', 'false');
+                    toggle.innerHTML = '<i class="bi bi-list fs-4"></i>';
+                }
+
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSidebar();
+            }
+        });
+
+        // Close sidebar when clicking a link on mobile
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth < 992) {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && sidebar.classList.contains('open') && e.target.closest('.sidebar a')) {
+                    closeSidebar();
+                }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 992) {
+                closeSidebar();
+            }
+        });
+    </script>
 
 </body>
 
