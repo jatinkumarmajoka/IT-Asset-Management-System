@@ -3,6 +3,18 @@
    Include this AFTER the main styles in app.blade.php
    ========================================================= */
 
+:root {
+  --theme-primary: #08203C;
+  --theme-primary-light: #0d2f56;
+  --theme-primary-lighter: #123d6e;
+  --theme-primary-rgb: 8, 32, 60;
+  --sidebar-bg: #08203C;
+  --sidebar-hover: #0d2f56;
+  --sidebar-text: #cbd5e1;
+  --sidebar-active: #ffffff;
+  --focus-ring: rgba(8, 32, 60, 0.25);
+}
+
 /* ---- Viewport & Base ---- */
 html {
   -webkit-text-size-adjust: 100%;
@@ -492,3 +504,69 @@ html {
 
 .min-w-0 { min-width: 0; }
 .flex-1 { flex: 1 1 auto; }
+
+/* ---- Brand Logo ---- */
+.brand-logo {
+  display: block;
+  max-height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.brand i {
+  font-size: 1.5rem;
+  margin-top: 2px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand-org {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.brand-product {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 991.98px) {
+  .brand-logo {
+    max-height: 28px;
+  }
+  
+  .brand-org {
+    font-size: 1rem;
+  }
+  
+  .brand-product {
+    font-size: 0.7rem;
+  }
+}
+
+/* Admin sidebar brand */
+#adminSidebar .brand-logo {
+  max-height: 28px;
+}
+
+#adminSidebar .brand-org {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+#adminSidebar .brand-product {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}

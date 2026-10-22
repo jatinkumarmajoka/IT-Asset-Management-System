@@ -1876,17 +1876,17 @@ class AssetImportNormalizer
 
 
 
-                'location' =>
-
-
+                            'location' =>
 
                     null,
 
+                'present_room_number' =>
 
+                    $department->import_room_number ?? null,
 
+                'present_sub_department_id' =>
 
-
-
+                    $department->import_sub_department_id ?? null,
 
                 'remarks' =>
 
@@ -3436,136 +3436,138 @@ class AssetImportNormalizer
 
 
 
-    private function resolveDepartment(
-
+        private function resolveDepartment(
         string $occupant
-
     ): ?Department
-
     {
-
         $cleanOccupant = $this->cleanOccupant($occupant);
 
-
-
         if ($cleanOccupant === '') {
-
             return null;
-
         }
 
-
-
         /*
-
         |--------------------------------------------------------------------------
-
-        | Normalize department/section name
-
+        | Extract room number from occupant text
         |--------------------------------------------------------------------------
-
-        |
-
-        | 7Hostel (Boys & Girls)
-
-        | becomes:
-
-        | Hostel (Boys & Girls)
-
-        |
-
-        | 5G SOET Lab remains unchanged.
-
+        | Examples:
+        | "ICT Section 313" -> department: "ICT Section", room: "313"
+        | "Lab 101" -> department: "Lab", room: "101", is_lab: true
+        | "Computer Lab 205" -> department: "Computer Lab", room: "205", is_lab: true
+        | "Physics Laboratory 12" -> department: "Physics Laboratory", room: "12", is_lab: true
         |--------------------------------------------------------------------------
-
         */
 
+        $roomNumber = null;
+        $isLab = false;
 
+        // Pattern to match room numbers at the end (e.g., "Section 313", "Lab 101", "Room 205")
+        // Also handles cases like "ICT-313", "ICT 313", "Section-313"
+        if (preg_match('/^(.+?)\s+(?:room|rm|no|#)?\s*(\d{2,4})\s*$/i', $cleanOccupant, $matches)) {
+            $departmentName = trim($matches[1]);
+            $roomNumber = $matches[2];
+        } elseif (preg_match('/^(.+?)[\s\-]+(\d{2,4})\s*$/i', $cleanOccupant, $matches)) {
+            // Fallback: any text followed by separator and 2-4 digits at end
+            $departmentName = trim($matches[1]);
+            $roomNumber = $matches[2];
+        } else {
+            $departmentName = $cleanOccupant;
+        }
+
+        // Check if it's a lab
+        if (preg_match('/\b(lab|laboratory)\b/i', $departmentName)) {
+            $isLab = true;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Normalize department/section name
+        |--------------------------------------------------------------------------
+        |
+        | 7Hostel (Boys & Girls)
+        | becomes:
+        | Hostel (Boys & Girls)
+        |
+        | 5G SOET Lab remains unchanged.
+        |--------------------------------------------------------------------------
+        */
 
         $departmentName = $this->normalizeDepartmentName(
-
-            $cleanOccupant
-
+            $departmentName
         );
 
-
-
         /*
-
         |--------------------------------------------------------------------------
-
         | Find existing active department
-
         |--------------------------------------------------------------------------
-
         */
-
-
 
         $department = Department::query()
-
             ->where('status', 'active')
-
             ->get()
-
             ->first(
-
                 fn ($department) =>
-
                     $this->normalizeName($department->name) ===
-
                     $this->normalizeName($departmentName)
-
             );
 
-
-
         if ($department) {
+            // Store room number and lab flag on department for later use
+            $department->import_room_number = $roomNumber;
+            $department->import_is_lab = $isLab;
+
+            // If it's a lab, try to find/create a "Lab" sub-department
+            $importSubDepartmentId = null;
+            if ($isLab) {
+                $subDept = \App\Models\SubDepartment::query()
+                    ->where('department_id', $department->id)
+                    ->where('status', 'active')
+                    ->get()
+                    ->first(fn ($sd) => $this->normalizeName($sd->name) === 'lab');
+
+                if (!$subDept) {
+                    $subDept = \App\Models\SubDepartment::create([
+                        'department_id' => $department->id,
+                        'name' => 'Lab',
+                        'code' => 'LAB',
+                        'status' => 'active',
+                        'description' => 'Automatically created for lab imports.',
+                    ]);
+                }
+                $importSubDepartmentId = $subDept->id;
+            }
+
+            // Store sub-department ID for later use
+            $department->import_sub_department_id = $importSubDepartmentId;
 
             return $department;
-
         }
 
-
-
         /*
-
         |--------------------------------------------------------------------------
-
         | Missing department -> create automatically
-
         |--------------------------------------------------------------------------
-
         |
-
         | We create ONLY departments.
-
         | We never create fake employees.
-
         |--------------------------------------------------------------------------
-
         */
 
-
-
-        return Department::create([
-
+        $newDepartment = Department::create([
             'name' => $departmentName,
-
             'code' => $this->generateDepartmentCode(
-
                 $departmentName
-
             ),
-
             'description' =>
-
                 'Automatically created during asset import.',
-
             'status' => 'active',
-
         ]);
 
+        // Store room number and lab flag on department for later use
+        $newDepartment->import_room_number = $roomNumber;
+        $newDepartment->import_is_lab = $isLab;
+
+        return $newDepartment;
     }
 
 

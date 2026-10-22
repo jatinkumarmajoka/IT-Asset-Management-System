@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#1e40af"/>
+  <!-- Monitor icon -->
+  <rect x="14" y="10" width="36" height="28" rx="3" stroke="white" stroke-width="2.5" fill="none"/>
+  <rect x="18" y="14" width="28" height="20" rx="1.5" fill="white"/>
+  <rect x="26" y="38" width="12" height="6" rx="1" fill="white"/>
+  <rect x="22" y="44" width="20" height="3" rx="1.5" fill="white"/>
+  <!-- Data/Acquisition symbol -->
+  <path d="M20 20h4v4h-4z M28 20h4v4h-4z M36 20h4v4h-4z" fill="#1e40af"/>
+</svg>

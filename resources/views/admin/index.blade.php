@@ -13,13 +13,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-    <title>Super Admin | IT Asset Management</title>
+    <title>Super Admin | {{ config('branding.org_name') }} - {{ config('branding.product_name') }}</title>
 
 
     <script src="https://cdn.tailwindcss.com"></script>
 
     {{-- Mobile-first responsive CSS --}}
     <link href="{{ asset('css/mobile-first.css') }}" rel="stylesheet">
+
+    <style>
+        :root {
+            --theme-primary: #08203C;
+            --theme-primary-light: #0d2f56;
+            --sidebar-bg: #08203C;
+            --sidebar-hover: #0d2f56;
+            --sidebar-text: #cbd5e1;
+            --sidebar-active: #ffffff;
+        }
+    </style>
 
 
 </head>
@@ -34,12 +45,24 @@
         {{-- Admin sidebar --}}
 
 
-        <aside class="hidden w-64 shrink-0 bg-slate-900 p-5 text-white md:block" id="adminSidebar">
+        <aside class="hidden w-64 shrink-0 p-5 text-white md:block" id="adminSidebar" style="background: var(--sidebar-bg);">
 
 
-            <a href="{{ route('admin.index') }}" class="text-lg font-bold">
+            <a href="{{ route('admin.index') }}" class="text-lg font-bold flex flex-col items-start gap-0">
 
-                IT Asset Management
+                @if(config('branding.show_logo_in_sidebar') && config('branding.logo'))
+                    <img src="{{ asset(config('branding.logo')) }}"
+                         alt="{{ config('branding.logo_alt') }}"
+                         class="brand-logo"
+                         style="height: 28px; width: auto;">
+                @else
+                    <i class="bi bi-pc-display"></i>
+                @endif
+
+                <div class="brand-text">
+                    <div class="brand-org fw-bold text-white">{{ config('branding.org_name') }}</div>
+                    <div class="brand-product text-xs text-slate-400">{{ config('branding.product_name') }}</div>
+                </div>
 
             </a>
 
@@ -48,61 +71,40 @@
             <nav class="mt-8 space-y-2">
 
                 <a href="{{ route('admin.index', ['tab' => 'overview']) }}"
-
-                    class="block rounded-lg px-3 py-2 hover:bg-slate-800">
-
+                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
                     Overview
-
                 </a>
 
                 <a href="{{ route('admin.index', ['tab' => 'staff']) }}"
-
-                    class="block rounded-lg px-3 py-2 hover:bg-slate-800">
-
+                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
                     Staff Management
-
                 </a>
 
                 <a href="{{ route('admin.index', ['tab' => 'generate']) }}"
-
-                    class="block rounded-lg px-3 py-2 hover:bg-slate-800">
-
+                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
                     Generate Account
-
                 </a>
 
                 <a href="{{ route('admin.index', ['tab' => 'permissions']) }}"
-
-                    class="block rounded-lg px-3 py-2 hover:bg-slate-800">
-
+                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
                     Permissions
-
                 </a>
 
                 <a href="{{ route('admin.index', ['tab' => 'requests']) }}"
-
-                    class="block rounded-lg px-3 py-2 hover:bg-slate-800">
-
+                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
                     Requests
-
                 </a>
 
                 <a href="{{ route('admin.index', ['tab' => 'audit']) }}"
-
-                    class="block rounded-lg px-3 py-2 hover:bg-slate-800">
-
+                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
                     Audit Logs
-
                 </a>
 
             </nav>
 
             <a href="{{ route('dashboard') }}"
-
-                class="mt-8 block rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800">
-
+                class="mt-8 block rounded-lg border border-slate-700 px-3 py-2 text-sm" style="background: var(--sidebar-hover); color: var(--sidebar-active);">
                 &larr; Back to application
-
             </a>
 
         </aside>
@@ -123,7 +125,7 @@
 
                     <p class="text-sm text-slate-500">Administration</p>
 
-                    <h1 class="mt-1 text-2xl font-bold">Super Admin Panel</h1>
+                    <h1 class="mt-1 text-2xl font-bold" style="color: var(--theme-primary);">Super Admin Panel</h1>
 
                     <p class="mt-1 text-sm text-slate-500">
 
@@ -137,10 +139,8 @@
 
                     @csrf
 
-                    <button class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm hover:bg-slate-50">
-
+                    <button class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm hover:bg-slate-50" style="color: var(--theme-primary); border-color: var(--theme-primary);">
                         Sign out
-
                     </button>
 
                 </form>
@@ -202,13 +202,10 @@
                 ] as $key => $label)
 
                 <a href="{{ route('admin.index', ['tab' => $key]) }}"
-
                     class="rounded-lg border px-3 py-2 text-sm
-
-                {{ $tab === $key ? 'border-blue-700 bg-blue-700 text-white' : 'border-slate-300 bg-white' }}">
-
+                {{ $tab === $key ? 'border-blue-700 bg-blue-700 text-white' : 'border-slate-300 bg-white' }}"
+                    style="{{ $tab === $key ? 'background: var(--theme-primary); border-color: var(--theme-primary);' : '' }}">
                     {{ $label }}
-
                 </a>
 
                 @endforeach
@@ -223,7 +220,7 @@
 
                     <p class="text-sm text-slate-500">Total Staff Accounts</p>
 
-                    <p class="mt-3 text-3xl font-bold">{{ $staffCount }}</p>
+                    <p class="mt-3 text-3xl font-bold" style="color: var(--theme-primary);">{{ $staffCount }}</p>
 
                 </article>
 
@@ -239,16 +236,13 @@
 
             <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5">
 
-                <h2 class="font-semibold">Quick actions</h2>
+                <h2 class="font-semibold" style="color: var(--theme-primary);">Quick actions</h2>
 
                 <div class="mt-4 flex flex-wrap gap-3">
 
                     <a href="{{ route('admin.index', ['tab' => 'permissions']) }}"
-
-                        class="rounded-lg border border-slate-300 px-4 py-2 text-sm">
-
+                        class="rounded-lg border border-slate-300 px-4 py-2 text-sm" style="color: var(--theme-primary); border-color: var(--theme-primary);">
                         Manage permissions
-
                     </a>
 
                 </div>
@@ -259,13 +253,13 @@
 
             <section class="overflow-x-auto rounded-xl border border-slate-200 bg-white p-5">
 
-                <h2 class="text-lg font-semibold">Staff Management</h2>
+                <h2 class="text-lg font-semibold" style="color: var(--theme-primary);">Staff Management</h2>
 
                 <table class="mt-4 w-full text-left text-sm">
 
                     <thead>
 
-                        <tr class="border-b text-slate-500">
+                        <tr class="border-b text-slate-500" style="border-color: var(--theme-primary);">
 
                             <th class="p-3">Name</th>
 
@@ -285,7 +279,7 @@
 
                         @forelse($staff as $user)
 
-                        <tr class="border-b last:border-0">
+                        <tr class="border-b last:border-0" style="border-color: #e5e7eb;">
 
                             <td class="p-3 font-medium">{{ $user->name }}</td>
 
@@ -306,31 +300,22 @@
                             <td class="p-3">
 
                                 <a href="{{ route('admin.staff.edit', $user) }}"
-
-                                    class="inline-block rounded-lg border border-blue-200 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-50">
-
+                                    class="inline-block rounded-lg border px-3 py-1.5 text-sm font-medium" style="border-color: var(--theme-primary); color: var(--theme-primary); background: #f0f4f8;">
                                     Edit
-
                                 </a>
 
                                 @if($user->account_status === 'approved')
 
                                 <form method="POST"
-
                                     action="{{ route('admin.staff.password-reset-link', $user) }}"
-
                                     onsubmit="return confirm('Send a password reset link to this staff member?')"
-
                                     class="mt-2">
 
                                     @csrf
 
                                     <button type="submit"
-
-                                        class="rounded-lg border border-amber-300 px-3 py-1.5 text-sm font-medium text-amber-800 hover:bg-amber-50">
-
+                                        class="rounded-lg border px-3 py-1.5 text-sm font-medium" style="border-color: var(--theme-primary); color: var(--theme-primary); background: #f0f4f8;">
                                         Send Password Reset Link
-
                                     </button>
 
                                 </form>
@@ -361,7 +346,7 @@
 
             <section class="max-w-2xl rounded-xl border border-slate-200 bg-white p-5">
 
-                <h2 class="text-lg font-semibold">Generate Staff Account</h2>
+                <h2 class="text-lg font-semibold" style="color: var(--theme-primary);">Generate Staff Account</h2>
 
                 <p class="mt-2 text-sm text-slate-600">Create an approved Staff account. Share the temporary credentials with the user through a secure channel.</p>
 
@@ -371,25 +356,25 @@
 
                     <div>
 
-                        <label for="generated-name" class="mb-1 block text-sm font-medium">Full name</label>
+                        <label for="generated-name" class="mb-1 block text-sm font-medium" style="color: var(--theme-primary);">Full name</label>
 
-                        <input id="generated-name" name="name" value="{{ old('name') }}" required maxlength="255" autocomplete="name" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-
-                    </div>
-
-                    <div>
-
-                        <label for="generated-email" class="mb-1 block text-sm font-medium">Email address</label>
-
-                        <input id="generated-email" name="email" type="email" value="{{ old('email') }}" required maxlength="255" autocomplete="email" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <input id="generated-name" name="name" value="{{ old('name') }}" required maxlength="255" autocomplete="name" class="w-full rounded-lg border border-slate-300 px-3 py-2" style="border-color: var(--theme-primary);">
 
                     </div>
 
                     <div>
 
-                        <label for="generated-department" class="mb-1 block text-sm font-medium">Department</label>
+                        <label for="generated-email" class="mb-1 block text-sm font-medium" style="color: var(--theme-primary);">Email address</label>
 
-                        <select id="generated-department" name="department_id" required class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2">
+                        <input id="generated-email" name="email" type="email" value="{{ old('email') }}" required maxlength="255" autocomplete="email" class="w-full rounded-lg border border-slate-300 px-3 py-2" style="border-color: var(--theme-primary);">
+
+                    </div>
+
+                    <div>
+
+                        <label for="generated-department" class="mb-1 block text-sm font-medium" style="color: var(--theme-primary);">Department</label>
+
+                        <select id="generated-department" name="department_id" required class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2" style="border-color: var(--theme-primary);">
 
                             <option value="">Select department</option>
 
@@ -407,9 +392,9 @@
 
                     <div>
 
-                        <label for="generated-password" class="mb-1 block text-sm font-medium">Temporary password</label>
+                        <label for="generated-password" class="mb-1 block text-sm font-medium" style="color: var(--theme-primary);">Temporary password</label>
 
-                        <input id="generated-password" name="password" type="password" required minlength="5" autocomplete="new-password" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <input id="generated-password" name="password" type="password" required minlength="5" autocomplete="new-password" class="w-full rounded-lg border border-slate-300 px-3 py-2" style="border-color: var(--theme-primary);">
 
                         <p class="mt-1 text-xs text-slate-500">Use at least 5 characters.</p>
 
@@ -417,13 +402,13 @@
 
                     <div>
 
-                        <label for="generated-password-confirmation" class="mb-1 block text-sm font-medium">Confirm password</label>
+                        <label for="generated-password-confirmation" class="mb-1 block text-sm font-medium" style="color: var(--theme-primary);">Confirm password</label>
 
-                        <input id="generated-password-confirmation" name="password_confirmation" type="password" required minlength="5" autocomplete="new-password" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <input id="generated-password-confirmation" name="password_confirmation" type="password" required minlength="5" autocomplete="new-password" class="w-full rounded-lg border border-slate-300 px-3 py-2" style="border-color: var(--theme-primary);">
 
                     </div>
 
-                    <button type="submit" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">Generate approved Staff account</button>
+                    <button type="submit" class="rounded-lg px-4 py-2 text-sm font-medium text-white" style="background: var(--theme-primary);">Generate approved Staff account</button>
 
                 </form>
 
@@ -435,7 +420,7 @@
 
                 <div>
 
-                    <h2 class="text-lg font-semibold text-slate-900">Staff Module Permissions</h2>
+                    <h2 class="text-lg font-semibold text-slate-900" style="color: var(--theme-primary);">Staff Module Permissions</h2>
 
                     <p class="mt-1 text-sm text-slate-500">Enable or disable access to individual modules.</p>
 
@@ -444,16 +429,14 @@
                 @forelse($staff->where('account_status', 'approved') as $user)
 
                     <form method="POST"
-
                           action="{{ route('admin.staff.permissions', $user) }}"
-
                           class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
                         @csrf
 
                         @method('PUT')
 
-                        <div class="border-b border-slate-200 px-5 py-4">
+                        <div class="border-b border-slate-200 px-5 py-4" style="border-color: var(--theme-primary);">
 
                             <h3 class="text-lg font-semibold text-slate-900">{{ $user->name }}</h3>
 
@@ -523,14 +506,11 @@
 
                         </div>
 
-                        <div class="border-t border-slate-200 bg-slate-50 px-5 py-4">
+                        <div class="border-t border-slate-200 bg-slate-50 px-5 py-4" style="border-color: var(--theme-primary);">
 
                             <button type="submit"
-
-                                    class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">
-
+                                    class="rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition" style="background: var(--theme-primary);">
                                 Save permissions
-
                             </button>
 
                         </div>
@@ -555,7 +535,7 @@
 
                 <div>
 
-                    <h2 class="text-xl font-semibold">Requests & Approvals</h2>
+                    <h2 class="text-xl font-semibold" style="color: var(--theme-primary);">Requests & Approvals</h2>
 
                     <p class="mt-1 text-sm text-slate-600">Review existing asset transfers and general operational requests submitted by staff.</p>
 
@@ -573,7 +553,7 @@
 
                         <div>
 
-                            <h3 class="text-lg font-semibold">Asset Transfer Requests</h3>
+                            <h3 class="text-lg font-semibold" style="color: var(--theme-primary);">Asset Transfer Requests</h3>
 
                             <p class="mt-1 text-sm text-slate-500">Existing transfer workflow. Asset details change only after a transfer is completed.</p>
 
@@ -587,7 +567,7 @@
 
                         @forelse(($assetTransfers ?? collect()) as $transfer)
 
-                        <article class="rounded-lg border border-slate-200 p-4">
+                        <article class="rounded-lg border border-slate-200 p-4" style="border-color: var(--theme-primary);">
 
                             <div class="flex flex-wrap items-start justify-between gap-3">
 
@@ -623,7 +603,7 @@
 
                                 @csrf
 
-                                <button type="submit" onclick="return confirm('Approve this asset transfer?')" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">Approve transfer</button>
+                                <button type="submit" onclick="return confirm('Approve this asset transfer?')" class="rounded-lg px-4 py-2 text-sm font-medium text-white" style="background: var(--theme-primary);">Approve transfer</button>
 
                             </form>
 
@@ -651,13 +631,13 @@
 
                 </section>
 
-                <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" style="border-color: var(--theme-primary);">
 
                     <div class="flex flex-wrap items-center justify-between gap-3">
 
                         <div>
 
-                            <h3 class="text-lg font-semibold">General Operational Requests</h3>
+                            <h3 class="text-lg font-semibold" style="color: var(--theme-primary);">General Operational Requests</h3>
 
                             <p class="mt-1 text-sm text-slate-500">Staff requests for hardware, software, repairs, accessories, and other operational needs.</p>
 
@@ -671,7 +651,7 @@
 
                         @forelse(($operationalRequests ?? collect()) as $operationalRequest)
 
-                        <article class="rounded-lg border border-slate-200 p-4">
+                        <article class="rounded-lg border border-slate-200 p-4" style="border-color: var(--theme-primary);">
 
                             <div class="flex flex-wrap items-start justify-between gap-3">
 
@@ -701,11 +681,11 @@
 
                             <div class="mt-4 grid gap-3 lg:grid-cols-2">
 
-                                <form method="POST" action="{{ route('admin.operational-requests.approve', $operationalRequest) }}" class="space-y-2 rounded-lg bg-green-50 p-3">
+                                <form method="POST" action="{{ route('admin.operational-requests.approve', $operationalRequest) }}" class="space-y-2 rounded-lg bg-green-50 p-3" style="border-color: var(--theme-primary);">
 
                                     @csrf
 
-                                    <label for="approve-response-{{ $operationalRequest->id }}" class="block text-sm font-medium text-green-900">Approval note (optional)</label>
+                                    <label for="approve-response-{{ $operationalRequest->id }}" class="block text-sm font-medium text-green-900" style="color: var(--theme-primary);">Approval note (optional)</label>
 
                                     <textarea id="approve-response-{{ $operationalRequest->id }}" name="admin_response" rows="2" maxlength="5000" class="w-full rounded-lg border border-green-200 bg-white px-3 py-2 text-sm" placeholder="Add instructions or approval details">{{ old('admin_response') }}</textarea>
 
@@ -713,11 +693,11 @@
 
                                 </form>
 
-                                <form method="POST" action="{{ route('admin.operational-requests.reject', $operationalRequest) }}" class="space-y-2 rounded-lg bg-red-50 p-3">
+                                <form method="POST" action="{{ route('admin.operational-requests.reject', $operationalRequest) }}" class="space-y-2 rounded-lg bg-red-50 p-3" style="border-color: var(--theme-primary);">
 
                                     @csrf
 
-                                    <label for="reject-response-{{ $operationalRequest->id }}" class="block text-sm font-medium text-red-900">Reason for rejection (optional)</label>
+                                    <label for="reject-response-{{ $operationalRequest->id }}" class="block text-sm font-medium text-red-900" style="color: var(--theme-primary);">Reason for rejection (optional)</label>
 
                                     <textarea id="reject-response-{{ $operationalRequest->id }}" name="admin_response" rows="2" maxlength="5000" class="w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-sm" placeholder="Explain why this request is rejected"></textarea>
 
@@ -749,9 +729,9 @@
 
             @elseif($tab === 'audit')
 
-            <section class="rounded-xl border border-slate-200 bg-white p-5">
+            <section class="rounded-xl border border-slate-200 bg-white p-5" style="border-color: var(--theme-primary);">
 
-                <h2 class="text-lg font-semibold">Audit Logs</h2>
+                <h2 class="text-lg font-semibold" style="color: var(--theme-primary);">Audit Logs</h2>
 
                 <p class="mt-2 text-sm text-slate-600">
 
