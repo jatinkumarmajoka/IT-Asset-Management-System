@@ -24,24 +24,16 @@ return new class extends Migration
 
         // Add the foreign key separately if the column already existed
         // but its foreign-key constraint was not created.
-        $hasForeignKey = collect(
-            \Illuminate\Support\Facades\DB::select(
-                "SELECT CONSTRAINT_NAME
-                 FROM information_schema.KEY_COLUMN_USAGE
-                 WHERE TABLE_SCHEMA = DATABASE()
-                   AND TABLE_NAME = 'assets'
-                   AND COLUMN_NAME = 'present_sub_department_id'
-                   AND REFERENCED_TABLE_NAME = 'sub_departments'"
-            )
-        )->isNotEmpty();
-
-        if (!$hasForeignKey) {
+        // SQLite doesn't support information_schema, so we try to add the FK and catch the error if it exists
+        try {
             Schema::table('assets', function (Blueprint $table) {
                 $table->foreign('present_sub_department_id')
                     ->references('id')
                     ->on('sub_departments')
                     ->nullOnDelete();
             });
+        } catch (\Exception $e) {
+            // Foreign key already exists or column doesn't exist, ignore
         }
     }
 

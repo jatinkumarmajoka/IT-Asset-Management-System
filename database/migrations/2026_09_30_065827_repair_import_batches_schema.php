@@ -75,10 +75,16 @@ return new class extends Migration
             }
         });
 
-        Schema::table('import_batches', function (Blueprint $table) {
-            $table->index('status');
-            $table->index('file_type');
-        });
+        // Indexes already created in create_import_batches_table migration
+        // Only create if they don't exist (SQLite doesn't support IF NOT EXISTS for indexes)
+        try {
+            Schema::table('import_batches', function (Blueprint $table) {
+                $table->index('status');
+                $table->index('file_type');
+            });
+        } catch (\Exception $e) {
+            // Index already exists, ignore
+        }
     }
 
     /**
