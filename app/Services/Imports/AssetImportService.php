@@ -3,25 +3,16 @@
 namespace App\Services\Imports;
 
 use App\Models\Asset;
-
 use App\Models\ImportBatch;
-
 use App\Services\Imports\Parsers\DocxAssetParser;
-
 use App\Services\Imports\Parsers\ExcelAssetParser;
-
 use Illuminate\Support\Facades\Auth;
-
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Support\Facades\Request;
-
 use Illuminate\Support\Facades\Storage;
 
 class AssetImportService
-
 {
-
     public function __construct(
 
         private DocxAssetParser $docxParser,
@@ -31,7 +22,6 @@ class AssetImportService
     ) {}
 
     /**
-
      * Extract the uploaded document into import_rows.
 
      *
@@ -43,11 +33,8 @@ class AssetImportService
      *
 
      * It does NOT create assets.
-
      */
-
     public function process(ImportBatch $import): void
-
     {
 
         $import->update([
@@ -108,7 +95,7 @@ class AssetImportService
                     ),
 
                     default => throw new \RuntimeException(
-                        'Unsupported import file type: ' . $import->file_type
+                        'Unsupported import file type: '.$import->file_type
                     ),
                 };
 
@@ -195,21 +182,21 @@ class AssetImportService
                     */
 
                     $headers = array_map(
-    function ($header) {
+                        function ($header) {
 
-        $header = (string) $header;
+                            $header = (string) $header;
 
-        // Replace line breaks and multiple spaces with one space.
-        $header = preg_replace(
-            '/\s+/',
-            ' ',
-            $header
-        );
+                            // Replace line breaks and multiple spaces with one space.
+                            $header = preg_replace(
+                                '/\s+/',
+                                ' ',
+                                $header
+                            );
 
-        return trim($header);
-    },
-    $headers
-);
+                            return trim($header);
+                        },
+                        $headers
+                    );
                     /*
 
                     |--------------------------------------------------------------------------
@@ -239,25 +226,15 @@ class AssetImportService
 
                         $import->rows()->create([
 
-                            'row_number' =>
+                            'row_number' => $sourceRowNumber,
 
-                            $sourceRowNumber,
+                            'raw_data' => $rowData,
 
-                            'raw_data' =>
+                            'normalized_data' => null,
 
-                            $rowData,
+                            'status' => 'pending',
 
-                            'normalized_data' =>
-
-                            null,
-
-                            'status' =>
-
-                            'pending',
-
-                            'errors' =>
-
-                            null,
+                            'errors' => null,
 
                         ]);
                     }
@@ -275,29 +252,17 @@ class AssetImportService
 
                 $import->update([
 
-                    'total_rows' =>
+                    'total_rows' => $sourceRowNumber,
 
-                    $sourceRowNumber,
+                    'valid_rows' => 0,
 
-                    'valid_rows' =>
+                    'invalid_rows' => 0,
 
-                    0,
+                    'duplicate_rows' => 0,
 
-                    'invalid_rows' =>
+                    'imported_rows' => 0,
 
-                    0,
-
-                    'duplicate_rows' =>
-
-                    0,
-
-                    'imported_rows' =>
-
-                    0,
-
-                    'status' =>
-
-                    $sourceRowNumber > 0
+                    'status' => $sourceRowNumber > 0
 
                         ? 'parsed'
 
@@ -324,7 +289,6 @@ class AssetImportService
     }
 
     /**
-
      * Normalize and validate extracted rows.
 
      *
@@ -354,11 +318,8 @@ class AssetImportService
      *
 
      * and stores the result in import_rows.normalized_data.
-
      */
-
     public function validate(ImportBatch $import): void
-
     {
 
         $import->load('rows');
@@ -399,17 +360,11 @@ class AssetImportService
 
                 $row->update([
 
-                    'normalized_data' =>
+                    'normalized_data' => $result,
 
-                    $result,
+                    'status' => $rowStatus,
 
-                    'status' =>
-
-                    $rowStatus,
-
-                    'errors' =>
-
-                    $result['errors'] ?? null,
+                    'errors' => $result['errors'] ?? null,
 
                 ]);
 
@@ -445,7 +400,7 @@ class AssetImportService
 
                     ->contains(function ($asset) {
 
-                        return !empty($asset['duplicate_of_asset_id'] ?? null);
+                        return ! empty($asset['duplicate_of_asset_id'] ?? null);
                     });
 
                 if ($hasDuplicate) {
@@ -466,21 +421,13 @@ class AssetImportService
 
             $import->update([
 
-                'valid_rows' =>
+                'valid_rows' => $validRows,
 
-                $validRows,
+                'invalid_rows' => $invalidRows,
 
-                'invalid_rows' =>
+                'duplicate_rows' => $duplicateRows,
 
-                $invalidRows,
-
-                'duplicate_rows' =>
-
-                $duplicateRows,
-
-                'status' =>
-
-                $invalidRows === 0
+                'status' => $invalidRows === 0
 
                     ? 'validated'
 
@@ -491,7 +438,6 @@ class AssetImportService
     }
 
     /**
-
      * Create one actual Asset record from an imported record.
 
      *
@@ -533,11 +479,8 @@ class AssetImportService
      *
 
      * because those are import/staging values, not Asset columns.
-
      */
-
     public function createImportedAsset(array $data): Asset
-
     {
 
         /*
@@ -565,7 +508,6 @@ class AssetImportService
         if (empty($data['department_id'])) {
 
             throw new \RuntimeException(
-
                 'Imported asset is missing department_id.'
 
             );
@@ -574,7 +516,6 @@ class AssetImportService
         if (empty($data['category_id'])) {
 
             throw new \RuntimeException(
-
                 'Imported asset is missing category_id.'
 
             );
@@ -592,87 +533,47 @@ class AssetImportService
 
         $assetData = [
 
-            'asset_code' =>
+            'asset_code' => $data['asset_code'] ?? null,
 
-            $data['asset_code'] ?? null,
+            'department_id' => $data['department_id'],
 
-            'department_id' =>
+            'category_id' => $data['category_id'],
 
-            $data['department_id'],
+            'item_name' => $data['item_name'] ?? null,
 
-            'category_id' =>
+            'make' => $data['make'] ?? null,
 
-            $data['category_id'],
+            'model' => $data['model'] ?? null,
 
-            'item_name' =>
+            'issued_quantity' => $data['issued_quantity'] ?? 0,
 
-            $data['item_name'] ?? null,
+            'physically_verified_quantity' => $data['physically_verified_quantity'] ?? 0,
 
-            'make' =>
+            'present_occupant_id' => $data['present_occupant_id'] ?? null,
 
-            $data['make'] ?? null,
+            'asset_serial_number' => $data['asset_serial_number'] ?? null,
 
-            'model' =>
+            'barcode_number' => $data['barcode_number'] ?? null,
 
-            $data['model'] ?? null,
+            'date_of_issue' => $data['date_of_issue'] ?? null,
 
-            'issued_quantity' =>
+            'asset_status' => $data['asset_status'] ?? 'Active',
 
-            $data['issued_quantity'] ?? 0,
+            'condition' => $data['condition'] ?? 'Good',
 
-            'physically_verified_quantity' =>
+            'location' => $data['location'] ?? null,
 
-            $data['physically_verified_quantity'] ?? 0,
+            'present_room_number' => $data['present_room_number'] ?? null,
 
-            'present_occupant_id' =>
+            'present_sub_department_id' => $data['present_sub_department_id'] ?? null,
 
-            $data['present_occupant_id'] ?? null,
-
-            'asset_serial_number' =>
-
-            $data['asset_serial_number'] ?? null,
-
-            'barcode_number' =>
-
-            $data['barcode_number'] ?? null,
-
-            'date_of_issue' =>
-
-            $data['date_of_issue'] ?? null,
-
-            'asset_status' =>
-
-            $data['asset_status'] ?? 'Active',
-
-            'condition' =>
-
-            $data['condition'] ?? 'Good',
-
-            'location' =>
-
-            $data['location'] ?? null,
-
-            'present_room_number' =>
-
-            $data['present_room_number'] ?? null,
-
-            'present_sub_department_id' =>
-
-            $data['present_sub_department_id'] ?? null,
-
-            'remarks' =>
-
-            $data['remarks']
+            'remarks' => $data['remarks']
 
                 ?? 'Imported from departmental stock register.',
 
-            'created_by' =>
+            'created_by' => $userId,
 
-            $userId,
-
-            'updated_by' =>
-
-            $userId,
+            'updated_by' => $userId,
 
         ];
 
@@ -710,13 +611,9 @@ class AssetImportService
 
         $asset->history()->create([
 
-            'action' =>
+            'action' => 'imported',
 
-            'imported',
-
-            'new_value' =>
-
-            json_encode(
+            'new_value' => json_encode(
 
                 $asset->only([
 
@@ -744,17 +641,11 @@ class AssetImportService
 
             ),
 
-            'performed_by' =>
+            'performed_by' => $userId,
 
-            $userId,
+            'ip_address' => Request::ip(),
 
-            'ip_address' =>
-
-            Request::ip(),
-
-            'created_at' =>
-
-            now(),
+            'created_at' => now(),
 
         ]);
 
@@ -762,7 +653,6 @@ class AssetImportService
     }
 
     /**
-
      * Import all valid normalized assets from a batch.
 
      *
@@ -776,23 +666,21 @@ class AssetImportService
      *
 
      * ALL assets are rolled back.
-
      */
-
     public function confirmImport(
 
         ImportBatch $import
 
     ): int {
 
-        if (!in_array(
+        if (! in_array(
             $import->status,
             ['validated', 'needs_review'],
             true
         )) {
             throw new \RuntimeException(
-                'This import is not ready for confirmation. ' .
-                    'Current status: ' . $import->status
+                'This import is not ready for confirmation. '.
+                    'Current status: '.$import->status
             );
         }
 
@@ -820,7 +708,7 @@ class AssetImportService
 
                 if (
 
-                    !is_array($normalized) ||
+                    ! is_array($normalized) ||
 
                     ($normalized['status'] ?? null) !== 'valid'
 
@@ -857,7 +745,7 @@ class AssetImportService
 
                     if (
 
-                        !($assetData['valid'] ?? false)
+                        ! ($assetData['valid'] ?? false)
 
                     ) {
 
@@ -958,13 +846,9 @@ class AssetImportService
 
             $import->update([
 
-                'status' =>
+                'status' => 'imported',
 
-                'imported',
-
-                'imported_rows' =>
-
-                $imported,
+                'imported_rows' => $imported,
 
             ]);
 
@@ -973,7 +857,6 @@ class AssetImportService
     }
 
     /**
-
      * Generate a unique internal asset code for imported assets.
 
      *
@@ -987,9 +870,7 @@ class AssetImportService
      * IMP-13-0002
 
      * IMP-13-0003
-
      */
-
     private function generateImportAssetCode(
 
         int $batchId,

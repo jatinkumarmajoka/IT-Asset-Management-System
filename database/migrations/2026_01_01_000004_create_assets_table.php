@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('assets', function (Blueprint $table) {
@@ -40,12 +41,15 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['department_id','asset_status']);
-            $table->index(['category_id','asset_status']);
-            $table->index(['item_name','make','model']);
+            $table->index(['department_id', 'asset_status']);
+            $table->index(['category_id', 'asset_status']);
+            $table->index(['item_name', 'make', 'model']);
             $table->index('date_of_issue');
         });
     }
 
-    public function down(): void { Schema::dropIfExists('assets'); }
+    public function down(): void
+    {
+        Schema::dropIfExists('assets');
+    }
 };

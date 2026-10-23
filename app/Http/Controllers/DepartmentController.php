@@ -21,8 +21,8 @@ class DepartmentController extends Controller
                 $search = $request->string('search')->toString();
 
                 $query->where(function ($query) use ($search) {
-                    $query->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('code', 'like', '%' . $search . '%');
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('code', 'like', '%'.$search.'%');
                 });
             })
             ->when($request->filled('type'), function ($query) use ($request) {

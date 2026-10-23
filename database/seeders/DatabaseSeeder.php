@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Asset;
 use App\Models\Category;
 use App\Models\Department;
 use App\Models\Employee;
-use App\Models\Asset;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -26,10 +26,10 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        $desktop = Category::create(['name'=>'Desktop','description'=>'Desktop computers','status'=>'active']);
-        $laptop = Category::create(['name'=>'Laptop','description'=>'Portable computers','status'=>'active']);
-        $printer = Category::create(['name'=>'Printer','description'=>'Printing devices','status'=>'active']);
-        $monitor = Category::create(['name'=>'Monitor','description'=>'Display devices','status'=>'active']);
+        $desktop = Category::create(['name' => 'Desktop', 'description' => 'Desktop computers', 'status' => 'active']);
+        $laptop = Category::create(['name' => 'Laptop', 'description' => 'Portable computers', 'status' => 'active']);
+        $printer = Category::create(['name' => 'Printer', 'description' => 'Printing devices', 'status' => 'active']);
+        $monitor = Category::create(['name' => 'Monitor', 'description' => 'Display devices', 'status' => 'active']);
 
         $employee = Employee::create([
             'employee_code' => 'EMP-001',

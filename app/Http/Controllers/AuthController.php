@@ -27,19 +27,19 @@ class AuthController extends Controller
 
         $user = User::where('email', $credentials['email'])->first();
 
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => 'The provided credentials are incorrect.',
             ]);
         }
 
-        if (!$user->isApproved()) {
+        if (! $user->isApproved()) {
             throw ValidationException::withMessages([
                 'email' => 'Your account is pending approval or is not active.',
             ]);
         }
 
-        if (!Auth::attempt($credentials, $remember)) {
+        if (! Auth::attempt($credentials, $remember)) {
             throw ValidationException::withMessages([
                 'email' => 'Unable to sign you in. Please try again.',
             ]);

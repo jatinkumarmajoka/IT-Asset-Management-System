@@ -191,21 +191,21 @@ class AssetController extends Controller
                 'asset_image' => AssetDocument::TYPE_ASSET_IMAGE,
                 'bill_invoice' => AssetDocument::TYPE_BILL_INVOICE,
             ] as $inputName => $documentType) {
-                if (!$request->hasFile($inputName)) {
+                if (! $request->hasFile($inputName)) {
                     continue;
                 }
 
                 $file = $request->file($inputName);
                 $extension = strtolower($file->getClientOriginalExtension());
-                $filename = Str::uuid()->toString() . '.' . $extension;
+                $filename = Str::uuid()->toString().'.'.$extension;
 
                 $storedPath = $file->storeAs(
-                    'assets/' . $asset->id,
+                    'assets/'.$asset->id,
                     $filename,
                     'private'
                 );
 
-                if (!$storedPath) {
+                if (! $storedPath) {
                     throw new \RuntimeException(
                         'The uploaded document could not be stored.'
                     );
@@ -295,76 +295,74 @@ class AssetController extends Controller
         ));
     }
 
-    
-/**
- * Show the edit asset form.
- */
-public function edit(Asset $asset)
-{
-    $asset->load([
-        'department',
-        'category',
-        'occupant',
-        'presentSubDepartment',
-        'documents',
-        'transfers' => function ($query) {
-            $query->where('status', 'completed')
-                ->with([
-                    'fromDepartment',
-                    'fromOccupant',
-                ])
-                ->latest('transfer_date')
-                ->latest('id');
-        },
-    ]);
+    /**
+     * Show the edit asset form.
+     */
+    public function edit(Asset $asset)
+    {
+        $asset->load([
+            'department',
+            'category',
+            'occupant',
+            'presentSubDepartment',
+            'documents',
+            'transfers' => function ($query) {
+                $query->where('status', 'completed')
+                    ->with([
+                        'fromDepartment',
+                        'fromOccupant',
+                    ])
+                    ->latest('transfer_date')
+                    ->latest('id');
+            },
+        ]);
 
-    $lastCompletedTransfer = $asset->transfers->first();
+        $lastCompletedTransfer = $asset->transfers->first();
 
-    $previousOccupant = null;
+        $previousOccupant = null;
 
-    if ($lastCompletedTransfer) {
-        $previousOccupant =
-            $lastCompletedTransfer->fromOccupant?->name
-            ?? $lastCompletedTransfer->fromDepartment?->name;
+        if ($lastCompletedTransfer) {
+            $previousOccupant =
+                $lastCompletedTransfer->fromOccupant?->name
+                ?? $lastCompletedTransfer->fromDepartment?->name;
+        }
+
+        $user = request()->user();
+
+        $canManageAssets = $user
+            && ($user->isSuperAdmin() || $user->canManageModule('assets'));
+
+        $canManageBills = $user
+            && ($user->isSuperAdmin() || $user->canManageModule('bills'));
+
+        return view('assets.edit', [
+            'asset' => $asset,
+            'previousOccupant' => $previousOccupant,
+
+            'departments' => Department::query()
+                ->where('status', 'active')
+                ->orderBy('name')
+                ->get(),
+
+            'categories' => Category::query()
+                ->where('status', 'active')
+                ->orderBy('name')
+                ->get(),
+
+            'employees' => Employee::query()
+                ->where('status', 'active')
+                ->orderBy('name')
+                ->get(),
+
+            'subDepartments' => SubDepartment::query()
+                ->where('status', 'active')
+                ->orderBy('name')
+                ->get(),
+
+            'canManageAssets' => $canManageAssets,
+            'canManageBills' => $canManageBills,
+        ]);
     }
-
-    $user = request()->user();
-
-    $canManageAssets = $user
-        && ($user->isSuperAdmin() || $user->canManageModule('assets'));
-
-    $canManageBills = $user
-        && ($user->isSuperAdmin() || $user->canManageModule('bills'));
-
-    return view('assets.edit', [
-        'asset' => $asset,
-        'previousOccupant' => $previousOccupant,
-
-        'departments' => Department::query()
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get(),
-
-        'categories' => Category::query()
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get(),
-
-        'employees' => Employee::query()
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get(),
-
-        'subDepartments' => SubDepartment::query()
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get(),
-
-        'canManageAssets' => $canManageAssets,
-        'canManageBills' => $canManageBills,
-    ]);
-}
-
 
     /**
      * Update an existing asset.

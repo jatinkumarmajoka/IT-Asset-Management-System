@@ -60,7 +60,7 @@ class User extends Authenticatable
 
     public function canManageModule(string $module): bool
     {
-        if (!$this->isApproved()) {
+        if (! $this->isApproved()) {
             return false;
         }
 
@@ -70,7 +70,7 @@ class User extends Authenticatable
 
         $permissions = $this->permissions ?? [];
 
-        if (!is_array($permissions)) {
+        if (! is_array($permissions)) {
             return false;
         }
 

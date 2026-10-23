@@ -15,7 +15,7 @@ class DocxAssetParser
     {
         if (! is_file($filePath)) {
             throw new RuntimeException(
-                'DOCX file not found: ' . $filePath
+                'DOCX file not found: '.$filePath
             );
         }
 
@@ -24,7 +24,7 @@ class DocxAssetParser
         } catch (\Throwable $e) {
             throw new RuntimeException(
                 'Unable to read the DOCX file: '
-                . $e->getMessage()
+                .$e->getMessage()
             );
         }
 
@@ -62,6 +62,7 @@ class DocxAssetParser
     ): void {
         if ($element instanceof Table) {
             $tables[] = $this->parseTable($element);
+
             return;
         }
 
@@ -305,7 +306,7 @@ class DocxAssetParser
 
         $values = preg_split(
             "/\r\n|\r|\n/",
-            $value  
+            $value
         );
 
         return array_values(

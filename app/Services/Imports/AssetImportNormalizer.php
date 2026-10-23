@@ -1,199 +1,85 @@
 <?php
 
-
-
-
-
-
-
 namespace App\Services\Imports;
 
-
-
-
-
-
-
 use App\Models\Asset;
-
-
-
 use App\Models\Category;
-
-
-
 use App\Models\Department;
-
-
-
 use App\Models\Employee;
-
-
-
+use App\Models\SubDepartment;
 use Carbon\Carbon;
 
-
-
-
-
-
-
 class AssetImportNormalizer
-
-
-
 {
-
-
-
     public function normalize(array $raw): array
-
-
-
     {
-
-
 
         $itemNames = $this->splitLines(
 
-
-
             $this->getValue($raw, [
-
-
 
                 'Name of the Item',
 
-
-
                 'Item Name',
-
-
 
                 'Name of Item',
 
-
-
                 'Asset Name',
-
-
 
             ])
 
-
-
         );
-
-
-
-
-
-
 
         $makeModels = $this->splitLines(
 
-
-
             $this->getValue($raw, [
-
-
 
                 'Make and Model of the Item',
 
-
-
                 'Make and Model',
-
-
 
                 'Make/Model',
 
-
-
                 'Manufacturer & Model',
-
-
 
             ]),
 
             true
         );
-
-
-
-
-
-
 
         $issuedQuantities = $this->splitLines(
 
-
-
             $this->getValue($raw, [
-
-
 
                 'Issued Quantity as per Departmental Stock Register',
 
-
-
                 'Issued Quantity',
-
-
 
                 'Stock Quantity',
 
-
-
                 'Quantity Issued',
-
-
 
             ]),
 
             true
         );
-
-
-
-
-
-
 
         $verifiedQuantities = $this->splitLines(
 
-
-
             $this->getValue($raw, [
-
-
 
                 'Quantity Physically Verified',
 
-
-
                 'Physically Verified',
-
-
 
                 'Verified Quantity',
 
-
-
                 'Physical Qty',
-
-
 
             ]),
 
             true
         );
-
-
-
-
-
-
 
         /*
 
@@ -257,156 +143,76 @@ class AssetImportNormalizer
 
         */
 
-
-
         $occupantText = $this->cleanOccupant(
 
-
-
             $this->getValue($raw, [
-
-
 
                 'Present Occupant',
 
-
-
                 'present_occupant',
-
-
 
                 'Occupant',
 
-
-
                 'User',
-
-
 
                 'Assigned To',
 
-
-
             ])
 
-
-
         );
-
-
-
-
-
-
 
         $dates = $this->splitLines(
 
-
-
             $this->getValue($raw, [
-
-
 
                 'Date of Issue',
 
-
-
                 'Issue Date',
-
-
 
                 'Date Issued',
 
-
-
                 'date_of_issue',
-
-
 
             ]),
 
             true
         );
-
-
-
-
-
-
 
         $barcodes = $this->splitLines(
 
-
-
             $this->getValue($raw, [
-
-
 
                 'Barcode/Sticker Sr. No. of the Sticker pasted on the Asset',
 
-
-
                 'Barcode/Sticker No.',
-
-
 
                 'Barcode',
 
-
-
                 'Sticker No.',
-
-
 
                 'barcode_number',
 
-
-
             ]),
 
             true
         );
-
-
-
-
-
-
 
         $serials = $this->splitLines(
 
-
-
             $this->getValue($raw, [
-
-
 
                 'Asset Serial Number',
 
-
-
                 'Serial Number',
-
-
 
                 'Serial',
 
-
-
                 'asset_serial_number',
-
-
 
             ]),
 
             true
         );
-
-
-
-
-
-
 
         /*
 
@@ -426,35 +232,15 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
         if (empty($itemNames)) {
-
-
 
             return $this->invalid(
 
-
-
                 ['No asset item name was found.']
-
-
 
             );
 
-
-
         }
-
-
-
-
-
-
 
         /*
 
@@ -474,63 +260,27 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
         $department = $this->resolveDepartment($occupantText);
 
-
-
-
-
-
-
-        if (!$department) {
-
-
+        if (! $department) {
 
             return [
 
-
-
                 'status' => 'invalid',
-
-
 
                 'errors' => [
 
-
-
-                    "Department/Present Occupant '{$occupantText}' could not be matched."
-
-
+                    "Department/Present Occupant '{$occupantText}' could not be matched.",
 
                 ],
 
-
-
                 'assets' => [],
-
-
 
                 'department' => null,
 
-
-
             ];
 
-
-
         }
-
-
-
-
-
-
 
         $itemCount = count($itemNames);
 
@@ -544,12 +294,6 @@ class AssetImportNormalizer
         $serials = $this->alignSequentialValues($serials, $itemCount, true);
 
         $errors = [];
-
-
-
-
-
-
 
         /*
 
@@ -569,51 +313,23 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
         if (
 
-
-
-            !empty($makeModels)
-
-
+            ! empty($makeModels)
 
             && count($makeModels) !== $itemCount
 
-
-
             && count($makeModels) !== 1
-
-
 
         ) {
 
-
-
             $errors[] =
 
-
-
-                "Make/Model count (" . count($makeModels) .
-
-
+                'Make/Model count ('.count($makeModels).
 
                 ") does not match item count ({$itemCount}).";
 
-
-
         }
-
-
-
-
-
-
 
         /*
 
@@ -665,47 +381,21 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
         if (
-
-
 
             count($issuedQuantities) !== $itemCount
 
-
-
             && count($issuedQuantities) !== 1
-
-
 
         ) {
 
-
-
             $errors[] =
 
-
-
-                "Issued quantity count (" . count($issuedQuantities) .
-
-
+                'Issued quantity count ('.count($issuedQuantities).
 
                 ") does not match item count ({$itemCount}).";
 
-
-
         }
-
-
-
-
-
-
 
         /*
 
@@ -725,43 +415,21 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
         if (
-            !empty($verifiedQuantities)
+            ! empty($verifiedQuantities)
             && count($verifiedQuantities) !== $itemCount
             && count($verifiedQuantities) !== 1
         ) {
 
-
-
             $errors[] =
 
+                'Physically verified quantity count ('.
 
-
-                "Physically verified quantity count (" .
-
-
-
-                count($verifiedQuantities) .
-
-
+                count($verifiedQuantities).
 
                 ") does not match item count ({$itemCount}).";
 
-
-
         }
-
-
-
-
-
-
 
         /*
 
@@ -809,51 +477,23 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
         if (
 
-
-
-            !empty($dates)
-
-
+            ! empty($dates)
 
             && count($dates) !== 1
 
-
-
             && count($dates) !== $itemCount
-
-
 
         ) {
 
-
-
             $errors[] =
 
-
-
-                "Date count (" . count($dates) .
-
-
+                'Date count ('.count($dates).
 
                 ") does not match item count ({$itemCount}).";
 
-
-
         }
-
-
-
-
-
-
 
         /*
 
@@ -881,91 +521,41 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
         if (
 
-
-
-            !empty($barcodes)
-
-
+            ! empty($barcodes)
 
             && count($barcodes) !== 1
 
-
-
             && count($barcodes) !== $itemCount
-
-
 
         ) {
 
-
-
             $errors[] =
 
-
-
-                "Barcode count (" . count($barcodes) .
-
-
+                'Barcode count ('.count($barcodes).
 
                 ") does not match item count ({$itemCount}).";
 
-
-
         }
-
-
-
-
-
-
 
         if (
 
-
-
-            !empty($serials)
-
-
+            ! empty($serials)
 
             && count($serials) !== 1
 
-
-
             && count($serials) !== $itemCount
-
-
 
         ) {
 
-
-
             $errors[] =
 
-
-
-                "Serial number count (" . count($serials) .
-
-
+                'Serial number count ('.count($serials).
 
                 ") does not match item count ({$itemCount}).";
 
-
-
         }
-
-
-
-
-
-
 
         /*
 
@@ -985,75 +575,35 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
-        if (!empty($errors)) {
-
-
+        if (! empty($errors)) {
 
             return [
 
-
-
                 'status' => 'invalid',
-
-
 
                 'errors' => $errors,
 
-
-
                 'department' => [
-
-
 
                     'id' => $department->id,
 
-
-
                     'name' => $department->name,
 
-
-
                 ],
-
-
 
                 'occupant' => [
 
-
-
                     'employee_id' => null,
-
-
 
                     'name' => $department->name,
 
-
-
                 ],
-
-
 
                 'assets' => [],
 
-
-
             ];
 
-
-
         }
-
-
-
-
-
-
 
         /*
 
@@ -1073,31 +623,13 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
         $employee = $this->resolveEmployee(
-
-
 
             $occupantText,
 
-
-
             $department
 
-
-
         );
-
-
-
-
-
-
 
         /*
 
@@ -1117,239 +649,93 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
         $assets = [];
-
-
-
-
-
-
 
         for ($i = 0; $i < $itemCount; $i++) {
 
-
-
-
-
-
-
             $itemName = trim($itemNames[$i]);
-
-
-
-
-
-
 
             if ($itemName === '') {
 
-
-
                 continue;
-
-
 
             }
 
-
-
-
-
-
-
             $makeModel = $this->valueAt(
-
-
 
                 $makeModels,
 
-
-
                 $i,
-
-
 
                 $itemCount
 
-
-
             );
-
-
-
-
-
-
 
             [$make, $model] =
 
-
-
                 $this->splitMakeModel($makeModel);
-
-
-
-
-
-
 
             $issuedQuantity =
 
-
-
                 $this->quantityAt(
-
-
 
                     $issuedQuantities,
 
-
-
                     $i
 
-
-
                 );
-
-
-
-
-
-
 
             $verifiedQuantity =
 
-
-
                 $this->quantityAt(
-
-
 
                     $verifiedQuantities,
 
-
-
                     $i
 
-
-
                 );
-
-
-
-
-
-
 
             $date =
 
-
-
                 $this->dateAt(
-
-
 
                     $dates,
 
-
-
                     $i,
-
-
 
                     $itemCount
 
-
-
                 );
-
-
-
-
-
-
 
             $barcode =
 
-
-
                 $this->valueAt(
-
-
 
                     $barcodes,
 
-
-
                     $i,
-
-
 
                     $itemCount
 
-
-
                 );
-
-
-
-
-
-
 
             $serial =
 
-
-
                 $this->valueAt(
-
-
 
                     $serials,
 
-
-
                     $i,
-
-
 
                     $itemCount
 
-
-
                 );
-
-
-
-
-
-
 
             $category =
 
-
-
                 $this->resolveCategory($itemName);
 
-
-
-
-
-
-
             $assetErrors = [];
-
-
-
-
-
-
 
             /*
 
@@ -1369,31 +755,13 @@ class AssetImportNormalizer
 
             */
 
-
-
-
-
-
-
             if ($issuedQuantity === null) {
-
-
 
                 $assetErrors[] =
 
-
-
                     "Invalid issued quantity for '{$itemName}'.";
 
-
-
             }
-
-
-
-
-
-
 
             /*
 
@@ -1413,12 +781,6 @@ class AssetImportNormalizer
 
             */
 
-
-
-
-
-
-
             $rawDateAtIndex = $this->rawValueAt(
                 $dates,
                 $i,
@@ -1433,12 +795,6 @@ class AssetImportNormalizer
                 $assetErrors[] =
                     "Invalid issue date for '{$itemName}'.";
             }
-
-
-
-
-
-
 
             /*
 
@@ -1458,31 +814,13 @@ class AssetImportNormalizer
 
             */
 
-
-
-
-
-
-
-            if (!$category) {
-
-
+            if (! $category) {
 
                 $assetErrors[] =
 
-
-
                     "Category could not be determined for '{$itemName}'.";
 
-
-
             }
-
-
-
-
-
-
 
             /*
 
@@ -1502,59 +840,27 @@ class AssetImportNormalizer
 
             */
 
-
-
-
-
-
-
             if (
-
-
 
                 $barcode !== null
 
-
-
                 && $barcode !== ''
-
-
 
                 && Asset::where(
 
-
-
                     'barcode_number',
-
-
 
                     $barcode
 
-
-
                 )->exists()
-
-
 
             ) {
 
-
-
                 $assetErrors[] =
-
-
 
                     "Barcode '{$barcode}' already exists.";
 
-
-
             }
-
-
-
-
-
-
 
             /*
 
@@ -1574,59 +880,27 @@ class AssetImportNormalizer
 
             */
 
-
-
-
-
-
-
             if (
-
-
 
                 $serial !== null
 
-
-
                 && $serial !== ''
-
-
 
                 && Asset::where(
 
-
-
                     'asset_serial_number',
-
-
 
                     $serial
 
-
-
                 )->exists()
-
-
 
             ) {
 
-
-
                 $assetErrors[] =
-
-
 
                     "Serial number '{$serial}' already exists.";
 
-
-
             }
-
-
-
-
-
-
 
             /*
 
@@ -1646,131 +920,27 @@ class AssetImportNormalizer
 
             */
 
-
-
-
-
-
-
             $assets[] = [
-
-
 
                 'asset_code' => null,
 
+                'department_id' => $department->id,
 
+                'department_name' => $department->name,
 
+                'category_id' => $category?->id,
 
+                'category_name' => $category?->name,
 
+                'item_name' => $itemName,
 
+                'make' => $make,
 
-                'department_id' =>
+                'model' => $model,
 
+                'issued_quantity' => $issuedQuantity,
 
-
-                    $department->id,
-
-
-
-
-
-
-
-                'department_name' =>
-
-
-
-                    $department->name,
-
-
-
-
-
-
-
-                'category_id' =>
-
-
-
-                    $category?->id,
-
-
-
-
-
-
-
-                'category_name' =>
-
-
-
-                    $category?->name,
-
-
-
-
-
-
-
-                'item_name' =>
-
-
-
-                    $itemName,
-
-
-
-
-
-
-
-                'make' =>
-
-
-
-                    $make,
-
-
-
-
-
-
-
-                'model' =>
-
-
-
-                    $model,
-
-
-
-
-
-
-
-                'issued_quantity' =>
-
-
-
-                    $issuedQuantity,
-
-
-
-
-
-
-
-                'physically_verified_quantity' =>
-
-
-
-                    $verifiedQuantity,
-
-
-
-
-
-
+                'physically_verified_quantity' => $verifiedQuantity,
 
                 /*
 
@@ -1786,151 +956,37 @@ class AssetImportNormalizer
 
                 */
 
+                'present_occupant_id' => $employee?->id,
 
-
-                'present_occupant_id' =>
-
-
-
-                    $employee?->id,
-
-
-
-
-
-
-
-                'present_occupant_name' =>
-
-
-
-                    $employee?->name
-
-
+                'present_occupant_name' => $employee?->name
 
                     ?? $department->name,
 
+                'asset_serial_number' => $serial ?: null,
 
+                'barcode_number' => $barcode ?: null,
 
+                'date_of_issue' => $date,
 
+                'asset_status' => 'Active',
 
+                'condition' => 'Good',
 
+                'location' => null,
 
-                'asset_serial_number' =>
+                'present_room_number' => $department->import_room_number ?? null,
 
+                'present_sub_department_id' => $department->import_sub_department_id ?? null,
 
+                'remarks' => 'Imported from departmental stock register.',
 
-                    $serial ?: null,
+                'errors' => $assetErrors,
 
-
-
-
-
-
-
-                'barcode_number' =>
-
-
-
-                    $barcode ?: null,
-
-
-
-
-
-
-
-                'date_of_issue' =>
-
-
-
-                    $date,
-
-
-
-
-
-
-
-                'asset_status' =>
-
-
-
-                    'Active',
-
-
-
-
-
-
-
-                'condition' =>
-
-
-
-                    'Good',
-
-
-
-
-
-
-
-                            'location' =>
-
-                    null,
-
-                'present_room_number' =>
-
-                    $department->import_room_number ?? null,
-
-                'present_sub_department_id' =>
-
-                    $department->import_sub_department_id ?? null,
-
-                'remarks' =>
-
-
-
-                    'Imported from departmental stock register.',
-
-
-
-
-
-
-
-                'errors' =>
-
-
-
-                    $assetErrors,
-
-
-
-
-
-
-
-                'valid' =>
-
-
-
-                    empty($assetErrors),
-
-
+                'valid' => empty($assetErrors),
 
             ];
 
-
-
         }
-
-
-
-
-
-
 
         /*
 
@@ -1950,175 +1006,57 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
         $allValid =
 
-
-
-            !empty($assets)
-
-
+            ! empty($assets)
 
             && collect($assets)->every(
 
-
-
                 fn ($asset) => $asset['valid']
-
-
 
             );
 
-
-
-
-
-
-
         return [
 
-
-
-            'status' =>
-
-
-
-                $allValid
-
-
+            'status' => $allValid
 
                     ? 'valid'
 
-
-
                     : 'invalid',
 
-
-
-
-
-
-
-            'errors' =>
-
-
-
-                $allValid
-
-
+            'errors' => $allValid
 
                     ? []
 
-
-
                     : [
 
-
-
-                        'One or more extracted assets require review.'
-
-
+                        'One or more extracted assets require review.',
 
                     ],
 
-
-
-
-
-
-
             'department' => [
 
+                'id' => $department->id,
 
-
-                'id' =>
-
-
-
-                    $department->id,
-
-
-
-
-
-
-
-                'name' =>
-
-
-
-                    $department->name,
-
-
+                'name' => $department->name,
 
             ],
-
-
-
-
-
-
 
             'occupant' => [
 
+                'employee_id' => $employee?->id,
 
-
-                'employee_id' =>
-
-
-
-                    $employee?->id,
-
-
-
-
-
-
-
-                'name' =>
-
-
-
-                    $employee?->name
-
-
+                'name' => $employee?->name
 
                     ?? $department->name,
 
-
-
             ],
 
-
-
-
-
-
-
-            'assets' =>
-
-
-
-                $assets,
-
-
+            'assets' => $assets,
 
         ];
 
-
-
     }
-
-
-
-
-
-
 
     /*
 
@@ -2138,75 +1076,33 @@ class AssetImportNormalizer
 
     */
 
-
-
-
-
-
-
     private function getValue(
-
-
 
         array $raw,
 
-
-
         array $keys
-
-
 
     ): mixed {
 
-
-
         foreach ($keys as $key) {
-
-
 
             if (
 
-
-
                 array_key_exists($key, $raw)
-
-
 
                 && $raw[$key] !== null
 
-
-
             ) {
-
-
 
                 return $raw[$key];
 
-
-
             }
-
-
 
         }
 
-
-
-
-
-
-
         return null;
 
-
-
     }
-
-
-
-
-
-
 
     /**
      * Pack extracted values in source order and align them to the number of
@@ -2292,7 +1188,7 @@ class AssetImportNormalizer
                         }
                     }
                 }
-                if (!$placed) {
+                if (! $placed) {
                     continue;
                 }
             }
@@ -2320,230 +1216,118 @@ class AssetImportNormalizer
         $lines = array_map(
             function ($line) {
                 $line = preg_replace('/\s+/', ' ', (string) $line);
+
                 return trim($line);
             },
             explode("\n", $value)
         );
 
-        if (!array_filter($lines, fn ($line) => $line !== '')) {
+        if (! array_filter($lines, fn ($line) => $line !== '')) {
             return [];
         }
 
-        if (!$preserveEmpty) {
+        if (! $preserveEmpty) {
             return array_values(array_filter($lines, fn ($line) => $line !== ''));
         }
 
         return $lines;
     }
 
-
     private function cleanOccupant(
-
-
 
         mixed $value
 
-
-
     ): string {
-
-
 
         if ($value === null) {
 
-
-
             return '';
 
-
-
         }
-
-
-
-
-
-
 
         return trim(
 
-
-
             preg_replace(
-
-
 
                 '/\s+/',
 
-
-
                 ' ',
-
-
 
                 str_replace(
 
-
-
                     ["\r\n", "\r", "\n"],
-
-
 
                     ' ',
 
-
-
                     (string) $value
-
-
 
                 )
 
-
-
             )
-
-
 
         );
 
-
-
     }
-
-
-
-
-
-
 
     private function resolveEmployee(
 
-
-
         string $occupant,
-
-
 
         Department $department
 
-
-
     ): ?Employee {
-
-
-
-
-
-
 
         if ($occupant === '') {
 
-
-
             return null;
-
-
 
         }
 
-
-
-
-
-
-
         return Employee::query()
-
-
 
             ->where('status', 'active')
 
-
-
             ->where(
-
-
 
                 'department_id',
 
-
-
                 $department->id
-
-
 
             )
 
-
-
             ->get()
-
-
 
             ->first(
 
+                fn ($employee) => $this->normalizeName(
 
+                    $employee->name
 
-                fn ($employee) =>
-
-
-
-                    $this->normalizeName(
-
-
-
-                        $employee->name
-
-
-
-                    ) ===
-
-
+                ) ===
 
                     $this->normalizeName(
-
-
 
                         $occupant
 
-
-
                     )
-
-
 
             );
 
-
-
     }
-
-
-
-
-
-
 
     private function resolveCategory(
 
         string $itemName
 
-    ): ?Category
-
-    {
+    ): ?Category {
 
         $cleanItem = $this->normalizeName($itemName);
-
-
 
         if ($cleanItem === '') {
 
             return null;
 
         }
-
-
 
         /*
 
@@ -2555,8 +1339,6 @@ class AssetImportNormalizer
 
         */
 
-
-
         $category = Category::query()
 
             ->where('status', 'active')
@@ -2565,21 +1347,15 @@ class AssetImportNormalizer
 
             ->first(
 
-                fn ($category) =>
-
-                    $this->normalizeName($category->name) === $cleanItem
+                fn ($category) => $this->normalizeName($category->name) === $cleanItem
 
             );
-
-
 
         if ($category) {
 
             return $category;
 
         }
-
-
 
         /*
 
@@ -2596,8 +1372,6 @@ class AssetImportNormalizer
         |--------------------------------------------------------------------------
 
         */
-
-
 
         $categoryMap = [
 
@@ -2617,8 +1391,6 @@ class AssetImportNormalizer
 
             ],
 
-
-
             'switch' => [
 
                 'canonical' => 'Switch',
@@ -2633,8 +1405,6 @@ class AssetImportNormalizer
 
             ],
 
-
-
             'ups' => [
 
                 'canonical' => 'UPS',
@@ -2646,8 +1416,6 @@ class AssetImportNormalizer
                 ],
 
             ],
-
-
 
             'printer' => [
 
@@ -2661,8 +1429,6 @@ class AssetImportNormalizer
 
             ],
 
-
-
             'desktop' => [
 
                 'canonical' => 'Desktop',
@@ -2675,8 +1441,6 @@ class AssetImportNormalizer
 
             ],
 
-
-
             'server' => [
 
                 'canonical' => 'Server',
@@ -2688,8 +1452,6 @@ class AssetImportNormalizer
                 ],
 
             ],
-
-
 
             'storage' => [
 
@@ -2707,8 +1469,6 @@ class AssetImportNormalizer
 
             ],
 
-
-
             'air_conditioner' => [
 
                 'canonical' => 'Air Conditioner',
@@ -2720,8 +1480,6 @@ class AssetImportNormalizer
                 ],
 
             ],
-
-
 
             'nvr' => [
 
@@ -2735,8 +1493,6 @@ class AssetImportNormalizer
 
             ],
 
-
-
             'lcd_tv' => [
 
                 'canonical' => 'LCD TV',
@@ -2749,8 +1505,6 @@ class AssetImportNormalizer
 
             ],
 
-
-
             'rack' => [
 
                 'canonical' => 'Rack',
@@ -2762,8 +1516,6 @@ class AssetImportNormalizer
                 ],
 
             ],
-
-
 
             'software' => [
 
@@ -2779,15 +1531,11 @@ class AssetImportNormalizer
 
         ];
 
-
-
         foreach ($categoryMap as $definition) {
 
             foreach ($definition['keywords'] as $keyword) {
 
                 $normalizedKeyword = $this->normalizeName($keyword);
-
-
 
                 if (
 
@@ -2798,8 +1546,6 @@ class AssetImportNormalizer
                 ) {
 
                     $canonicalName = $definition['canonical'];
-
-
 
                     /*
 
@@ -2815,23 +1561,17 @@ class AssetImportNormalizer
 
                         ->first(
 
-                            fn ($category) =>
-
-                                $this->normalizeName($category->name) ===
+                            fn ($category) => $this->normalizeName($category->name) ===
 
                                 $this->normalizeName($canonicalName)
 
                         );
-
-
 
                     if ($category) {
 
                         return $category;
 
                     }
-
-
 
                     /*
 
@@ -2857,8 +1597,6 @@ class AssetImportNormalizer
 
         }
 
-
-
         /*
 
         |--------------------------------------------------------------------------
@@ -2877,8 +1615,6 @@ class AssetImportNormalizer
 
         */
 
-
-
         return Category::create([
 
             'name' => trim($itemName),
@@ -2889,111 +1625,47 @@ class AssetImportNormalizer
 
     }
 
-
-
     private function quantityAt(
-
-
 
         array $values,
 
-
-
         int $index
-
-
 
     ): ?int {
 
-
-
-
-
-
-
         if (count($values) === 1) {
-
-
 
             $value = $values[0];
 
-
-
         } else {
-
-
 
             $value = $values[$index] ?? null;
 
-
-
         }
-
-
-
-
-
-
 
         if (
 
-
-
             $value === null
-
-
 
             || $value === ''
 
-
-
-            || !is_numeric($value)
-
-
+            || ! is_numeric($value)
 
         ) {
 
-
-
             return null;
-
-
 
         }
 
-
-
-
-
-
-
         $quantity = (int) $value;
-
-
-
-
-
-
 
         return $quantity >= 0
 
-
-
             ? $quantity
-
-
 
             : null;
 
-
-
     }
-
-
-
-
-
-
 
     private function rawValueAt(
         array $values,
@@ -3006,239 +1678,103 @@ class AssetImportNormalizer
         if (count($values) === 1) {
             return (string) $values[0];
         }
+
         return array_key_exists($index, $values)
             ? (string) $values[$index]
             : null;
     }
 
-
     private function valueAt(
-
-
 
         array $values,
 
-
-
         int $index,
-
-
 
         int $itemCount
 
-
-
     ): ?string {
-
-
-
-
-
-
 
         if (empty($values)) {
 
-
-
             return null;
 
-
-
         }
-
-
-
-
-
-
 
         if (count($values) === 1) {
 
-
-
             return trim($values[0]);
 
-
-
         }
-
-
-
-
-
-
 
         return isset($values[$index])
 
-
-
             ? trim($values[$index])
-
-
 
             : null;
 
-
-
     }
-
-
-
-
-
-
 
     private function dateAt(
 
-
-
         array $dates,
-
-
 
         int $index,
 
-
-
         int $itemCount
-
-
 
     ): ?string {
 
-
-
-
-
-
-
         if (empty($dates)) {
-
-
 
             return null;
 
-
-
         }
-
-
-
-
-
-
 
         if (count($dates) === 1) {
 
-
-
             $value = $dates[0];
-
-
 
         } else {
 
-
-
             $value = $dates[$index] ?? null;
-
-
 
         }
 
-
-
-
-
-
-
-        if (!$value) {
-
-
+        if (! $value) {
 
             return null;
 
-
-
         }
-
-
-
-
-
-
 
         try {
 
-
-
             return Carbon::createFromFormat(
-
-
 
                 'd/m/Y',
 
-
-
                 trim($value)
-
-
 
             )->format('Y-m-d');
 
-
-
         } catch (\Throwable) {
-
-
 
             return null;
 
-
-
         }
-
-
 
     }
 
-
-
-
-
-
-
     private function splitMakeModel(
-
-
 
         ?string $value
 
-
-
     ): array {
 
-
-
-
-
-
-
-        if (!$value) {
-
-
+        if (! $value) {
 
             return [null, null];
 
-
-
         }
-
-
-
-
-
-
 
         /*
 
@@ -3282,164 +1818,73 @@ class AssetImportNormalizer
 
         */
 
-
-
-
-
-
-
         return [
-
-
 
             trim($value),
 
-
-
             null,
-
-
 
         ];
 
-
-
     }
-
-
-
-
-
-
 
     private function normalizeName(
 
-
-
         string $value
-
-
 
     ): string {
 
-
-
-
-
-
-
         $value = str_replace(
-
-
 
             ["\r\n", "\r", "\n"],
 
-
-
             ' ',
-
-
 
             $value
 
-
-
         );
-
-
-
-
-
-
 
         $value =
 
-
-
             preg_replace(
-
-
 
                 '/\s+/',
 
-
-
                 ' ',
-
-
 
                 $value
 
-
-
             );
-
-
-
-
-
-
 
         return mb_strtolower(
 
-
-
             trim($value)
-
-
 
         );
 
-
-
     }
-
-
-
-
-
-
 
     private function invalid(
 
-
-
         array $errors
-
-
 
     ): array {
 
-
-
         return [
-
-
 
             'status' => 'invalid',
 
-
-
             'errors' => $errors,
-
-
 
             'assets' => [],
 
-
-
         ];
-
-
 
     }
 
-
-
-        private function resolveDepartment(
+    private function resolveDepartment(
         string $occupant
-    ): ?Department
-    {
+    ): ?Department {
         $cleanOccupant = $this->cleanOccupant($occupant);
 
         if ($cleanOccupant === '') {
@@ -3506,8 +1951,7 @@ class AssetImportNormalizer
             ->where('status', 'active')
             ->get()
             ->first(
-                fn ($department) =>
-                    $this->normalizeName($department->name) ===
+                fn ($department) => $this->normalizeName($department->name) ===
                     $this->normalizeName($departmentName)
             );
 
@@ -3519,14 +1963,14 @@ class AssetImportNormalizer
             // If it's a lab, try to find/create a "Lab" sub-department
             $importSubDepartmentId = null;
             if ($isLab) {
-                $subDept = \App\Models\SubDepartment::query()
+                $subDept = SubDepartment::query()
                     ->where('department_id', $department->id)
                     ->where('status', 'active')
                     ->get()
                     ->first(fn ($sd) => $this->normalizeName($sd->name) === 'lab');
 
-                if (!$subDept) {
-                    $subDept = \App\Models\SubDepartment::create([
+                if (! $subDept) {
+                    $subDept = SubDepartment::create([
                         'department_id' => $department->id,
                         'name' => 'Lab',
                         'code' => 'LAB',
@@ -3558,8 +2002,7 @@ class AssetImportNormalizer
             'code' => $this->generateDepartmentCode(
                 $departmentName
             ),
-            'description' =>
-                'Automatically created during asset import.',
+            'description' => 'Automatically created during asset import.',
             'status' => 'active',
         ]);
 
@@ -3570,27 +2013,19 @@ class AssetImportNormalizer
         return $newDepartment;
     }
 
-
-
     private function normalizeDepartmentName(
 
         string $name
 
-    ): string
-
-    {
+    ): string {
 
         $name = $this->cleanOccupant($name);
-
-
 
         if ($name === '') {
 
             return '';
 
         }
-
-
 
         /*
 
@@ -3614,29 +2049,21 @@ class AssetImportNormalizer
 
         */
 
-
-
         if (preg_match('/^\d+Hostel\s*\(Boys\s*&\s*Girls\)$/i', $name)) {
 
             return 'Hostel (Boys & Girls)';
 
         }
 
-
-
         return $name;
 
     }
-
-
 
     private function generateDepartmentCode(
 
         string $name
 
-    ): string
-
-    {
+    ): string {
 
         $base = strtoupper(
 
@@ -3652,11 +2079,7 @@ class AssetImportNormalizer
 
         );
 
-
-
         $base = trim($base, '-');
-
-
 
         if ($base === '') {
 
@@ -3664,13 +2087,9 @@ class AssetImportNormalizer
 
         }
 
-
-
         $code = $base;
 
         $counter = 1;
-
-
 
         while (
 
@@ -3684,18 +2103,11 @@ class AssetImportNormalizer
 
             $counter++;
 
-
-
-            $code = $base . '-' . $counter;
+            $code = $base.'-'.$counter;
 
         }
-
-
 
         return $code;
 
     }
-
-
-
 }

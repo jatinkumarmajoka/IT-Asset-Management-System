@@ -10,14 +10,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('assets', function (Blueprint $table) {
-            if (!Schema::hasColumn('assets', 'present_sub_department_id')) {
+            if (! Schema::hasColumn('assets', 'present_sub_department_id')) {
                 $table->foreignId('present_sub_department_id')
                     ->nullable()
                     ->constrained('sub_departments')
                     ->nullOnDelete();
             }
 
-            if (!Schema::hasColumn('assets', 'present_occupant_name')) {
+            if (! Schema::hasColumn('assets', 'present_occupant_name')) {
                 $table->string('present_occupant_name', 150)->nullable();
             }
         });
@@ -32,7 +32,7 @@ return new class extends Migration
                     ->on('sub_departments')
                     ->nullOnDelete();
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Foreign key already exists or column doesn't exist, ignore
         }
     }

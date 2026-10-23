@@ -82,7 +82,7 @@ return new class extends Migration
                 $table->index('status');
                 $table->index('file_type');
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Index already exists, ignore
         }
     }

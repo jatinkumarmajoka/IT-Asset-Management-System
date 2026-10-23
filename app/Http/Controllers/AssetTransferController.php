@@ -17,8 +17,7 @@ class AssetTransferController extends Controller
 {
     public function __construct(
         private AssetTransferService $transferService
-    ) {
-    }
+    ) {}
 
     /**
      * Display transfer history.
@@ -44,7 +43,7 @@ class AssetTransferController extends Controller
             ->latest('id');
 
         // Staff can see requests they submitted. Super Admin can see all.
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $query->where('initiated_by', $user->id);
         }
 

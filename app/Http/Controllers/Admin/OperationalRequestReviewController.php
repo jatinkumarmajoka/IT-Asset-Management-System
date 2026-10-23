@@ -55,6 +55,6 @@ class OperationalRequestReviewController extends Controller
 
         return redirect()
             ->route('admin.index', ['tab' => 'requests'])
-            ->with('success', 'Operational request ' . $status . ' successfully.');
+            ->with('success', 'Operational request '.$status.' successfully.');
     }
 }

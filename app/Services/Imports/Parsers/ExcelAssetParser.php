@@ -17,21 +17,21 @@ class ExcelAssetParser
      */
     public function parse(string $path, string $fileType = 'xlsx'): array
     {
-        if (!is_file($path)) {
-            throw new RuntimeException('Spreadsheet file not found: ' . $path);
+        if (! is_file($path)) {
+            throw new RuntimeException('Spreadsheet file not found: '.$path);
         }
 
         $type = strtolower($fileType ?: pathinfo($path, PATHINFO_EXTENSION));
 
         return match ($type) {
-            'xlsx' => $this->read(new XlsxReader(), $path),
-            'csv'  => $this->read(new CsvReader(), $path),
-            'ods'  => $this->read(new OdsReader(), $path),
-            'xls'  => throw new RuntimeException(
+            'xlsx' => $this->read(new XlsxReader, $path),
+            'csv' => $this->read(new CsvReader, $path),
+            'ods' => $this->read(new OdsReader, $path),
+            'xls' => throw new RuntimeException(
                 'Legacy .xls files are not supported by OpenSpout. Save the workbook as .xlsx and upload it again.'
             ),
             default => throw new RuntimeException(
-                'Unsupported spreadsheet format: .' . $type
+                'Unsupported spreadsheet format: .'.$type
             ),
         };
     }
@@ -48,7 +48,7 @@ class ExcelAssetParser
                     $rows[] = $this->values($row);
                 }
 
-                if (!$rows) {
+                if (! $rows) {
                     continue;
                 }
 
@@ -157,7 +157,7 @@ class ExcelAssetParser
             $header = preg_replace('/\s+/u', ' ', trim((string) $header));
             $result[] = $header !== ''
                 ? $header
-                : 'Column ' . ($index + 1);
+                : 'Column '.($index + 1);
         }
 
         return $result;

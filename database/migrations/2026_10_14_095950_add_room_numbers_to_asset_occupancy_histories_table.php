@@ -10,11 +10,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('asset_occupancy_histories', function (Blueprint $table) {
-            if (!Schema::hasColumn('asset_occupancy_histories', 'previous_room_number')) {
+            if (! Schema::hasColumn('asset_occupancy_histories', 'previous_room_number')) {
                 $table->string('previous_room_number')->nullable();
             }
 
-            if (!Schema::hasColumn('asset_occupancy_histories', 'present_room_number')) {
+            if (! Schema::hasColumn('asset_occupancy_histories', 'present_room_number')) {
                 $table->string('present_room_number')->nullable();
             }
         });

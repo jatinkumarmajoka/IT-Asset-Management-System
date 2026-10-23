@@ -158,7 +158,7 @@ class AssetService
 
         if (
             empty($previousOccupantName)
-            && !empty($old['present_occupant_id'])
+            && ! empty($old['present_occupant_id'])
         ) {
             $previousOccupantName = $asset->occupant()
                 ->getRelated()
@@ -169,7 +169,7 @@ class AssetService
 
         if (
             empty($presentOccupantName)
-            && !empty($current['present_occupant_id'])
+            && ! empty($current['present_occupant_id'])
         ) {
             $presentOccupantName = $asset->occupant()
                 ->getRelated()
@@ -186,13 +186,11 @@ class AssetService
             'previous_sub_department_id' => $previousSubDepartmentId,
             'previous_sub_department_name' => $previousSubDepartmentName,
             'previous_occupant_name' => $previousOccupantName,
-            'previous_location' =>
-                $old['previous_location']
+            'previous_location' => $old['previous_location']
                 ?? $old['present_location']
                 ?? $old['location']
                 ?? null,
-            'previous_room_number' =>
-                $old['previous_room_number']
+            'previous_room_number' => $old['previous_room_number']
                 ?? $old['present_room_number']
                 ?? null,
 
@@ -201,12 +199,10 @@ class AssetService
             'present_sub_department_id' => $presentSubDepartmentId,
             'present_sub_department_name' => $presentSubDepartmentName,
             'present_occupant_name' => $presentOccupantName,
-            'present_location' =>
-                $current['present_location']
+            'present_location' => $current['present_location']
                 ?? $current['location']
                 ?? null,
-            'present_room_number' =>
-                $current['present_room_number'] ?? null,
+            'present_room_number' => $current['present_room_number'] ?? null,
 
             'effective_at' => now(),
             'recorded_by' => Auth::id(),

@@ -188,23 +188,17 @@ class UpdateAssetRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'asset_code.unique' =>
-                'This asset code already exists.',
+            'asset_code.unique' => 'This asset code already exists.',
 
-            'asset_serial_number.unique' =>
-                'This serial number is already registered.',
+            'asset_serial_number.unique' => 'This serial number is already registered.',
 
-            'barcode_number.unique' =>
-                'This barcode is already registered.',
+            'barcode_number.unique' => 'This barcode is already registered.',
 
-            'department_id.prohibited' =>
-                'Department can only be changed through Asset Transfer.',
+            'department_id.prohibited' => 'Department can only be changed through Asset Transfer.',
 
-            'present_occupant_id.prohibited' =>
-                'Present occupant can only be changed through Asset Transfer.',
+            'present_occupant_id.prohibited' => 'Present occupant can only be changed through Asset Transfer.',
 
-            'present_sub_department_id.exists' =>
-                'Select a sub-department belonging to the asset department.',
+            'present_sub_department_id.exists' => 'Select a sub-department belonging to the asset department.',
         ];
     }
 }

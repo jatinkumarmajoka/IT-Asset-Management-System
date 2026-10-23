@@ -67,15 +67,15 @@ class AssetDocumentController extends Controller
     ): array {
         $file = $request->file('file');
         $extension = strtolower($file->getClientOriginalExtension());
-        $filename = Str::uuid()->toString() . '.' . $extension;
+        $filename = Str::uuid()->toString().'.'.$extension;
 
         $path = $file->storeAs(
-            'assets/' . $asset->id,
+            'assets/'.$asset->id,
             $filename,
             'private'
         );
 
-        if (!$path) {
+        if (! $path) {
             abort(500, 'The uploaded file could not be stored.');
         }
 
@@ -304,7 +304,7 @@ class AssetDocumentController extends Controller
             )
             ->first();
 
-        if (!$document) {
+        if (! $document) {
             return back()->withErrors([
                 'file' => 'No asset image exists for this asset.',
             ]);
@@ -339,7 +339,7 @@ class AssetDocumentController extends Controller
 
         abort_unless($user, 401);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $canManageAssets = $user->canManageModule('assets');
             $canManageBills = $user->canManageModule('bills');
 
@@ -369,8 +369,8 @@ class AssetDocumentController extends Controller
             [
                 'Content-Type' => $document->mime_type,
                 'X-Content-Type-Options' => 'nosniff',
-                'Content-Disposition' => 'inline; filename="' .
-                    addslashes($document->original_name) . '"',
+                'Content-Disposition' => 'inline; filename="'.
+                    addslashes($document->original_name).'"',
             ]
         );
     }
@@ -392,7 +392,7 @@ class AssetDocumentController extends Controller
             )
             ->first();
 
-        if (!$document) {
+        if (! $document) {
             return back()->withErrors([
                 'file' => 'No bill or invoice exists for this asset.',
             ]);

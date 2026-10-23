@@ -44,7 +44,7 @@ class ImportController extends Controller
             'docx',
         ];
 
-        if (!in_array($extension, $allowedExtensions, true)) {
+        if (! in_array($extension, $allowedExtensions, true)) {
             return back()->withErrors([
                 'file' => 'Only XLSX, XLS, CSV, PDF and DOCX files are allowed.',
             ])->withInput();
@@ -69,8 +69,8 @@ class ImportController extends Controller
             ->route('imports.index')
             ->with(
                 'success',
-                'File uploaded successfully. Import #' .
-                $import->id .
+                'File uploaded successfully. Import #'.
+                $import->id.
                 ' is ready for processing.'
             );
     }
@@ -101,8 +101,8 @@ class ImportController extends Controller
                 ->route('imports.show', $import)
                 ->with(
                     'success',
-                    'Document processed successfully. ' .
-                    $import->total_rows .
+                    'Document processed successfully. '.
+                    $import->total_rows.
                     ' source rows extracted for review.'
                 );
         } catch (\Throwable $e) {
@@ -112,8 +112,7 @@ class ImportController extends Controller
             return redirect()
                 ->route('imports.show', $import)
                 ->withErrors([
-                    'import' =>
-                        'Import processing failed: ' .
+                    'import' => 'Import processing failed: '.
                         $e->getMessage(),
                 ]);
         }
@@ -141,8 +140,7 @@ class ImportController extends Controller
             return redirect()
                 ->route('imports.show', $import)
                 ->withErrors([
-                    'import' =>
-                        'Validation failed: ' .
+                    'import' => 'Validation failed: '.
                         $e->getMessage(),
                 ]);
         }
@@ -163,7 +161,7 @@ class ImportController extends Controller
     ) {
         try {
 
-            if (!in_array(
+            if (! in_array(
                 $import->status,
                 ['validated', 'needs_review'],
                 true
@@ -171,9 +169,8 @@ class ImportController extends Controller
                 return redirect()
                     ->route('imports.show', $import)
                     ->withErrors([
-                        'import' =>
-                            'This import is not ready for confirmation. ' .
-                            'Current status: ' .
+                        'import' => 'This import is not ready for confirmation. '.
+                            'Current status: '.
                             $import->status,
                     ]);
             }
@@ -184,8 +181,8 @@ class ImportController extends Controller
                 ->route('imports.show', $import)
                 ->with(
                     'success',
-                    $imported .
-                    ' valid assets imported successfully. ' .
+                    $imported.
+                    ' valid assets imported successfully. '.
                     'Invalid rows were skipped.'
                 );
 
@@ -196,8 +193,7 @@ class ImportController extends Controller
             return redirect()
                 ->route('imports.show', $import)
                 ->withErrors([
-                    'import' =>
-                        'Final import failed: ' .
+                    'import' => 'Final import failed: '.
                         $e->getMessage(),
                 ]);
         }

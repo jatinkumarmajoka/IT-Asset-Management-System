@@ -11,7 +11,7 @@ class AssetHistory extends Model
 
     protected $fillable = [
         'asset_id', 'action', 'old_value', 'new_value',
-        'performed_by', 'ip_address', 'created_at'
+        'performed_by', 'ip_address', 'created_at',
     ];
 
     protected $casts = [

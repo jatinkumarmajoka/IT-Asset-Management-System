@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -14,12 +15,12 @@ class EnsureApprovedAndActive
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
         // Only approved accounts may use the application.
-        if (!$user->isApproved()) {
+        if (! $user->isApproved()) {
             Auth::logout();
 
             $request->session()->invalidate();

@@ -15,7 +15,7 @@ class EnsureModuleAccess
     ): Response {
         $user = $request->user();
 
-        if (!$user || !$user->isApproved()) {
+        if (! $user || ! $user->isApproved()) {
             abort(403, 'Your account is not approved.');
         }
 

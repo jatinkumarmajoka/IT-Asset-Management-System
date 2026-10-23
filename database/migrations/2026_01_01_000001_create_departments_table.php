@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('departments', function (Blueprint $table) {
@@ -12,11 +13,14 @@ return new class extends Migration {
             $table->string('name', 150);
             $table->string('code', 50)->unique();
             $table->text('description')->nullable();
-            $table->enum('status', ['active','inactive'])->default('active');
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
-            $table->index(['status','name']);
+            $table->index(['status', 'name']);
         });
     }
 
-    public function down(): void { Schema::dropIfExists('departments'); }
+    public function down(): void
+    {
+        Schema::dropIfExists('departments');
+    }
 };

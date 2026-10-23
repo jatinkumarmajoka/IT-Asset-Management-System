@@ -17,6 +17,7 @@ class CreateSuperAdmin extends Command
     {
         if (User::where('role', 'super_admin')->exists()) {
             $this->error('A Super Admin account already exists.');
+
             return self::FAILURE;
         }
 
@@ -27,6 +28,7 @@ class CreateSuperAdmin extends Command
 
         if ($password !== $confirmation) {
             $this->error('Passwords do not match.');
+
             return self::FAILURE;
         }
 

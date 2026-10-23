@@ -55,8 +55,7 @@ class AssetTransferDocumentController extends Controller
 
         if ($existing) {
             return back()->withErrors([
-                'transfer_image' =>
-                    'A transfer image already exists for this transfer.',
+                'transfer_image' => 'A transfer image already exists for this transfer.',
             ]);
         }
 
@@ -66,8 +65,8 @@ class AssetTransferDocumentController extends Controller
             $file->getClientOriginalExtension()
         );
 
-        $filename = Str::uuid()->toString() . '.' . $extension;
-        $directory = 'asset-transfers/' . $transfer->id;
+        $filename = Str::uuid()->toString().'.'.$extension;
+        $directory = 'asset-transfers/'.$transfer->id;
 
         $storedPath = $file->storeAs(
             $directory,
@@ -75,7 +74,7 @@ class AssetTransferDocumentController extends Controller
             'private'
         );
 
-        if (!$storedPath) {
+        if (! $storedPath) {
             abort(500, 'The transfer image could not be stored.');
         }
 
@@ -138,8 +137,8 @@ class AssetTransferDocumentController extends Controller
             [
                 'Content-Type' => $document->mime_type,
                 'X-Content-Type-Options' => 'nosniff',
-                'Content-Disposition' => 'inline; filename="' .
-                    addslashes($document->original_name) . '"',
+                'Content-Disposition' => 'inline; filename="'.
+                    addslashes($document->original_name).'"',
             ]
         );
     }

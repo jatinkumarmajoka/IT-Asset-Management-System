@@ -13,7 +13,7 @@ class Employee extends Model
 
     protected $fillable = [
         'employee_code', 'name', 'designation', 'department_id',
-        'email', 'phone', 'status'
+        'email', 'phone', 'status',
     ];
 
     public function department(): BelongsTo

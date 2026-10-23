@@ -38,8 +38,7 @@ class AssetTransferService
 
             if ($activeTransferExists) {
                 throw ValidationException::withMessages([
-                    'asset_id' =>
-                        'This asset already has a pending or approved transfer.',
+                    'asset_id' => 'This asset already has a pending or approved transfer.',
                 ]);
             }
 
@@ -51,8 +50,7 @@ class AssetTransferService
                 (int) $data['to_department_id']
             ) {
                 throw ValidationException::withMessages([
-                    'to_department_id' =>
-                        'The destination department must be different from the current department.',
+                    'to_department_id' => 'The destination department must be different from the current department.',
                 ]);
             }
 
@@ -60,7 +58,7 @@ class AssetTransferService
              * Verify that the destination occupant belongs
              * to the destination department.
              */
-            if (!empty($data['to_occupant_id'])) {
+            if (! empty($data['to_occupant_id'])) {
                 $validOccupant = DB::table('employees')
                     ->where('id', $data['to_occupant_id'])
                     ->where(
@@ -69,10 +67,9 @@ class AssetTransferService
                     )
                     ->exists();
 
-                if (!$validOccupant) {
+                if (! $validOccupant) {
                     throw ValidationException::withMessages([
-                        'to_occupant_id' =>
-                            'The selected occupant does not belong to the destination department.',
+                        'to_occupant_id' => 'The selected occupant does not belong to the destination department.',
                     ]);
                 }
             }
@@ -118,8 +115,7 @@ class AssetTransferService
 
             if ($transfer->status !== 'pending') {
                 throw ValidationException::withMessages([
-                    'transfer' =>
-                        'Only pending transfers can be approved.',
+                    'transfer' => 'Only pending transfers can be approved.',
                 ]);
             }
 
@@ -153,8 +149,7 @@ class AssetTransferService
 
             if ($transfer->status !== 'approved') {
                 throw ValidationException::withMessages([
-                    'transfer' =>
-                        'Only approved transfers can be completed.',
+                    'transfer' => 'Only approved transfers can be completed.',
                 ]);
             }
 
@@ -173,8 +168,7 @@ class AssetTransferService
                 (int) $transfer->from_department_id
             ) {
                 throw ValidationException::withMessages([
-                    'transfer' =>
-                        'The asset department has changed since this transfer was created. Review the transfer before completing it.',
+                    'transfer' => 'The asset department has changed since this transfer was created. Review the transfer before completing it.',
                 ]);
             }
 
@@ -192,8 +186,7 @@ class AssetTransferService
 
             if ($currentOccupantId !== $transferOccupantId) {
                 throw ValidationException::withMessages([
-                    'transfer' =>
-                        'The asset occupant has changed since this transfer was created. Review the transfer before completing it.',
+                    'transfer' => 'The asset occupant has changed since this transfer was created. Review the transfer before completing it.',
                 ]);
             }
 
@@ -341,14 +334,13 @@ class AssetTransferService
                 ->lockForUpdate()
                 ->findOrFail($transfer->id);
 
-            if (!in_array(
+            if (! in_array(
                 $transfer->status,
                 ['pending', 'approved'],
                 true
             )) {
                 throw ValidationException::withMessages([
-                    'transfer' =>
-                        'Only pending or approved transfers can be cancelled.',
+                    'transfer' => 'Only pending or approved transfers can be cancelled.',
                 ]);
             }
 
@@ -373,9 +365,9 @@ class AssetTransferService
     {
         do {
             $reference = 'TRF-'
-                . now()->format('YmdHis')
-                . '-'
-                . strtoupper(
+                .now()->format('YmdHis')
+                .'-'
+                .strtoupper(
                     substr(bin2hex(random_bytes(3)), 0, 6)
                 );
         } while (

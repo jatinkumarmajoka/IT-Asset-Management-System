@@ -203,38 +203,27 @@ class StoreAssetRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'asset_code.unique' =>
-                'This asset code already exists.',
+            'asset_code.unique' => 'This asset code already exists.',
 
-            'asset_serial_number.unique' =>
-                'This serial number is already registered.',
+            'asset_serial_number.unique' => 'This serial number is already registered.',
 
-            'barcode_number.unique' =>
-                'This barcode is already registered.',
+            'barcode_number.unique' => 'This barcode is already registered.',
 
-            'present_occupant_id.exists' =>
-                'Select an employee belonging to the selected department.',
+            'present_occupant_id.exists' => 'Select an employee belonging to the selected department.',
 
-            'present_sub_department_id.exists' =>
-                'Select a sub-department belonging to the selected department.',
+            'present_sub_department_id.exists' => 'Select a sub-department belonging to the selected department.',
 
-            'asset_image.image' =>
-                'The asset image must be a valid image file.',
+            'asset_image.image' => 'The asset image must be a valid image file.',
 
-            'asset_image.mimes' =>
-                'The asset image must be JPG, JPEG, PNG, or WEBP.',
+            'asset_image.mimes' => 'The asset image must be JPG, JPEG, PNG, or WEBP.',
 
-            'asset_image.max' =>
-                'The asset image must not exceed 10 MB.',
+            'asset_image.max' => 'The asset image must not exceed 10 MB.',
 
-            'bill_invoice.file' =>
-                'The bill/invoice must be a valid file.',
+            'bill_invoice.file' => 'The bill/invoice must be a valid file.',
 
-            'bill_invoice.mimes' =>
-                'The bill/invoice must be JPG, JPEG, PNG, WEBP, or PDF.',
+            'bill_invoice.mimes' => 'The bill/invoice must be JPG, JPEG, PNG, WEBP, or PDF.',
 
-            'bill_invoice.max' =>
-                'The bill/invoice must not exceed 10 MB.',
+            'bill_invoice.max' => 'The bill/invoice must not exceed 10 MB.',
         ];
     }
 }

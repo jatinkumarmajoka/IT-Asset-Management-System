@@ -127,7 +127,7 @@ class AdminController extends Controller
             false
         );
 
-        $user = new User();
+        $user = new User;
 
         $user->forceFill([
             'name' => $validated['name'],
@@ -210,7 +210,7 @@ class AdminController extends Controller
                 ->route('admin.index', ['tab' => 'staff'])
                 ->with(
                     'status',
-                    'Password-reset link sent to ' . $user->email . '.'
+                    'Password-reset link sent to '.$user->email.'.'
                 );
         }
 
