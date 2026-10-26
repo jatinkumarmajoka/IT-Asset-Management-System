@@ -172,6 +172,9 @@ Route::middleware(['auth', 'approved.session'])->group(function () {
         Route::post('/assets/bulk-action', [AssetController::class, 'bulkAction'])
             ->name('assets.bulk-action');
 
+        Route::post('/filter-presets', [AssetController::class, 'storeFilterPreset'])
+            ->name('filter-presets.store');
+
         Route::post('/assets/{asset}/documents/image/replace', [
             AssetDocumentController::class,
             'replaceImage',

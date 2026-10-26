@@ -81,6 +81,77 @@ class AssetController extends Controller
             )
         );
 
+        // Advanced filters
+        $query->when(
+            $request->filled('condition'),
+            fn ($q) => $q->where('condition', $request->input('condition'))
+        );
+
+        $query->when(
+            $request->filled('assigned_only'),
+            fn ($q) => $q->whereNotNull('present_occupant_id')
+        );
+
+        $query->when(
+            $request->filled('unassigned_only'),
+            fn ($q) => $q->whereNull('present_occupant_id')
+        );
+
+        $query->when(
+            $request->filled('has_image'),
+            fn ($q) => $q->whereHas('documents', fn ($dq) => $dq->where('document_type', AssetDocument::TYPE_ASSET_IMAGE))
+        );
+
+        $query->when(
+            $request->filled('has_bill'),
+            fn ($q) => $q->whereHas('documents', fn ($dq) => $dq->where('document_type', AssetDocument::TYPE_BILL_INVOICE))
+        );
+
+        $query->when(
+            $request->filled('verified'),
+            fn ($q) => $q->whereRaw('physically_verified_quantity = issued_quantity')
+        );
+
+        $query->when(
+            $request->filled('unverified'),
+            fn ($q) => $q->whereRaw('physically_verified_quantity < issued_quantity')
+        );
+
+        $query->when(
+            $request->filled('date_from'),
+            fn ($q) => $q->whereDate('date_of_issue', '>=', $request->input('date_from'))
+        );
+
+        $query->when(
+            $request->filled('date_to'),
+            fn ($q) => $q->whereDate('date_of_issue', '<=', $request->input('date_to'))
+        );
+
+        $query->when(
+            $request->filled('qty_min'),
+            fn ($q) => $q->where('issued_quantity', '>=', $request->integer('qty_min'))
+        );
+
+        $query->when(
+            $request->filled('qty_max'),
+            fn ($q) => $q->where('issued_quantity', '<=', $request->integer('qty_max'))
+        );
+
+        $query->when(
+            $request->filled('verified_qty_min'),
+            fn ($q) => $q->where('physically_verified_quantity', '>=', $request->integer('verified_qty_min'))
+        );
+
+        $query->when(
+            $request->filled('verified_qty_max'),
+            fn ($q) => $q->where('physically_verified_quantity', '<=', $request->integer('verified_qty_max'))
+        );
+
+        $query->when(
+            $request->filled('employee_id'),
+            fn ($q) => $q->where('present_occupant_id', $request->integer('employee_id'))
+        );
+
         $assets = $query
             ->latest()
             ->paginate(15)
@@ -106,12 +177,21 @@ class AssetController extends Controller
             ->orderBy('name')
             ->get();
 
+        $conditions = ['New', 'Good', 'Fair', 'Damaged', 'Critical'];
+
+        // Get filter presets for current user
+        $filterPresets = $request->user()
+            ? $request->user()->filterPresets()->where('module', 'assets')->get()
+            : collect();
+
         return view('assets.index', compact(
             'assets',
             'departments',
             'categories',
             'employees',
-            'subDepartments'
+            'subDepartments',
+            'conditions',
+            'filterPresets'
         ));
     }
 
@@ -592,6 +672,36 @@ class AssetController extends Controller
             'performed_by' => $user->id,
             'ip_address' => request()->ip(),
             'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Store a filter preset for the current user.
+     */
+    public function storeFilterPreset(Request $request)
+    {
+        $request->validate([
+            'preset_name' => ['required', 'string', 'max:100'],
+            'module' => ['required', 'string', 'max:50'],
+            'filters' => ['nullable', 'array'],
+        ]);
+
+        // If setting as default, unset other defaults
+        $request->user()->filterPresets()
+            ->where('module', $request->input('module'))
+            ->where('is_default', true)
+            ->update(['is_default' => false]);
+
+        $preset = $request->user()->filterPresets()->create([
+            'module' => $request->input('module'),
+            'name' => $request->input('preset_name'),
+            'filters' => $request->input('filters', []),
+            'is_default' => true,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'preset' => $preset,
         ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -78,5 +79,13 @@ class User extends Authenticatable
             $permissions[$module] ?? false,
             FILTER_VALIDATE_BOOLEAN
         );
+    }
+
+    /**
+     * Filter presets for this user.
+     */
+    public function filterPresets(): HasMany
+    {
+        return $this->hasMany(FilterPreset::class);
     }
 }

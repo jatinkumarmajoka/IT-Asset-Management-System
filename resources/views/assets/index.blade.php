@@ -277,179 +277,230 @@
 
                 ====================================================== --}}
 
-        <form class="row g-2 mb-3">
-
-            {{-- Search --}}
-
-            <div class="col-md-4">
-
-                <input
-
-                    name="search"
-
-                    class="form-control"
-
-                    placeholder="Search asset, barcode, serial..."
-
-                    value="{{ request('search') }}">
-
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0"><i class="bi bi-funnel me-1"></i> Filters</h6>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="toggleAdvancedFilters" title="Toggle advanced filters">
+                        <i class="bi bi-sliders me-1"></i> Advanced
+                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bookmark-star me-1"></i> Presets
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            @if($filterPresets->isNotEmpty())
+                                @foreach($filterPresets as $preset)
+                                    <li>
+                                        <a class="dropdown-item load-preset" href="#" data-preset='{{ json_encode($preset->filters) }}' data-name="{{ $preset->name }}">
+                                            <i class="bi bi-bookmark me-2"></i> {{ $preset->name }}
+                                            @if($preset->is_default) <span class="badge bg-primary ms-1">Default</span> @endif
+                                        </a>
+                                    </li>
+                                @endforeach
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" id="saveCurrentPreset"><i class="bi bi-plus-circle me-2"></i> Save current as preset</a></li>
+                                <li><a class="dropdown-item text-danger" href="#" id="clearAllFilters"><i class="bi bi-x-circle me-2"></i> Clear all filters</a></li>
+                            @else
+                                <li><a class="dropdown-item" href="#" id="saveFirstPreset"><i class="bi bi-plus-circle me-2"></i> Save current as preset</a></li>
+                            @endif
+                        </ul>
+                    </div>
+                </div>
             </div>
 
-            {{-- Department --}}
+            {{-- Basic Filters --}}
+            <form class="row g-2 mb-3" id="basicFiltersForm">
 
-            <div class="col-md-2">
+                {{-- Search --}}
+                <div class="col-md-4">
+                    <input
+                        name="search"
+                        class="form-control"
+                        placeholder="Search asset, barcode, serial..."
+                        value="{{ request('search') }}">
+                </div>
 
-                <select
+                {{-- Department --}}
+                <div class="col-md-2">
+                    <select
+                        name="department_id"
+                        class="form-select">
+                        <option value="">All Departments</option>
+                        @foreach($departments as $d)
+                        <option
+                            value="{{ $d->id }}"
+                            @selected(request('department_id') == $d->id)>
+                            {{ $d->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
 
-                    name="department_id"
+                {{-- Category --}}
+                <div class="col-md-2">
+                    <select
+                        name="category_id"
+                        class="form-select">
+                        <option value="">All Categories</option>
+                        @foreach($categories as $c)
+                        <option
+                            value="{{ $c->id }}"
+                            @selected(request('category_id') == $c->id)>
+                            {{ $c->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
 
-                    class="form-select">
+                {{-- Status --}}
+                <div class="col-md-2">
+                    <select
+                        name="asset_status"
+                        class="form-select">
+                        <option value="">All Status</option>
+                        @foreach([
+                        'Active',
+                        'Assigned',
+                        'Unassigned',
+                        'Missing',
+                        'Damaged',
+                        'Disposed',
+                        'Transferred',
+                        'Under Repair',
+                        'Retired'
+                        ] as $s)
+                        <option
+                            value="{{ $s }}"
+                            @selected(request('asset_status') == $s)>
+                            {{ $s }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
 
-                    <option value="">
+                {{-- Filter Button --}}
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-dark w-100">
+                        <i class="bi bi-funnel me-1"></i> Filter
+                    </button>
+                </div>
 
-                        All Departments
+            </form>
 
-                    </option>
+            {{-- Advanced Filters (Collapsible) --}}
+            <div class="card border-0 bg-light rounded p-3 mb-3" id="advancedFiltersPanel" style="display: none;">
+                <form class="row g-2" id="advancedFiltersForm">
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                    <input type="hidden" name="department_id" value="{{ request('department_id') }}">
+                    <input type="hidden" name="category_id" value="{{ request('category_id') }}">
+                    <input type="hidden" name="asset_status" value="{{ request('asset_status') }}">
 
-                    @foreach($departments as $d)
+                    {{-- Sub Department --}}
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Sub Department</label>
+                        <select name="present_sub_department_id" class="form-select">
+                            <option value="">All Sub Departments</option>
+                            @foreach($subDepartments as $sd)
+                            <option value="{{ $sd->id }}" @selected(request('present_sub_department_id') == $sd->id)>{{ $sd->name }} ({{ $sd->department?->name }})</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                    <option
+                    {{-- Condition --}}
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Condition</label>
+                        <select name="condition" class="form-select">
+                            <option value="">All Conditions</option>
+                            @foreach($conditions as $c)
+                            <option value="{{ $c }}" @selected(request('condition') == $c)>{{ $c }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                        value="{{ $d->id }}"
+                    {{-- Employee --}}
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Employee</label>
+                        <select name="employee_id" class="form-select">
+                            <option value="">All Employees</option>
+                            @foreach($employees as $emp)
+                            <option value="{{ $emp->id }}" @selected(request('employee_id') == $emp->id)>{{ $emp->name }} ({{ $emp->employee_code }})</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                        @selected(
+                    {{-- Date Range --}}
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Date From</label>
+                        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+                    </div>
 
-                        request('department_id') == $d->id
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Date To</label>
+                        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                    </div>
 
-                        )
+                    {{-- Quantity Range --}}
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Qty Min</label>
+                        <input type="number" name="qty_min" class="form-control" min="0" value="{{ request('qty_min') }}">
+                    </div>
 
-                        >
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Qty Max</label>
+                        <input type="number" name="qty_max" class="form-control" min="0" value="{{ request('qty_max') }}">
+                    </div>
 
-                        {{ $d->name }}
+                    {{-- Verified Qty Range --}}
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Verified Min</label>
+                        <input type="number" name="verified_qty_min" class="form-control" min="0" value="{{ request('verified_qty_min') }}">
+                    </div>
 
-                    </option>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Verified Max</label>
+                        <input type="number" name="verified_qty_max" class="form-control" min="0" value="{{ request('verified_qty_max') }}">
+                    </div>
 
-                    @endforeach
+                    {{-- Quick Filters --}}
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Quick Filters</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <input type="checkbox" name="assigned_only" value="1" id="filter_assigned" @checked(request('assigned_only')) class="form-check-input" style="margin-top: 0.5rem;">
+                            <label for="filter_assigned" class="form-check-label small ms-1">Assigned Only</label>
 
-                </select>
+                            <input type="checkbox" name="unassigned_only" value="1" id="filter_unassigned" @checked(request('unassigned_only')) class="form-check-input" style="margin-top: 0.5rem;">
+                            <label for="filter_unassigned" class="form-check-label small ms-1">Unassigned Only</label>
 
+                            <input type="checkbox" name="has_image" value="1" id="filter_image" @checked(request('has_image')) class="form-check-input" style="margin-top: 0.5rem;">
+                            <label for="filter_image" class="form-check-label small ms-1">Has Image</label>
+
+                            <input type="checkbox" name="has_bill" value="1" id="filter_bill" @checked(request('has_bill')) class="form-check-input" style="margin-top: 0.5rem;">
+                            <label for="filter_bill" class="form-check-label small ms-1">Has Bill</label>
+
+                            <input type="checkbox" name="verified" value="1" id="filter_verified" @checked(request('verified')) class="form-check-input" style="margin-top: 0.5rem;">
+                            <label for="filter_verified" class="form-check-label small ms-1">Verified</label>
+
+                            <input type="checkbox" name="unverified" value="1" id="filter_unverified" @checked(request('unverified')) class="form-check-input" style="margin-top: 0.5rem;">
+                            <label for="filter_unverified" class="form-check-label small ms-1">Unverified</label>
+                        </div>
+                    </div>
+
+                    {{-- Submit & Clear --}}
+                    <div class="col-md-12 mt-2">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-funnel me-1"></i> Apply Advanced Filters
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="clearAdvancedFilters">
+                                <i class="bi bi-x-lg me-1"></i> Clear Advanced
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
             </div>
-
-            {{-- Category --}}
-
-            <div class="col-md-2">
-
-                <select
-
-                    name="category_id"
-
-                    class="form-select">
-
-                    <option value="">
-
-                        All Categories
-
-                    </option>
-
-                    @foreach($categories as $c)
-
-                    <option
-
-                        value="{{ $c->id }}"
-
-                        @selected(
-
-                        request('category_id') == $c->id
-
-                        )
-
-                        >
-
-                        {{ $c->name }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-            {{-- Status --}}
-
-            <div class="col-md-2">
-
-                <select
-
-                    name="asset_status"
-
-                    class="form-select">
-
-                    <option value="">
-
-                        All Status
-
-                    </option>
-
-                    @foreach([
-
-                    'Active',
-
-                    'Assigned',
-
-                    'Unassigned',
-
-                    'Missing',
-
-                    'Damaged',
-
-                    'Disposed',
-
-                    'Transferred',
-
-                    'Under Repair',
-
-                    'Retired'
-
-                    ] as $s)
-
-                    <option
-
-                        value="{{ $s }}"
-
-                        @selected(
-
-                        request('asset_status') == $s
-
-                        )>
-
-                        {{ $s }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-            {{-- Filter Button --}}
-
-            <div class="col-md-2">
-
-                <button
-
-                    type="submit"
-
-                    class="btn btn-dark w-100">
-
-                    Filter
-
-                </button>
-
-            </div>
-
-        </form>
+        </div>
 
         {{-- =====================================================
 
@@ -899,14 +950,231 @@
         updateBulkUI();
     }
 
+    // Advanced Filters
+    function setupAdvancedFilters() {
+        const toggleBtn = document.getElementById('toggleAdvancedFilters');
+        const panel = document.getElementById('advancedFiltersPanel');
+        const clearBtn = document.getElementById('clearAdvancedFilters');
+        const basicForm = document.getElementById('basicFiltersForm');
+        const advancedForm = document.getElementById('advancedFiltersForm');
+        const savePresetBtn = document.getElementById('saveCurrentPreset') || document.getElementById('saveFirstPreset');
+        const clearAllBtn = document.getElementById('clearAllFilters');
+        const loadPresetLinks = document.querySelectorAll('.load-preset');
+
+        if (!toggleBtn || !panel) return;
+
+        toggleBtn.addEventListener('click', () => {
+            const isVisible = panel.style.display !== 'none';
+            panel.style.display = isVisible ? 'none' : 'block';
+            toggleBtn.innerHTML = isVisible
+                ? '<i class="bi bi-sliders me-1"></i> Advanced'
+                : '<i class="bi bi-sliders me-1"></i> Advanced <span class="badge bg-success ms-1">Open</span>';
+        });
+
+        clearBtn?.addEventListener('click', () => {
+            advancedForm.querySelectorAll('input, select').forEach(el => {
+                if (el.type === 'checkbox') el.checked = false;
+                else if (el.type === 'hidden') return;
+                else el.value = '';
+            });
+            advancedForm.submit();
+        });
+
+        // Save preset
+        savePresetBtn?.addEventListener('click', (e) => {
+            e.preventDefault();
+            const name = prompt('Enter preset name:');
+            if (!name) return;
+
+            const params = new URLSearchParams();
+            [...basicForm.querySelectorAll('input, select'), ...advancedForm.querySelectorAll('input, select')].forEach(el => {
+                if (el.type === 'checkbox') {
+                    if (el.checked) params.append(el.name, el.value);
+                } else if (el.type !== 'submit' && el.name) {
+                    params.append(el.name, el.value);
+                }
+            });
+            params.append('preset_name', name);
+            params.append('module', 'assets');
+
+            fetch('{{ route("filter-presets.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: params.toString()
+            }).then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Preset saved!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to save'));
+                }
+            });
+        });
+
+        // Clear all filters
+        clearAllBtn?.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Clear all filters?')) {
+                window.location.href = '{{ route("assets.index") }}';
+            }
+        });
+
+        // Load preset
+        loadPresetLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const filters = JSON.parse(link.dataset.preset);
+                Object.entries(filters).forEach(([key, value]) => {
+                    const basicEl = basicForm.querySelector(`[name="${key}"]`);
+                    const advancedEl = advancedForm.querySelector(`[name="${key}"]`);
+                    if (basicEl) basicEl.value = value;
+                    if (advancedEl) {
+                        if (advancedEl.type === 'checkbox') advancedEl.checked = value;
+                        else advancedEl.value = value;
+                    }
+                });
+                basicForm.submit();
+            });
+        });
+
+        // Sync hidden fields
+        const syncFields = ['search', 'department_id', 'category_id', 'asset_status'];
+        basicForm.addEventListener('submit', () => {
+            syncFields.forEach(name => {
+                const basicEl = basicForm.querySelector(`[name="${name}"]`);
+                const advancedEl = advancedForm.querySelector(`[name="${name}"]`);
+                if (basicEl && advancedEl) advancedEl.value = basicEl.value;
+            });
+        });
+    }
+
+    // Drag & Drop for file uploads
+    function setupDragDrop() {
+        const dropZones = document.querySelectorAll('.drag-drop-zone');
+        dropZones.forEach(zone => {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                zone.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                zone.addEventListener(eventName, () => zone.classList.add('drag-over'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                zone.addEventListener(eventName, () => zone.classList.remove('drag-over'), false);
+            });
+
+            zone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files, zone);
+            }, false);
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function handleFiles(files, zone) {
+                [...files].forEach(file => {
+                    if (!file.type.match('image.*') && !file.type.match('application/pdf')) {
+                        alert('Only images and PDFs allowed');
+                        return;
+                    }
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('File too large (max 10MB)');
+                        return;
+                    }
+
+                    const input = zone.querySelector('input[type="file"]');
+                    if (input) {
+                        const dt = new DataTransfer();
+                        dt.items.add(file);
+                        input.files = dt.files;
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                });
+            }
+        }
+    }
+
+    // Table row drag-and-drop for reordering (if needed for custom ordering)
+    function setupTableDragDrop() {
+        const table = document.querySelector('.assets-table tbody');
+        if (!table) return;
+
+        let draggedRow = null;
+
+        table.querySelectorAll('tr[data-asset-id]').forEach(row => {
+            row.draggable = true;
+
+            row.addEventListener('dragstart', (e) => {
+                draggedRow = row;
+                row.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', row.dataset.assetId);
+            });
+
+            row.addEventListener('dragend', () => {
+                row.classList.remove('dragging');
+                draggedRow = null;
+            });
+
+            row.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                const afterElement = getDragAfterElement(table, e.clientY);
+                if (afterElement == null) {
+                    table.appendChild(draggedRow);
+                } else {
+                    table.insertBefore(draggedRow, afterElement);
+                }
+            });
+
+            row.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                const targetId = row.dataset.assetId;
+                const sourceId = draggedRow.dataset.assetId;
+                if (sourceId !== targetId) {
+                    // Could implement reorder API call here
+                    console.log('Reorder:', sourceId, '->', targetId);
+                }
+            });
+        });
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('tr[data-asset-id]:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+    }
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
             setupAssetsTopScrollbar();
             setupBulkActions();
+            setupAdvancedFilters();
+            setupDragDrop();
+            setupTableDragDrop();
         });
     } else {
         setupAssetsTopScrollbar();
         setupBulkActions();
+        setupAdvancedFilters();
+        setupDragDrop();
+        setupTableDragDrop();
     }
 })();
 </script>
