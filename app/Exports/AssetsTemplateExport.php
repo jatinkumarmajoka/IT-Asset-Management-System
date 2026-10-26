@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
@@ -14,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class AssetsTemplateExport implements FromCollection, ShouldAutoSize, WithColumnWidths, WithHeadings, WithStyles
 {
-    public function collection()
+    public function collection(): Collection
     {
         // Return sample data rows (3 empty rows for user to fill)
         return collect([
@@ -72,7 +73,7 @@ class AssetsTemplateExport implements FromCollection, ShouldAutoSize, WithColumn
         ];
     }
 
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet): ?array
     {
         return [
             // Header row
