@@ -44,6 +44,13 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:5,1')
         ->name('login.store');
 
+    Route::get('/register', [AuthController::class, 'showRegister'])
+        ->name('register');
+
+    Route::post('/register', [AuthController::class, 'register'])
+        ->middleware('throttle:5,1')
+        ->name('register.store');
+
     Route::get('/reset-password/{token}', [
         NewPasswordController::class,
         'create',

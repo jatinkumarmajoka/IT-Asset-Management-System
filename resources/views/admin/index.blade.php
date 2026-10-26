@@ -1,818 +1,194 @@
-<!DOCTYPE html>
+@extends('layouts.app')
 
+@section('page-title', 'Super Admin')
 
-<html lang="en">
-
-
-<head>
-
-
-    <meta charset="UTF-8">
-
-
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-
-    <title>Super Admin | {{ config('branding.org_name') }} - {{ config('branding.product_name') }}</title>
-
-
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    {{-- Mobile-first responsive CSS --}}
-    <link href="{{ asset('css/mobile-first.css') }}" rel="stylesheet">
-
-    <style>
-        :root {
-            --theme-primary: #08203C;
-            --theme-primary-light: #0d2f56;
-            --sidebar-bg: #08203C;
-            --sidebar-hover: #0d2f56;
-            --sidebar-text: #cbd5e1;
-            --sidebar-active: #ffffff;
-        }
-    </style>
-
-
-</head>
-
-
-<body class="min-h-screen bg-slate-100 text-slate-800">
-
-
-    <div class="flex min-h-screen">
-
-
-        {{-- Admin sidebar --}}
-
-
-        <aside class="hidden w-64 shrink-0 p-5 text-white md:block" id="adminSidebar" style="background: var(--sidebar-bg);">
-
-
-            <a href="{{ route('admin.index') }}" class="text-lg font-bold flex flex-col items-start gap-0">
-
+@section('content')
+<div class="d-flex flex-column flex-md-row min-vh-100">
+    {{-- Admin Sidebar --}}
+    <aside class="admin-sidebar d-none d-md-block border-end" style="width: 260px; background: var(--sidebar-bg); min-height: 100vh;">
+        <div class="p-4">
+            <a href="{{ route('admin.index') }}" class="text-lg font-bold text-white d-flex flex-column align-items-start gap-0 text-decoration-none">
                 @if(config('branding.show_logo_in_sidebar') && config('branding.logo'))
                     <img src="{{ asset(config('branding.logo')) }}"
                          alt="{{ config('branding.logo_alt') }}"
-                         class="brand-logo"
+                         class="brand-logo mb-2"
                          style="height: 28px; width: auto;">
                 @else
-                    <i class="bi bi-pc-display"></i>
+                    <i class="bi bi-pc-display fs-1"></i>
                 @endif
-
                 <div class="brand-text">
-                    <div class="brand-org fw-bold text-white">{{ config('branding.org_name') }}</div>
-                    <div class="brand-product text-xs text-slate-400">{{ config('branding.product_name') }}</div>
+                    <div class="fw-bold fs-5 text-white">{{ config('branding.org_name') }}</div>
+                    <div class="small text-slate-400">{{ config('branding.product_name') }}</div>
                 </div>
-
             </a>
 
-            <p class="mt-1 text-xs text-slate-400">SUPER ADMIN</p>
+            <p class="mt-2 text-xs text-slate-400">SUPER ADMIN</p>
 
-            <nav class="mt-8 space-y-2">
-
+            <nav class="mt-4">
                 <a href="{{ route('admin.index', ['tab' => 'overview']) }}"
-                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
-                    Overview
+                    class="d-block rounded px-3 py-2 mb-1 text-white-50 hover:text-white hover:bg-slate-700/50 transition
+                           {{ request('tab', 'overview') === 'overview' ? 'bg-slate-700/50 fw-semibold' : '' }}">
+                    <i class="bi bi-speedometer2 me-2"></i> Overview
                 </a>
 
                 <a href="{{ route('admin.index', ['tab' => 'staff']) }}"
-                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
-                    Staff Management
+                    class="d-block rounded px-3 py-2 mb-1 text-white-50 hover:text-white hover:bg-slate-700/50 transition
+                           {{ request('tab') === 'staff' ? 'bg-slate-700/50 fw-semibold' : '' }}">
+                    <i class="bi bi-people me-2"></i> Staff Management
                 </a>
 
                 <a href="{{ route('admin.index', ['tab' => 'generate']) }}"
-                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
-                    Generate Account
+                    class="d-block rounded px-3 py-2 mb-1 text-white-50 hover:text-white hover:bg-slate-700/50 transition
+                           {{ request('tab') === 'generate' ? 'bg-slate-700/50 fw-semibold' : '' }}">
+                    <i class="bi bi-person-plus me-2"></i> Generate Account
                 </a>
 
                 <a href="{{ route('admin.index', ['tab' => 'permissions']) }}"
-                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
-                    Permissions
+                    class="d-block rounded px-3 py-2 mb-1 text-white-50 hover:text-white hover:bg-slate-700/50 transition
+                           {{ request('tab') === 'permissions' ? 'bg-slate-700/50 fw-semibold' : '' }}">
+                    <i class="bi bi-shield-lock me-2"></i> Permissions
                 </a>
 
                 <a href="{{ route('admin.index', ['tab' => 'requests']) }}"
-                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
-                    Requests
+                    class="d-block rounded px-3 py-2 mb-1 text-white-50 hover:text-white hover:bg-slate-700/50 transition
+                           {{ request('tab') === 'requests' ? 'bg-slate-700/50 fw-semibold' : '' }}">
+                    <i class="bi bi-inbox me-2"></i> Requests
                 </a>
 
                 <a href="{{ route('admin.index', ['tab' => 'audit']) }}"
-                    class="block rounded-lg px-3 py-2" style="color: var(--sidebar-text);">
-                    Audit Logs
+                    class="d-block rounded px-3 py-2 mb-1 text-white-50 hover:text-white hover:bg-slate-700/50 transition
+                           {{ request('tab') === 'audit' ? 'bg-slate-700/50 fw-semibold' : '' }}">
+                    <i class="bi bi-journal-text me-2"></i> Audit Logs
                 </a>
-
             </nav>
 
             <a href="{{ route('dashboard') }}"
-                class="mt-8 block rounded-lg border border-slate-700 px-3 py-2 text-sm" style="background: var(--sidebar-hover); color: var(--sidebar-active);">
+                class="mt-4 d-block rounded px-3 py-2 text-center small border border-slate-600 hover:bg-slate-700 transition">
                 &larr; Back to application
             </a>
+        </div>
+    </aside>
 
-        </aside>
+    <!-- Main Content -->
+    <main class="flex-1 min-vh-100">
+        <header class="bg-white border-bottom px-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3 sticky-top">
+            <button class="sidebar-toggle d-lg-none me-3 p-2 rounded border bg-white" type="button"
+                    onclick="toggleAdminSidebar()" aria-label="Toggle navigation" aria-expanded="false">
+                <i class="bi bi-list fs-4"></i>
+            </button>
 
-        {{-- Sidebar backdrop for mobile --}}
-        <div class="sidebar-backdrop" id="adminSidebarBackdrop" onclick="closeAdminSidebar()" hidden></div>
-
-        <main class="min-w-0 flex-1 p-5 sm:p-8">
-
-            <header class="mb-8 flex flex-wrap items-center justify-between gap-4">
-
-                {{-- Mobile sidebar toggle --}}
-                <button class="sidebar-toggle lg:hidden p-2 rounded-lg border border-slate-300 bg-white text-slate-700" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="adminSidebar" onclick="toggleAdminSidebar()">
-                    <i class="bi bi-list fs-5"></i>
-                </button>
-
-                <div class="lg:ml-0">
-
-                    <p class="text-sm text-slate-500">Administration</p>
-
-                    <h1 class="mt-1 text-2xl font-bold" style="color: var(--theme-primary);">Super Admin Panel</h1>
-
-                    <p class="mt-1 text-sm text-slate-500">
-
-                        Manage access to your IT Asset Management System.
-
-                    </p>
-
-                </div>
-
-                <form method="POST" action="{{ route('logout') }}">
-
-                    @csrf
-
-                    <button class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm hover:bg-slate-50" style="color: var(--theme-primary); border-color: var(--theme-primary);">
-                        Sign out
-                    </button>
-
-                </form>
-
-            </header>
-
-            @if(session('status'))
-
-            <div role="status" class="mb-5 rounded-lg bg-green-50 p-3 text-sm text-green-800">
-
-                {{ session('status') }}
-
+            <div class="flex-1">
+                <p class="text-sm text-slate-500 mb-0">Administration</p>
+                <h1 class="h4 fw-bold mb-0" style="color: var(--theme-primary);">Super Admin Panel</h1>
+                <p class="text-sm text-slate-500 mb-0">Manage access to your IT Asset Management System.</p>
             </div>
 
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-box-arrow-right me-1"></i> Sign out
+                </button>
+            </form>
+        </header>
+
+        <div class="p-4">
+            @if(session('status'))
+                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                    {{ session('status') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             @endif
 
             @if($errors->any())
-
-            <div role="alert" class="mb-5 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-
-                {{ $errors->first() }}
-
-            </div>
-
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    {{ $errors->first() }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             @endif
 
             @php
-
-            $tab = request('tab', 'overview');
-
-            $validTabs = ['overview', 'staff', 'generate', 'permissions', 'requests', 'audit'];
-
-            if (!in_array($tab, $validTabs, true)) {
-
-            $tab = 'overview';
-
-            }
-
+                $tab = request('tab', 'overview');
+                $validTabs = ['overview', 'staff', 'generate', 'permissions', 'requests', 'audit'];
+                if (!in_array($tab, $validTabs)) $tab = 'overview';
             @endphp
 
-            {{-- Mobile navigation --}}
-
-            <nav class="mb-6 flex flex-wrap gap-2 md:hidden">
-
-                @foreach([
-
-                'overview' => 'Overview',
-
-                'staff' => 'Staff',
-
-                'generate' => 'Generate Account',
-
-                'permissions' => 'Permissions',
-
-                'requests' => 'Requests',
-
-                'audit' => 'Audit Logs',
-
-                ] as $key => $label)
-
-                <a href="{{ route('admin.index', ['tab' => $key]) }}"
-                    class="rounded-lg border px-3 py-2 text-sm
-                {{ $tab === $key ? 'border-blue-700 bg-blue-700 text-white' : 'border-slate-300 bg-white' }}"
-                    style="{{ $tab === $key ? 'background: var(--theme-primary); border-color: var(--theme-primary);' : '' }}">
-                    {{ $label }}
-                </a>
-
+            <!-- Mobile Tab Navigation -->
+            <nav class="mb-4 d-md-none overflow-x-auto pb-2">
+                @foreach(['overview' => 'Overview', 'staff' => 'Staff', 'generate' => 'Generate', 'permissions' => 'Permissions', 'requests' => 'Requests', 'audit' => 'Audit'] as $key => $label)
+                    <a href="{{ route('admin.index', ['tab' => $key]) }}"
+                        class="btn btn-sm px-3 py-2 me-2 rounded-pill white-space-nowrap
+                               {{ $tab === $key ? 'btn-primary' : 'btn-outline-secondary' }}">
+                        {{ $label }}
+                    </a>
                 @endforeach
-
             </nav>
 
             @if($tab === 'overview')
-
-            <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-
-                <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-
-                    <p class="text-sm text-slate-500">Total Staff Accounts</p>
-
-                    <p class="mt-3 text-3xl font-bold" style="color: var(--theme-primary);">{{ $staffCount }}</p>
-
-                </article>
-
-                <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-
-                    <p class="text-sm text-slate-500">Approved Staff</p>
-
-                    <p class="mt-3 text-3xl font-bold text-green-700">{{ $approvedCount }}</p>
-
-                </article>
-
-            </section>
-
-            <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5">
-
-                <h2 class="font-semibold" style="color: var(--theme-primary);">Quick actions</h2>
-
-                <div class="mt-4 flex flex-wrap gap-3">
-
-                    <a href="{{ route('admin.index', ['tab' => 'permissions']) }}"
-                        class="rounded-lg border border-slate-300 px-4 py-2 text-sm" style="color: var(--theme-primary); border-color: var(--theme-primary);">
-                        Manage permissions
-                    </a>
-
-                </div>
-
-            </section>
-
+                @include('admin.partials.overview')
             @elseif($tab === 'staff')
-
-            <section class="overflow-x-auto rounded-xl border border-slate-200 bg-white p-5">
-
-                <h2 class="text-lg font-semibold" style="color: var(--theme-primary);">Staff Management</h2>
-
-                <table class="mt-4 w-full text-left text-sm">
-
-                    <thead>
-
-                        <tr class="border-b text-slate-500" style="border-color: var(--theme-primary);">
-
-                            <th class="p-3">Name</th>
-
-                            <th class="p-3">Email</th>
-
-                            <th class="p-3">Department</th>
-
-                            <th class="p-3">Status</th>
-
-                            <th class="p-3">Actions</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @forelse($staff as $user)
-
-                        <tr class="border-b last:border-0" style="border-color: #e5e7eb;">
-
-                            <td class="p-3 font-medium">{{ $user->name }}</td>
-
-                            <td class="p-3">{{ $user->email }}</td>
-
-                            <td class="p-3">{{ $user->department?->name ?? 'Not assigned' }}</td>
-
-                            <td class="p-3">
-
-                                <span class="rounded-full px-2 py-1 text-xs {{ $user->account_status === 'approved' ? 'bg-green-100 text-green-800' : ($user->account_status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700') }}">
-
-                                    {{ ucfirst($user->account_status) }}
-
-                                </span>
-
-                            </td>
-
-                            <td class="p-3">
-
-                                <a href="{{ route('admin.staff.edit', $user) }}"
-                                    class="inline-block rounded-lg border px-3 py-1.5 text-sm font-medium" style="border-color: var(--theme-primary); color: var(--theme-primary); background: #f0f4f8;">
-                                    Edit
-                                </a>
-
-                                @if($user->account_status === 'approved')
-
-                                <form method="POST"
-                                    action="{{ route('admin.staff.password-reset-link', $user) }}"
-                                    onsubmit="return confirm('Send a password reset link to this staff member?')"
-                                    class="mt-2">
-
-                                    @csrf
-
-                                    <button type="submit"
-                                        class="rounded-lg border px-3 py-1.5 text-sm font-medium" style="border-color: var(--theme-primary); color: var(--theme-primary); background: #f0f4f8;">
-                                        Send Password Reset Link
-                                    </button>
-
-                                </form>
-
-                                @endif
-
-                            </td>
-
-                        </tr>
-
-                        @empty
-
-                        <tr>
-
-                            <td colspan="5" class="p-3 text-slate-500">No Staff accounts found.</td>
-
-                        </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
-            </section>
-
+                @include('admin.partials.staff')
             @elseif($tab === 'generate')
-
-            <section class="max-w-2xl rounded-xl border border-slate-200 bg-white p-5">
-
-                <h2 class="text-lg font-semibold" style="color: var(--theme-primary);">Generate Staff Account</h2>
-
-                <p class="mt-2 text-sm text-slate-600">Create an approved Staff account. Share the temporary credentials with the user through a secure channel.</p>
-
-                <form method="POST" action="{{ route('admin.accounts.generate') }}" class="mt-5 space-y-4">
-
-                    @csrf
-
-                    <div>
-
-                        <label for="generated-name" class="mb-1 block text-sm font-medium" style="color: var(--theme-primary);">Full name</label>
-
-                        <input id="generated-name" name="name" value="{{ old('name') }}" required maxlength="255" autocomplete="name" class="w-full rounded-lg border border-slate-300 px-3 py-2" style="border-color: var(--theme-primary);">
-
-                    </div>
-
-                    <div>
-
-                        <label for="generated-email" class="mb-1 block text-sm font-medium" style="color: var(--theme-primary);">Email address</label>
-
-                        <input id="generated-email" name="email" type="email" value="{{ old('email') }}" required maxlength="255" autocomplete="email" class="w-full rounded-lg border border-slate-300 px-3 py-2" style="border-color: var(--theme-primary);">
-
-                    </div>
-
-                    <div>
-
-                        <label for="generated-department" class="mb-1 block text-sm font-medium" style="color: var(--theme-primary);">Department</label>
-
-                        <select id="generated-department" name="department_id" required class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2" style="border-color: var(--theme-primary);">
-
-                            <option value="">Select department</option>
-
-                            @foreach($departments as $department)
-
-                           <option value="{{ $department->id }}" @selected(old('department_id') == $department->id)>
-    {{ $department->name }}
-</option>
-
-                            @endforeach
-
-                        </select>
-
-                    </div>
-
-                    <div>
-
-                        <label for="generated-password" class="mb-1 block text-sm font-medium" style="color: var(--theme-primary);">Temporary password</label>
-
-                        <input id="generated-password" name="password" type="password" required minlength="5" autocomplete="new-password" class="w-full rounded-lg border border-slate-300 px-3 py-2" style="border-color: var(--theme-primary);">
-
-                        <p class="mt-1 text-xs text-slate-500">Use at least 5 characters.</p>
-
-                    </div>
-
-                    <div>
-
-                        <label for="generated-password-confirmation" class="mb-1 block text-sm font-medium" style="color: var(--theme-primary);">Confirm password</label>
-
-                        <input id="generated-password-confirmation" name="password_confirmation" type="password" required minlength="5" autocomplete="new-password" class="w-full rounded-lg border border-slate-300 px-3 py-2" style="border-color: var(--theme-primary);">
-
-                    </div>
-
-                    <button type="submit" class="rounded-lg px-4 py-2 text-sm font-medium text-white" style="background: var(--theme-primary);">Generate approved Staff account</button>
-
-                </form>
-
-            </section>
-
+                @include('admin.partials.generate')
             @elseif($tab === 'permissions')
-
-            <section class="space-y-5">
-
-                <div>
-
-                    <h2 class="text-lg font-semibold text-slate-900" style="color: var(--theme-primary);">Staff Module Permissions</h2>
-
-                    <p class="mt-1 text-sm text-slate-500">Enable or disable access to individual modules.</p>
-
-                </div>
-
-                @forelse($staff->where('account_status', 'approved') as $user)
-
-                    <form method="POST"
-                          action="{{ route('admin.staff.permissions', $user) }}"
-                          class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                        @csrf
-
-                        @method('PUT')
-
-                        <div class="border-b border-slate-200 px-5 py-4" style="border-color: var(--theme-primary);">
-
-                            <h3 class="text-lg font-semibold text-slate-900">{{ $user->name }}</h3>
-
-                            <p class="mt-1 text-sm text-slate-500">{{ $user->email }}</p>
-
-                        </div>
-
-                        <div class="px-5">
-
-                            @foreach($modules as $key => $label)
-
-                                @php
-
-                                    $enabled = filter_var(
-
-                                        $user->permissions[$key] ?? false,
-
-                                        FILTER_VALIDATE_BOOLEAN
-
-                                    );
-
-                                @endphp
-
-                                <div class="flex min-h-[70px] items-center justify-between gap-4 border-b border-slate-100 py-3 last:border-b-0">
-
-                                    <div>
-
-                                        <p class="font-medium text-slate-800">{{ $label }}</p>
-
-                                        <p class="mt-1 text-xs text-slate-500">
-
-                                            {{ $enabled ? 'Access enabled' : 'Access disabled' }}
-
-                                        </p>
-
-                                    </div>
-
-                                    <label class="relative inline-flex shrink-0 cursor-pointer items-center">
-
-                                        <input type="hidden" name="permissions[{{ $key }}]" value="0">
-
-                                        <input
-
-                                            type="checkbox"
-
-                                            name="permissions[{{ $key }}]"
-
-                                            value="1"
-
-                                            class="peer sr-only"
-
-                                            @checked($enabled)
-
-                                            aria-label="{{ $label }} permission for {{ $user->name }}"
-
-                                        >
-
-                                        <span class="h-7 w-12 rounded-full bg-gray-300 transition-colors duration-200 peer-checked:bg-green-500 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-green-600"></span>
-
-                                        <span class="pointer-events-none absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-5"></span>
-
-                                    </label>
-
-                                </div>
-
-                            @endforeach
-
-                        </div>
-
-                        <div class="border-t border-slate-200 bg-slate-50 px-5 py-4" style="border-color: var(--theme-primary);">
-
-                            <button type="submit"
-                                    class="rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition" style="background: var(--theme-primary);">
-                                Save permissions
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                @empty
-
-                    <div class="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-500">
-
-                        No approved Staff accounts are available to configure.
-
-                    </div>
-
-                @endforelse
-
-            </section>
-
+                @include('admin.partials.permissions')
             @elseif($tab === 'requests')
-
-            <section class="space-y-8">
-
-                <div>
-
-                    <h2 class="text-xl font-semibold" style="color: var(--theme-primary);">Requests & Approvals</h2>
-
-                    <p class="mt-1 text-sm text-slate-600">Review existing asset transfers and general operational requests submitted by staff.</p>
-
-                </div>
-
-                @if(session('success'))
-
-                <div role="status" class="rounded-lg bg-green-50 p-3 text-sm text-green-800">{{ session('success') }}</div>
-
-                @endif
-
-                <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-
-                        <div>
-
-                            <h3 class="text-lg font-semibold" style="color: var(--theme-primary);">Asset Transfer Requests</h3>
-
-                            <p class="mt-1 text-sm text-slate-500">Existing transfer workflow. Asset details change only after a transfer is completed.</p>
-
-                        </div>
-
-                        <span class="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium">{{ isset($assetTransfers) ? $assetTransfers->count() : 0 }} total</span>
-
-                    </div>
-
-                    <div class="mt-5 space-y-4">
-
-                        @forelse(($assetTransfers ?? collect()) as $transfer)
-
-                        <article class="rounded-lg border border-slate-200 p-4" style="border-color: var(--theme-primary);">
-
-                            <div class="flex flex-wrap items-start justify-between gap-3">
-
-                                <div>
-
-                                    <h4 class="font-semibold">{{ $transfer->reference_number ?: 'Transfer #'.$transfer->id }} &mdash; {{ $transfer->asset?->asset_tag ?? $transfer->asset?->name ?? 'Asset #'.$transfer->asset_id }}</h4>
-
-                                    <p class="mt-1 text-sm text-slate-600">{{ $transfer->fromDepartment?->name ?? 'Unknown department' }} &rarr; {{ $transfer->toDepartment?->name ?? 'Unknown department' }}</p>
-
-                                    <p class="mt-1 text-xs text-slate-500">Requested by {{ $transfer->initiatedBy?->name ?? 'Unknown user' }} &middot; {{ optional($transfer->transfer_date)->format('d M Y') ?? 'No date' }}</p>
-
-                                </div>
-
-                                <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $transfer->status === 'completed' ? 'bg-green-100 text-green-800' : ($transfer->status === 'pending' ? 'bg-amber-100 text-amber-800' : ($transfer->status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-700')) }}">{{ ucfirst($transfer->status) }}</span>
-
-                            </div>
-
-                            @if($transfer->reason)
-
-                            <p class="mt-3 text-sm"><span class="font-medium">Reason:</span> {{ $transfer->reason }}</p>
-
-                            @endif
-
-                            @if($transfer->remarks)
-
-                            <p class="mt-1 text-sm text-slate-600">{{ $transfer->remarks }}</p>
-
-                            @endif
-
-                            @if($transfer->status === 'pending')
-
-                            <form method="POST" action="{{ route('admin.transfers.approve', $transfer) }}" class="mt-4">
-
-                                @csrf
-
-                                <button type="submit" onclick="return confirm('Approve this asset transfer?')" class="rounded-lg px-4 py-2 text-sm font-medium text-white" style="background: var(--theme-primary);">Approve transfer</button>
-
-                            </form>
-
-                            @elseif($transfer->status === 'approved')
-
-                            <form method="POST" action="{{ route('admin.transfers.complete', $transfer) }}" class="mt-4">
-
-                                @csrf
-
-                                <button type="submit" onclick="return confirm('Complete this transfer and update the asset department/occupant?')" class="rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800">Mark as completed</button>
-
-                            </form>
-
-                            @endif
-
-                        </article>
-
-                        @empty
-
-                        <p class="rounded-lg bg-slate-50 p-4 text-sm text-slate-500">No asset transfer requests found.</p>
-
-                        @endforelse
-
-                    </div>
-
-                </section>
-
-                <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" style="border-color: var(--theme-primary);">
-
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-
-                        <div>
-
-                            <h3 class="text-lg font-semibold" style="color: var(--theme-primary);">General Operational Requests</h3>
-
-                            <p class="mt-1 text-sm text-slate-500">Staff requests for hardware, software, repairs, accessories, and other operational needs.</p>
-
-                        </div>
-
-                        <span class="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium">{{ isset($operationalRequests) ? $operationalRequests->count() : 0 }} total</span>
-
-                    </div>
-
-                    <div class="mt-5 space-y-4">
-
-                        @forelse(($operationalRequests ?? collect()) as $operationalRequest)
-
-                        <article class="rounded-lg border border-slate-200 p-4" style="border-color: var(--theme-primary);">
-
-                            <div class="flex flex-wrap items-start justify-between gap-3">
-
-                                <div>
-
-                                    <h4 class="font-semibold">{{ $operationalRequest->subject }}</h4>
-
-                                    <p class="mt-1 text-sm text-slate-600">{{ $operationalRequest->type }} &middot; {{ $operationalRequest->department?->name ?? $operationalRequest->user?->department?->name ?? 'No department' }}</p>
-
-                                    <p class="mt-1 text-xs text-slate-500">Submitted by {{ $operationalRequest->user?->name ?? 'Unknown user' }} &middot; {{ $operationalRequest->created_at?->format('d M Y, h:i A') }}</p>
-
-                                </div>
-
-                                <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $operationalRequest->status === 'approved' ? 'bg-green-100 text-green-800' : ($operationalRequest->status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800') }}">{{ ucfirst($operationalRequest->status) }}</span>
-
-                            </div>
-
-                            <p class="mt-3 whitespace-pre-line text-sm text-slate-700">{{ $operationalRequest->description }}</p>
-
-                            @if($operationalRequest->admin_response)
-
-                            <div class="mt-3 rounded-lg bg-slate-50 p-3 text-sm"><span class="font-medium">Admin response:</span> {{ $operationalRequest->admin_response }}</div>
-
-                            @endif
-
-                            @if($operationalRequest->status === 'pending')
-
-                            <div class="mt-4 grid gap-3 lg:grid-cols-2">
-
-                                <form method="POST" action="{{ route('admin.operational-requests.approve', $operationalRequest) }}" class="space-y-2 rounded-lg bg-green-50 p-3" style="border-color: var(--theme-primary);">
-
-                                    @csrf
-
-                                    <label for="approve-response-{{ $operationalRequest->id }}" class="block text-sm font-medium text-green-900" style="color: var(--theme-primary);">Approval note (optional)</label>
-
-                                    <textarea id="approve-response-{{ $operationalRequest->id }}" name="admin_response" rows="2" maxlength="5000" class="w-full rounded-lg border border-green-200 bg-white px-3 py-2 text-sm" placeholder="Add instructions or approval details">{{ old('admin_response') }}</textarea>
-
-                                    <button type="submit" onclick="return confirm('Approve this operational request?')" class="rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800">Approve request</button>
-
-                                </form>
-
-                                <form method="POST" action="{{ route('admin.operational-requests.reject', $operationalRequest) }}" class="space-y-2 rounded-lg bg-red-50 p-3" style="border-color: var(--theme-primary);">
-
-                                    @csrf
-
-                                    <label for="reject-response-{{ $operationalRequest->id }}" class="block text-sm font-medium text-red-900" style="color: var(--theme-primary);">Reason for rejection (optional)</label>
-
-                                    <textarea id="reject-response-{{ $operationalRequest->id }}" name="admin_response" rows="2" maxlength="5000" class="w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-sm" placeholder="Explain why this request is rejected"></textarea>
-
-                                    <button type="submit" onclick="return confirm('Reject this operational request?')" class="rounded-lg bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-800">Reject request</button>
-
-                                </form>
-
-                            </div>
-
-                            @else
-
-                            <p class="mt-3 text-xs text-slate-500">Reviewed by {{ $operationalRequest->reviewer?->name ?? 'Super Admin' }}{{ $operationalRequest->reviewed_at ? ' &middot; '.$operationalRequest->reviewed_at->format('d M Y, h:i A') : '' }}</p>
-
-                            @endif
-
-                        </article>
-
-                        @empty
-
-                        <p class="rounded-lg bg-slate-50 p-4 text-sm text-slate-500">No general operational requests found.</p>
-
-                        @endforelse
-
-                    </div>
-
-                </section>
-
-            </section>
-
+                @include('admin.partials.requests')
             @elseif($tab === 'audit')
-
-            <section class="rounded-xl border border-slate-200 bg-white p-5" style="border-color: var(--theme-primary);">
-
-                <h2 class="text-lg font-semibold" style="color: var(--theme-primary);">Audit Logs</h2>
-
-                <p class="mt-2 text-sm text-slate-600">
-
-                    Audit logging needs a database table and event recording.
-
-                    This tab will be connected when that component is implemented.
-
-                </p>
-
-            </section>
-
+                @include('admin.partials.audit')
             @endif
+        </div>
+    </main>
 
-        </main>
+    <!-- Mobile Sidebar Backdrop -->
+    <div class="sidebar-backdrop d-lg-none" id="adminSidebarBackdrop" onclick="closeAdminSidebar()" hidden></div>
+</div>
 
-    </div>
+@push('scripts')
+<script>
+function toggleAdminSidebar() {
+    const sidebar = document.getElementById('adminSidebar');
+    const backdrop = document.getElementById('adminSidebarBackdrop');
+    const toggle = document.querySelector('.sidebar-toggle');
 
-    {{-- Mobile Sidebar Toggle Script for Admin --}}
-    <script>
-        function toggleAdminSidebar() {
-            const sidebar = document.getElementById('adminSidebar');
-            const backdrop = document.getElementById('adminSidebarBackdrop');
-            const toggle = document.querySelector('.sidebar-toggle');
+    if (sidebar && backdrop) {
+        const isOpen = sidebar.classList.toggle('open');
+        backdrop.hidden = !isOpen;
+        backdrop.classList.toggle('show', isOpen);
 
-            if (sidebar && backdrop) {
-                const isOpen = sidebar.classList.toggle('open');
-                backdrop.hidden = !isOpen;
-                backdrop.classList.toggle('show', isOpen);
-
-                if (toggle) {
-                    toggle.setAttribute('aria-expanded', isOpen);
-                    toggle.innerHTML = isOpen ? '<i class="bi bi-x-lg fs-5"></i>' : '<i class="bi bi-list fs-5"></i>';
-                }
-
-                document.body.style.overflow = isOpen ? 'hidden' : '';
-            }
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', isOpen);
+            toggle.innerHTML = isOpen ? '<i class="bi bi-x-lg fs-4"></i>' : '<i class="bi bi-list fs-4"></i>';
         }
 
-        function closeAdminSidebar() {
-            const sidebar = document.getElementById('adminSidebar');
-            const backdrop = document.getElementById('adminSidebarBackdrop');
-            const toggle = document.querySelector('.sidebar-toggle');
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+}
 
-            if (sidebar && backdrop) {
-                sidebar.classList.remove('open');
-                backdrop.hidden = true;
-                backdrop.classList.remove('show');
+function closeAdminSidebar() {
+    const sidebar = document.getElementById('adminSidebar');
+    const backdrop = document.getElementById('adminSidebarBackdrop');
+    const toggle = document.querySelector('.sidebar-toggle');
 
-                if (toggle) {
-                    toggle.setAttribute('aria-expanded', 'false');
-                    toggle.innerHTML = '<i class="bi bi-list fs-5"></i>';
-                }
+    if (sidebar && backdrop) {
+        sidebar.classList.remove('open');
+        backdrop.hidden = true;
+        backdrop.classList.remove('show');
 
-                document.body.style.overflow = '';
-            }
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.innerHTML = '<i class="bi bi-list fs-4"></i>';
         }
 
-        // Close sidebar on escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeAdminSidebar();
-            }
-        });
+        document.body.style.overflow = '';
+    }
+}
 
-        // Close sidebar when clicking a link on mobile
-        document.addEventListener('click', function(e) {
-            if (window.innerWidth < 768) {
-                const sidebar = document.getElementById('adminSidebar');
-                if (sidebar && sidebar.classList.contains('open') && e.target.closest('nav a')) {
-                    closeAdminSidebar();
-                }
-            }
-        });
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeAdminSidebar();
+});
 
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 768) {
-                closeAdminSidebar();
-            }
-        });
-    </script>
-</body>
-
-</html>
+window.addEventListener('resize', function() {
+    if (window.innerWidth >= 768) closeAdminSidebar();
+});
+</script>
+@endpush

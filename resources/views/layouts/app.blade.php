@@ -14,6 +14,8 @@
         {{ $title ?? config('branding.org_name') . ' - ' . config('branding.product_name') }}
     </title>
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     {{-- Bootstrap CSS --}}
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -24,8 +26,16 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
         rel="stylesheet">
 
+    {{-- SweetAlert2 --}}
+    <link
+        href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+        rel="stylesheet">
+
     {{-- Mobile-first responsive CSS --}}
     <link href="{{ asset('css/mobile-first.css') }}" rel="stylesheet">
+
+    {{-- Vite Assets --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         :root {
@@ -456,13 +466,14 @@
                         <i class="bi bi-person-circle fs-5"></i>
 
                         <span class="text-muted">
-                            {{ auth()->user()->name }}
+                            {{ auth()->user()->name ?? 'Guest' }}
                         </span>
                     </button>
 
                     <ul class="dropdown-menu dropdown-menu-end shadow"
                         aria-labelledby="userDropdown">
 
+                        @auth
                         <li>
                             <div class="dropdown-item-text">
                                 <strong>{{ auth()->user()->name }}</strong>
@@ -486,6 +497,20 @@
                                 </button>
                             </form>
                         </li>
+                        @else
+                        <li>
+                            <a class="dropdown-item" href="{{ route('login') }}">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Login
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('register') }}">
+                                <i class="bi bi-person-plus me-2"></i>
+                                Register
+                            </a>
+                        </li>
+                        @endauth
                     </ul>
                 </div>
 
@@ -559,6 +584,10 @@
     {{-- Bootstrap JavaScript --}}
     <script
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    {{-- SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @stack('scripts')
 
 
