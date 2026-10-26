@@ -25,7 +25,7 @@ class EnsureModuleAccess
         }
 
         // Staff with this module permission can manage its records.
-        $canManage = $user->hasModuleAccess($module);
+        $canManage = $user->canManageModule($module);
 
         // Allow Staff to view module pages without edit permission.
         if ($request->isMethod('GET') || $request->isMethod('HEAD')) {

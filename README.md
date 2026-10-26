@@ -1,621 +1,354 @@
 # IT Asset Management System
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="360" alt="Laravel">
-</p>
+> A comprehensive Laravel-based IT Asset Management System for tracking assets, departments, employees, transfers, and operational requests — built with role-based access control and audit trails.
 
-<p align="center">
-  <strong>IT Asset Management System</strong><br>
-  A dynamic web-based system for managing, tracking, issuing, verifying, and maintaining organizational IT assets.
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Laravel-PHP-red?style=for-the-badge&logo=laravel" alt="Laravel">
-  <img src="https://img.shields.io/badge/PHP-8.x-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
-  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
-  <img src="https://img.shields.io/badge/Tailwind_CSS-UI-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
-  <img src="https://img.shields.io/badge/Vite-Build-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
-</p>
+![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat&logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.5+-777BB4?style=flat&logo=php&logoColor=white)
+![SQLite](https://img.shields.io/badge/Database-SQLite%20%7C%20MySQL-003B57?style=flat&logo=sqlite&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=flat&logo=bootstrap&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
-## 📌 About the Project
+## 📋 Overview
 
-The **IT Asset Management System** is a web-based application designed to manage an organization's IT and physical assets digitally.
+The **IT Asset Management System** helps organizations manage their IT inventory lifecycle — from procurement to disposal. It provides a complete workflow for asset tracking, department/employee assignments, transfer approvals, document management, and operational requests.
 
-The system replaces manual asset registers and spreadsheets with a centralized application for maintaining asset records, department assignments, locations, users, categories, issue history, verification records, and asset status.
+### Key Capabilities
 
-The application is designed to be **dynamic, scalable, and database-driven**, allowing organizations to manage large numbers of assets while maintaining a complete history of asset movement and ownership.
-
----
-
-## 🎯 Objectives
-
-The main objectives of the system are:
-
-* Digitize IT asset records
-* Maintain a centralized asset database
-* Track assets assigned to employees/departments
-* Record asset issue and return information
-* Track asset locations
-* Maintain asset categories and manufacturers
-* Perform physical asset verification
-* Maintain asset history
-* Reduce duplicate/manual data entry
-* Improve asset accountability
-* Generate reliable asset records and reports
+| Module | Description |
+|--------|-------------|
+| **Assets** | Full CRUD with categories, departments, occupants, quantities, serial/barcode, condition, status |
+| **Transfers** | Multi-step workflow: Request → Super Admin Approve → Complete (with audit trail) |
+| **Documents** | Secure private storage for asset images & bills/invoices (locked after upload) |
+| **Departments** | Hierarchical with sub-departments, academic/non-teaching types |
+| **Employees** | Linked to departments, employee codes, designations |
+| **Categories** | Auto-created during imports, status tracking |
+| **Imports** | Upload CSV/XLSX/PDF/DOCX → Parse → Validate → Confirm (transactional) |
+| **Operational Requests** | Staff submit requests (hardware, software, repairs) → Admin approve/reject |
+| **Super Admin** | Staff management, permissions, password resets, transfer/request approvals |
+| **Authentication** | Email/password, account approval flow, session timeout (48h), CSRF protection |
 
 ---
 
-## 🚀 Key Features
+## 🏗️ Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Framework** | Laravel 12.x |
+| **Language** | PHP 8.5+ (ZTS) |
+| **Database** | SQLite (dev) / MySQL / MariaDB (prod) |
+| **Frontend** | Bootstrap 5.3 + TailwindCSS 4 |
+| **Build Tool** | Vite 7.x |
+| **Testing** | PHPUnit 12.x |
+| **Code Style** | Laravel Pint |
+| **Icons** | Bootstrap Icons |
+
+---
+
+## ✨ Features in Detail
+
+### 🔐 Authentication & Authorization
+- **Account Approval Flow**: Users register → status `pending` → Super Admin approves → `approved`
+- **Role-Based Access**: `super_admin` (full access) vs `staff` (module permissions)
+- **Module Permissions**: Granular control per module (`assets`, `departments`, `categories`, `employees`, `imports`, `transfers`, `bills`, `verification`, `reports`)
+- **Session Security**: 48-hour inactivity auto-logout, HTTP-only cookies, SameSite=lax
+- **Rate Limiting**: 5 attempts/minute on login & password reset
 
 ### 📦 Asset Management
+- Unique asset codes, serial numbers, barcodes
+- Issued vs. physically verified quantities
+- Present/previous occupant tracking (employee or department)
+- Location + room number with "Other" custom entry
+- Condition: New / Good / Fair / Damaged / Critical
+- Status: Active, Assigned, Unassigned, Missing, Damaged, Disposed, Return to Store, Under Repair, Retired
 
-Manage complete information about organizational assets, including:
+### 🔄 Asset Transfers
+```
+Staff creates request (select asset → destination dept/occupant)
+    ↓
+Super Admin approves (validates source unchanged)
+    ↓
+Super Admin completes (atomically updates asset + creates occupancy history + audit log)
+```
+- Prevents concurrent transfers on same asset
+- Validates destination occupant belongs to destination department
+- Locks asset row during completion (`lockForUpdate`)
 
-* Asset name
-* Asset category
-* Make and model
-* Serial number
-* Asset ID / identification number
-* Purchase information
-* Asset status
-* Current location
-* Current occupant
-* Department
-* Remarks
+### 📄 Document Management
+- **Asset Images**: JPG/PNG/WebP, replaceable, not locked
+- **Bills/Invoices**: JPG/PNG/WebP/PDF, **locked after upload** (immutable)
+- All files stored on **private disk** (not publicly accessible)
+- Served via authorized routes with `X-Content-Type-Options: nosniff`
 
-### 👤 Asset Assignment
+### 📥 Import System
+1. **Upload** → File stored locally
+2. **Process** → Parse (Excel/CSV/PDF/DOCX) → Extract rows to staging table
+3. **Validate** → Normalize (resolve departments, categories, employees, dates, quantities) → Mark valid/invalid/duplicate
+4. **Confirm** → Transactional import of all valid rows → Generate `IMP-{batch}-{seq}` asset codes
 
-Track who is currently using an asset.
-
-The system can maintain:
-
-* Present occupant
-* Department
-* Date of issue
-* Date of return
-* Assignment history
-* Asset status
-
-### 🏢 Department Management
-
-Manage organizational departments and associate assets with the appropriate department.
-
-### 📍 Location Management
-
-Track where assets are physically located.
-
-Examples:
-
-* Office
-* Computer Lab
-* Department
-* Store
-* Server Room
-* Classroom
-
-### 🗂️ Category Management
-
-Create and manage asset categories such as:
-
-* Desktop Computers
-* Laptops
-* Monitors
-* Printers
-* UPS
-* Networking Equipment
-* Servers
-* Projectors
-* Accessories
-* Other IT Equipment
-
-### 🔍 Physical Verification
-
-The system supports physical verification of assets and can record information such as:
-
-| Field               | Description                          |
-| ------------------- | ------------------------------------ |
-| Name of Item        | Asset/item name                      |
-| Make & Model        | Manufacturer and model               |
-| Issued Quantity     | Quantity according to stock register |
-| Physically Verified | Quantity physically found            |
-| Present Occupant    | Current user/custodian               |
-| Date of Issue       | Asset issue date                     |
-| Remarks             | Additional observations              |
-
-### 📊 Dashboard
-
-The dashboard can provide an overview of:
-
-* Total assets
-* Active assets
-* Assigned assets
-* Available assets
-* Under-repair assets
-* Retired assets
-* Department-wise assets
-* Location-wise assets
-
-### 📝 Import & Data Management
-
-The system supports structured asset data management and import workflows for transferring existing records into the application.
-
-### 🔄 Asset History
-
-Maintain historical information about asset movements and assignments instead of only storing the current state.
+### 🛡️ Security Highlights
+- ✅ No SQL injection (Eloquent + parameter binding)
+- ✅ No XSS (Blade `{{ }}` escaping, secure headers on downloads)
+- ✅ CSRF on all state-changing forms
+- ✅ Mass assignment protection (`$fillable` on all models)
+- ✅ File upload validation (MIME, size, extension, private storage)
+- ✅ Authorization checks on every route (middleware chain)
+- ✅ Dependency scanning clean (`composer audit`, `npm audit`)
 
 ---
 
-## 🛠️ Technology Stack
+## 🚀 Quick Start (Local Development)
 
-### Backend
+### Prerequisites
+- **PHP 8.5+** with extensions: `openssl`, `mbstring`, `curl`, `fileinfo`, `pdo_mysql`, `pdo_sqlite`, `zip`, `gd`, `sqlite3`
+- **Composer 2.x**
+- **Node.js 20+** & **npm 10+**
+- **Git**
 
-* PHP
-* Laravel
-* Laravel Eloquent ORM
-* RESTful application architecture
+### Installation
+```bash
+# 1. Clone repository
+git clone <repository-url>
+cd it-asset-management
 
-### Frontend
+# 2. Install PHP dependencies
+composer install
 
-* Blade
-* HTML5
-* CSS3
-* JavaScript
-* Tailwind CSS
-* Vite
+# 3. Install JS dependencies & build assets
+npm ci && npm run build
 
-### Database
+# 4. Configure environment
+cp .env.example .env
+# Edit .env with your settings (see Configuration section)
 
-* MySQL
+# 5. Generate application key
+php artisan key:generate
 
-### Development Tools
+# 6. Run migrations (creates SQLite database by default)
+php artisan migrate --force
 
-* Git
-* GitHub
-* Composer
-* Node.js
-* npm
-* VS Code
-* XAMPP
+# 7. (Optional) Seed demo data
+php artisan db:seed
+
+# 8. Start development server
+php artisan serve
+# → Visit http://127.0.0.1:8000
+```
+
+### First Super Admin
+```bash
+php artisan app:create-super-admin
+# Follow prompts: name, email, password (min 12 chars)
+```
+
+---
+
+## ⚙️ Configuration
+
+### Environment Variables (`.env`)
+
+| Variable | Description | Default | Production |
+|----------|-------------|---------|------------|
+| `APP_NAME` | Application name | `Laravel` | Your org name |
+| `APP_ENV` | Environment | `local` | `production` |
+| `APP_DEBUG` | Debug mode | `true` | **`false`** |
+| `APP_URL` | Base URL | `http://localhost` | `https://yourdomain.com` |
+| `APP_KEY` | Encryption key | (generated) | Keep secure! |
+| `DB_CONNECTION` | Database driver | `sqlite` | `mysql` |
+| `DB_DATABASE` | Database path/name | `database/database.sqlite` | Your MySQL DB |
+| `SESSION_DRIVER` | Session storage | `database` | `database` or `redis` |
+| `SESSION_SECURE_COOKIE` | HTTPS-only cookies | `null` | **`true`** |
+| `SESSION_ENCRYPT` | Encrypt session data | `false` | **`true`** |
+| `SESSION_DOMAIN` | Cookie domain | `null` | `yourdomain.com` |
+| `MAIL_MAILER` | Mail driver | `log` | `smtp` / `mailgun` / etc. |
+
+> **⚠️ Production Checklist:** Set `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`, `SESSION_ENCRYPT=true`, use real DB credentials, and configure a proper mail driver.
 
 ---
 
 ## 📁 Project Structure
 
-```text
-it-asset-management/
-│
-├── app/
-│   ├── Http/
-│   ├── Models/
-│   ├── Services/
-│   └── ...
-│
-├── bootstrap/
-│
-├── config/
-│
-├── database/
-│   ├── migrations/
-│   ├── seeders/
-│   └── factories/
-│
-├── public/
-│
-├── resources/
-│   ├── css/
-│   ├── js/
-│   └── views/
-│
-├── routes/
-│
-├── storage/
-│
-├── tests/
-│
-├── artisan
-├── composer.json
-├── package.json
-├── vite.config.js
-└── README.md
+```
+app/
+├── Console/Commands/          # Artisan commands (CreateSuperAdmin)
+├── Http/
+│   ├── Controllers/           # All controllers (Auth, Asset, Transfer, Admin, etc.)
+│   ├── Middleware/            # EnsureApprovedAndActive, EnsureModuleAccess, EnsureSuperAdmin
+│   └── Requests/              # FormRequests for validation
+├── Models/                    # Eloquent models (User, Asset, Department, etc.)
+├── Services/                  # Business logic (AssetService, AssetTransferService, Import services)
+│   └── Imports/
+│       └── Parsers/           # ExcelAssetParser, DocxAssetParser
+├── Providers/                 # AppServiceProvider
+└── Http/Middleware/           # Custom middleware
+
+database/
+├── migrations/                # 23 migrations (users, assets, transfers, imports, etc.)
+├── seeders/                   # DatabaseSeeder, DepartmentSeeder, CategorySeeder
+└── factories/                 # UserFactory
+
+resources/
+├── views/
+│   ├── layouts/app.blade.php  # Main layout (sidebar, navbar, confirm modal)
+│   ├── auth/                  # Login, register, reset password
+│   ├── admin/                 # Super Admin panel
+│   ├── assets/                # Index, create, edit, show
+│   ├── transfers/             # Index, create, show
+│   ├── departments/           # Index, create, edit
+│   ├── categories/            # Index, create, edit
+│   ├── employees/             # Index, create, edit
+│   ├── imports/               # Index, show
+│   ├── operational-requests/  # Index, create
+│   └── dashboard/             # Dashboard
+├── css/app.css                # TailwindCSS entry
+├── js/app.js                  # Bootstrap + Alpine.js entry
+└── views/                     # Compiled Blade cache
+
+routes/
+├── web.php                    # All web routes (71 routes)
+└── console.php                # Artisan commands
+
+tests/
+├── Feature/                   # Feature tests
+└── Unit/                      # Unit tests
 ```
 
 ---
 
-# ⚙️ Installation & Setup
-
-## Requirements
-
-Before installing the project, make sure the following are installed:
-
-* PHP 8.x
-* Composer
-* MySQL
-* Node.js
-* npm
-* Git
-* XAMPP / Apache
-
----
-
-## 1. Clone the Repository
+## 🧪 Testing
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
+# Run all tests
+php artisan test
+
+# With coverage (requires Xdebug or PCOV)
+php artisan test --coverage
+
+# Code style check
+./vendor/bin/pint --test
+
+# Fix code style
+./vendor/bin/pint
 ```
 
-Enter the project directory:
-
-```bash
-cd it-asset-management
+### Current Test Status
 ```
+Tests:  2 passed (4 assertions)
+Duration: ~0.9s
+```
+> **Note:** Test coverage is minimal. Add feature tests for critical workflows (see `tests/Feature/ExampleTest.php`).
 
 ---
 
-## 2. Install PHP Dependencies
+## 📦 Deployment
 
+### Shared Hosting (InfinityFree, cPanel, etc.)
 ```bash
-composer install
+# 1. Set document root to /public
+# 2. Upload project (exclude: vendor/, node_modules/, .git/, .env, database/*.sqlite)
+# 3. On server:
+composer install --no-dev --optimize-autoloader
+
+# 4. Configure production .env (see Configuration)
+# 5. Run migrations
+php artisan migrate --force
+
+# 6. Cache for performance
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# 7. Ensure writable directories
+chmod -R 755 storage bootstrap/cache
 ```
 
----
+### VPS / Docker / Laravel Forge
+- Use `php-fpm` + Nginx
+- Configure queue worker: `php artisan queue:work`
+- Schedule: `* * * * * php artisan schedule:run`
+- Use Redis for sessions/cache/queues in production
 
-## 3. Install Frontend Dependencies
-
-```bash
-npm install
-```
-
----
-
-## 4. Create Environment File
-
-Copy the example environment file:
-
-### Windows
-
-```powershell
-copy .env.example .env
-```
-
-### macOS / Linux
-
-```bash
-cp .env.example .env
-```
-
----
-
-## 5. Generate Application Key
-
-```bash
-php artisan key:generate
-```
-
----
-
-## 6. Configure Database
-
-Create a MySQL database using phpMyAdmin or MySQL.
-
-Example:
-
-```text
-Database Name: it_asset_management
-```
-
-Update the `.env` file:
-
+### Required Production `.env` Changes
 ```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://yourdomain.com
+SESSION_SECURE_COOKIE=true
+SESSION_ENCRYPT=true
+SESSION_DOMAIN=yourdomain.com
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=it_asset_management
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-> Never commit your `.env` file to GitHub.
-
----
-
-## 7. Run Database Migrations
-
-```bash
-php artisan migrate
-```
-
-If seed data is available:
-
-```bash
-php artisan db:seed
-```
-
-Or:
-
-```bash
-php artisan migrate --seed
+DB_DATABASE=your_db
+DB_USERNAME=your_user
+DB_PASSWORD=your_secure_password
+MAIL_MAILER=smtp
+MAIL_HOST=your-smtp-host
+MAIL_PORT=587
+MAIL_USERNAME=your_user
+MAIL_PASSWORD=your_password
+MAIL_ENCRYPTION=tls
 ```
 
 ---
 
-## 8. Build Frontend Assets
+## 🔒 Security
 
-For development:
+### Reporting Vulnerabilities
+If you discover a security vulnerability, please email **security@yourdomain.com** instead of opening an issue.
 
-```bash
-npm run dev
-```
-
-For production:
-
-```bash
-npm run build
-```
-
----
-
-## 9. Start Laravel
-
-```bash
-php artisan serve
-```
-
-The application will normally be available at:
-
-```text
-http://127.0.0.1:8000
-```
+### Security Features Implemented
+- **Authentication**: bcrypt, rate limiting, account approval
+- **Authorization**: middleware chain (`auth` → `approved.session` → `module.access`/`super.admin`)
+- **Data Protection**: encrypted sessions, private file storage, secure headers
+- **Input Validation**: FormRequests on all endpoints
+- **Audit Trail**: AssetHistory on create/update/delete/transfer/import
+- **Dependency Scanning**: `composer audit` & `npm audit` in CI
 
 ---
 
-# 💻 Development Workflow
+## 🤝 Contributing
 
-This project is intended to be developed across multiple computers using Git and GitHub.
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Follow code style: `./vendor/bin/pint`
+4. Write tests for new functionality
+5. Ensure all tests pass: `php artisan test`
+6. Submit a Pull Request
 
-### First computer
-
-After making changes:
-
-```bash
-git status
-git add .
-git commit -m "Describe your changes"
-git push
-```
-
-### Second computer
-
-Before starting work:
-
-```bash
-git pull
-```
-
-After making changes:
-
-```bash
-git add .
-git commit -m "Describe your changes"
-git push
-```
-
-### Recommended workflow
-
-```text
-                ┌───────────────┐
-                │    GitHub     │
-                │  Repository   │
-                └───────┬───────┘
-                        │
-              ┌─────────┴─────────┐
-              │                   │
-              ▼                   ▼
-       ┌─────────────┐     ┌─────────────┐
-       │ Office PC   │     │ Personal PC │
-       │   XAMPP     │     │   XAMPP     │
-       └─────────────┘     └─────────────┘
-              │                   │
-              └─────── Git ───────┘
-```
+### Coding Standards
+- PSR-12 + Laravel Pint (run `./vendor/bin/pint` before committing)
+- Strict types (`declare(strict_types=1)`) in new files
+- Eloquent over raw queries
+- FormRequests for validation
+- Service classes for business logic
 
 ---
 
-# 🔐 Security
+## 📝 License
 
-Sensitive configuration files should never be committed to the repository.
-
-The following files/directories are intentionally ignored:
-
-```text
-.env
-/vendor
-/node_modules
-/public/build
-/storage/*.key
-```
-
-Make sure passwords, API keys, database credentials, and other secrets remain inside `.env`.
+This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
 
 ---
 
-# 🗄️ Database
+## 🙏 Acknowledgments
 
-The application uses a relational MySQL database.
-
-Database structure is maintained through Laravel migrations:
-
-```bash
-php artisan migrate
-```
-
-To create a new migration:
-
-```bash
-php artisan make:migration create_example_table
-```
-
-To rollback the latest migration:
-
-```bash
-php artisan migrate:rollback
-```
+- [Laravel](https://laravel.com) — The PHP framework for web artisans
+- [Bootstrap](https://getbootstrap.com) — Responsive CSS framework
+- [TailwindCSS](https://tailwindcss.com) — Utility-first CSS
+- [Vite](https://vitejs.dev) — Next-gen frontend tooling
+- [OpenSpout](https://openspout.org) — CSV/XLSX reading
+- [PhpOffice/PHPWord](https://github.com/PHPOffice/PHPWord) — DOCX parsing
 
 ---
 
-# 🧪 Testing
+## 📞 Support
 
-Run the application's test suite with:
-
-```bash
-php artisan test
-```
-
-Or:
-
-```bash
-vendor/bin/phpunit
-```
+- **Documentation**: This README + inline code comments
+- **Issues**: GitHub Issues for bugs/features
+- **Security**: Email security@yourdomain.com
 
 ---
 
-# 🔧 Useful Laravel Commands
-
-### Clear application cache
-
-```bash
-php artisan optimize:clear
-```
-
-### Check routes
-
-```bash
-php artisan route:list
-```
-
-### Start development server
-
-```bash
-php artisan serve
-```
-
-### Run migrations
-
-```bash
-php artisan migrate
-```
-
-### Create model
-
-```bash
-php artisan make:model ModelName
-```
-
-### Create controller
-
-```bash
-php artisan make:controller ControllerName
-```
-
-### Create migration
-
-```bash
-php artisan make:migration create_table_name_table
-```
-
----
-
-# 📌 Current Development Status
-
-| Module                 | Status            |
-| ---------------------- | ----------------- |
-| Laravel Application    | 🟢 Active         |
-| Database               | 🟢 Active         |
-| Asset Management       | 🟢 Active         |
-| Categories             | 🟢 Active         |
-| Locations              | 🟢 Active         |
-| Departments            | 🟢 Active         |
-| Asset Assignment       | 🟢 Active         |
-| Asset Verification     | 🟢 Active         |
-| Import System          | 🟡 In Development |
-| Reports                | 🟡 In Development |
-| Dashboard              | 🟡 In Development |
-| Authentication & Roles | 🟡 In Development |
-
-> Update this table as development progresses.
-
----
-
-# 🗺️ Future Improvements
-
-Planned improvements may include:
-
-* Advanced dashboard analytics
-* Role-based access control
-* User management
-* Asset QR codes
-* Barcode scanning
-* Asset transfer workflow
-* Asset return workflow
-* Maintenance management
-* Warranty tracking
-* Purchase records
-* Depreciation tracking
-* PDF reports
-* Excel exports
-* Audit logs
-* Notifications
-* Advanced search and filtering
-* Department-wise reports
-* Location-wise reports
-* Import/export improvements
-
----
-
-# 🤝 Development
-
-This project is maintained as a continuously evolving application.
-
-Development workflow:
-
-```text
-Feature Development
-        ↓
-Local Testing
-        ↓
-Git Commit
-        ↓
-GitHub Push
-        ↓
-Other Computer
-        ↓
-Git Pull
-        ↓
-Continue Development
-```
-
----
-
-# 📄 License
-
-This project is intended for organizational/internal use.
-
-The Laravel framework itself is open-source and licensed under the MIT License.
-
----
-
-## 👨‍💻 Project
-
-**IT Asset Management System**
-
-Built with:
-
-**Laravel + PHP + MySQL + Tailwind CSS + JavaScript**
-
----
-
-<p align="center">
-  <strong>IT Asset Management System</strong><br>
-  Digital asset tracking • Assignment • Verification • Management
-</p>
+> **Built with ❤️ using Laravel 12** — *A robust, secure, and maintainable asset management solution.*
