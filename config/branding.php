@@ -11,11 +11,11 @@ return [
     |
     */
 
-    'org_name' => env('APP_BRAND_ORG_NAME', 'CUH'),
+    'org_name' => env('APP_BRAND_ORG_NAME', 'IAT'),
 
     'product_name' => env('APP_BRAND_PRODUCT_NAME', 'Asset Management System'),
 
-    'short_name' => env('APP_BRAND_SHORT_NAME', 'CUH'),
+    'short_name' => env('APP_BRAND_SHORT_NAME', 'IAT'),
 
     'logo' => env('APP_BRAND_LOGO', null), // Path to logo file in public/storage or public/images
 
