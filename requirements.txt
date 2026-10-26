@@ -1,0 +1,322 @@
+================================================================================
+REQUIREMENTS.TXT - IT ASSET MANAGEMENT SYSTEM
+================================================================================
+
+This file documents ALL dependencies required to run the project on a new device.
+Run the ONE COMMAND at the bottom to install everything automatically.
+
+================================================================================
+SYSTEM REQUIREMENTS (PRE-INSTALL THESE MANUALLY)
+================================================================================
+
+These MUST be installed on the OS before running the install command:
+
+REQUIRED SOFTWARE:
+------------------
+| Component        | Minimum Version | Install Command / Link |
+|------------------|-----------------|------------------------|
+| PHP              | 8.5+ (ZTS)      | See platform-specific below |
+| Composer         | 2.x             | https://getcomposer.org/download/ |
+| Node.js          | 20+ (LTS)       | https://nodejs.org/ |
+| npm              | 10+             | Included with Node.js |
+| Git              | 2.x             | https://git-scm.com/ |
+| Database         | SQLite 3 / MySQL 8+ / MariaDB 10.6+ | See below |
+
+REQUIRED PHP EXTENSIONS (enable in php.ini):
+---------------------------------------------
+extension=openssl
+extension=mbstring
+extension=curl
+extension=fileinfo
+extension=pdo_mysql
+extension=pdo_sqlite
+extension=zip
+extension=gd
+extension=sqlite3
+extension=bcmath
+extension=ctype
+extension=dom
+extension=xml
+extension=xmlreader
+extension=xmlwriter
+extension=tokenizer
+extension=json
+extension=iconv
+
+PLATFORM-SPECIFIC PHP INSTALL:
+------------------------------
+Windows (XAMPP):
+  1. Download XAMPP PHP 8.5+: https://www.apachefriends.org/download.html
+  2. Install to C:\xampp
+  3. Edit C:\xampp\php\php.ini - uncomment all extensions above
+  4. Set extension_dir = "ext"
+  5. Add C:\xampp\php to Windows PATH
+
+macOS (Homebrew):
+  brew install php@8.5 composer node git mysql
+  brew link --force --overwrite php@8.5
+
+Linux Ubuntu/Debian:
+  sudo apt update && sudo apt install -y \
+    php8.5 php8.5-cli php8.5-common php8.5-mysql php8.5-sqlite3 \
+    php8.5-mbstring php8.5-xml php8.5-curl php8.5-zip php8.5-gd \
+    php8.5-bcmath php8.5-tokenizer php8.5-fileinfo \
+    composer nodejs npm git mysql-server
+
+================================================================================
+PHP DEPENDENCIES (COMPOSER) - FROM composer.json
+================================================================================
+
+PRODUCTION DEPENDENCIES (require):
+----------------------------------
+| Package                      | Version Constraint | Purpose |
+|------------------------------|-------------------|---------|
+| php                          | ^8.5              | PHP runtime |
+| laravel/framework            | ^12.0             | Laravel framework core |
+| laravel/tinker               | ^2.10             | REPL for debugging |
+| openspout/openspout          | ^4.26             | CSV/XLSX reading (imports) |
+| phpoffice/phpword            | ^1.1              | DOCX parsing (imports) |
+
+DEVELOPMENT DEPENDENCIES (require-dev):
+---------------------------------------
+| Package                      | Version Constraint | Purpose |
+|------------------------------|-------------------|---------|
+| fakerphp/faker               | ^1.24             | Fake data for testing/seeding |
+| laravel/pail                 | ^1.2              | Log viewer (CLI) |
+| laravel/pint                 | ^1.24             | Code style fixer (PSR-12) |
+| laravel/sail                 | ^1.41             | Docker development environment |
+| mockery/mockery              | ^1.6              | Mocking for tests |
+| nunomaduro/collision         | ^8.6              | Beautiful error pages |
+| phpunit/phpunit              | ^12.0             | Unit/feature testing |
+
+COMPOSER CONFIG:
+----------------
+- minimum-stability: stable
+- prefer-stable: true
+- platform.php: 8.5.12 (forces PHP 8.5.12 compatibility)
+- allow-plugins: pestphp/pest-plugin, php-http/discovery
+- optimize-autoloader: true
+
+================================================================================
+NODE.JS DEPENDENCIES (NPM) - FROM package.json
+================================================================================
+
+DEVELOPMENT DEPENDENCIES (devDependencies):
+-------------------------------------------
+| Package                      | Version Constraint | Purpose |
+|------------------------------|-------------------|---------|
+| @tailwindcss/vite            | ^4.0.0            | TailwindCSS Vite plugin |
+| axios                        | ^1.11.0           | HTTP client for JS |
+| concurrently                 | ^9.0.1            | Run multiple commands (dev script) |
+| laravel-vite-plugin          | ^2.0.0            | Laravel + Vite integration |
+| tailwindcss                  | ^4.0.0            | Utility-first CSS framework |
+| vite                         | ^7.0.7            | Build tool & dev server |
+
+BUILD SCRIPTS:
+--------------
+"build": "vite build"          # Production build (minified, hashed)
+"dev": "vite"                   # Development server with HMR
+
+================================================================================
+DATABASE OPTIONS
+================================================================================
+
+DEFAULT (DEVELOPMENT): SQLite
+------------------------------
+- File: database/database.sqlite
+- Zero configuration
+- Run: touch database/database.sqlite && php artisan migrate --force
+
+PRODUCTION: MySQL 8+ / MariaDB 10.6+
+-------------------------------------
+- Create database: CREATE DATABASE it_asset_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+- Create user: CREATE USER 'asset_user'@'%' IDENTIFIED BY 'strong_password';
+- Grant: GRANT ALL PRIVILEGES ON it_asset_management.* TO 'asset_user'@'%';
+- Update .env with DB credentials
+
+================================================================================
+================================================================================
+ONE-COMMAND INSTALL (RUN THIS ON NEW DEVICE)
+================================================================================
+
+PREREQUISITE: Ensure PHP, Composer, Node.js, Git are installed and in PATH.
+              Enable required PHP extensions in php.ini first (see above).
+
+COPY-PASTE THIS ENTIRE BLOCK INTO YOUR TERMINAL:
+================================================================================
+
+# ============================================================================
+# COMPLETE AUTOMATED SETUP - COPY & RUN THIS
+# ============================================================================
+
+set -e  # Exit on error
+
+echo "=========================================="
+echo "IT ASSET MANAGEMENT SYSTEM - AUTO SETUP"
+echo "=========================================="
+
+# 1. CLONE REPOSITORY
+if [ ! -d "IT-Asset-Management-System" ]; then
+    echo "[1/8] Cloning repository..."
+    git clone https://github.com/jatinkumarmajoka/IT-Asset-Management-System.git
+fi
+cd IT-Asset-Management-System
+
+# 2. VERIFY PREREQUISITES
+echo "[2/8] Verifying prerequisites..."
+php -v | grep -q "8.5" || { echo "ERROR: PHP 8.5+ required"; exit 1; }
+composer --version >/dev/null || { echo "ERROR: Composer not found"; exit 1; }
+node -v | grep -q "v2[0-9]" || { echo "ERROR: Node.js 20+ required"; exit 1; }
+npm -v >/dev/null || { echo "ERROR: npm not found"; exit 1; }
+git --version >/dev/null || { echo "ERROR: Git not found"; exit 1; }
+echo "    All prerequisites OK"
+
+# 3. INSTALL PHP DEPENDENCIES
+echo "[3/8] Installing PHP dependencies (Composer)..."
+composer install --no-interaction --prefer-dist --optimize-autoloader
+
+# 4. INSTALL NODE DEPENDENCIES
+echo "[4/8] Installing Node dependencies (npm)..."
+npm ci
+
+# 5. CONFIGURE ENVIRONMENT
+echo "[5/8] Configuring environment..."
+if [ ! -f .env ]; then
+    cp .env.example .env
+    php artisan key:generate --no-interaction
+    echo "    Created .env and generated APP_KEY"
+else
+    echo "    .env already exists"
+fi
+
+# 6. DATABASE SETUP (SQLite for local dev)
+echo "[6/8] Setting up database..."
+if [ ! -f database/database.sqlite ]; then
+    touch database/database.sqlite
+    echo "    Created database/database.sqlite"
+fi
+php artisan migrate --force --no-interaction
+
+# 7. (OPTIONAL) SEED DEMO DATA
+echo "[7/8] Seeding demo data (optional)..."
+php artisan db:seed --force --no-interaction 2>/dev/null || echo "    Seeder skipped or failed (non-critical)"
+
+# 8. BUILD FRONTEND ASSETS
+echo "[8/8] Building frontend assets..."
+npm run build
+
+echo ""
+echo "=========================================="
+echo "SETUP COMPLETE!"
+echo "=========================================="
+echo ""
+echo "Next steps:"
+echo "  1. Create Super Admin:  php artisan app:create-super-admin"
+echo "  2. Start dev server:    php artisan serve"
+echo "  3. Open browser:        http://127.0.0.1:8000"
+echo ""
+echo "For production deployment, see SETUP.txt or SETUP.md"
+echo "=========================================="
+
+# ============================================================================
+# END OF ONE-COMMAND SETUP
+# ============================================================================
+
+================================================================================
+ALTERNATIVE: STEP-BY-STEP COMMANDS
+================================================================================
+
+If you prefer to run each step manually:
+
+# 1. Clone
+git clone https://github.com/jatinkumarmajoka/IT-Asset-Management-System.git
+cd IT-Asset-Management-System
+
+# 2. Install PHP deps
+composer install
+
+# 3. Install Node deps
+npm ci
+
+# 4. Setup env
+cp .env.example .env
+php artisan key:generate
+
+# 5. Database (SQLite)
+touch database/database.sqlite
+php artisan migrate --force
+
+# 6. Seed (optional)
+php artisan db:seed
+
+# 7. Build assets
+npm run build
+
+# 8. Create admin
+php artisan app:create-super-admin
+
+# 9. Run server
+php artisan serve
+
+================================================================================
+VERIFICATION COMMANDS (RUN AFTER INSTALL)
+================================================================================
+
+# All should pass:
+php artisan test                    # 2 tests pass
+./vendor/bin/pint --test            # Code style OK
+composer audit                      # No security issues
+npm audit                           # No vulnerabilities
+php artisan migrate:status          # All migrations "Ran"
+php artisan --version               # Laravel 12.x
+
+================================================================================
+PRODUCTION DEPLOY COMMANDS
+================================================================================
+
+# On production server (after cloning & configuring .env for production):
+composer install --no-dev --optimize-autoloader
+npm run build
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+chmod -R 755 storage bootstrap/cache
+
+# Queue worker (systemd/supervisor):
+php artisan queue:work --daemon
+
+# Scheduler (cron):
+* * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
+
+================================================================================
+TROUBLESHOOTING QUICK FIXES
+================================================================================
+
+| Error                          | Fix Command |
+|--------------------------------|-------------|
+| could not find driver (PDO)    | Enable pdo_mysql/pdo_sqlite in php.ini, restart PHP |
+| No application encryption key  | php artisan key:generate |
+| Permission denied (storage)    | chmod -R 755 storage bootstrap/cache |
+| Vite manifest not found        | npm run build |
+| npm ERR! code ENOLOCK          | npm i --package-lock-only && npm ci |
+| Composer platform req failed   | composer install --ignore-platform-req=ext-gd |
+
+================================================================================
+FILES IN THIS REPO FOR REFERENCE
+================================================================================
+
+| File              | Purpose |
+|-------------------|---------|
+| composer.json     | PHP dependencies (source of truth) |
+| composer.lock     | Locked PHP versions |
+| package.json      | Node dependencies (source of truth) |
+| package-lock.json | Locked Node versions |
+| .env.example      | Environment template |
+| SETUP.txt         | This file - complete guide |
+| SETUP.md          | Markdown version of guide |
+| README.md         | Project overview |
+
+================================================================================
+LAST UPDATED: October 2026 | Laravel 12.x | PHP 8.5+
+================================================================================
