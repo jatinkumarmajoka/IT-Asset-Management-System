@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Asset;
 use App\Models\AssetDocument;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
@@ -24,7 +25,7 @@ class AssetsExport implements FromCollection, ShouldAutoSize, WithColumnWidths, 
         $this->filters = $filters;
     }
 
-    public function collection()
+    public function collection(): Collection
     {
         $query = Asset::query()->with([
             'department',
@@ -202,7 +203,7 @@ class AssetsExport implements FromCollection, ShouldAutoSize, WithColumnWidths, 
         ];
     }
 
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet): ?array
     {
         return [
             // Header row
