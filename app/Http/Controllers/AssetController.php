@@ -463,10 +463,6 @@ class AssetController extends Controller
                                 $this->bulkAssignEmployee($asset, $request, $user);
                                 break;
 
-                            case 'export_csv':
-                                // Export is handled separately via GET route
-                                break;
-
                             default:
                                 throw new \InvalidArgumentException("Unknown action: {$action}");
                         }

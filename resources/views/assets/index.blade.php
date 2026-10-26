@@ -866,10 +866,10 @@
         });
 
         applyBtn.addEventListener('click', () => {
-            const action = prompt('Select action:\n1. status_change - Change status\n2. delete - Delete assets\n3. assign_employee - Assign employee\n4. export_csv - Export to CSV\n\nEnter action name:');
+            const action = prompt('Select action:\n1. status_change - Change status\n2. delete - Delete assets\n3. assign_employee - Assign employee\n\nEnter action name:');
             if (!action) return;
 
-            const validActions = ['status_change', 'delete', 'assign_employee', 'export_csv'];
+            const validActions = ['status_change', 'delete', 'assign_employee'];
             if (!validActions.includes(action)) {
                 alert('Invalid action: ' + action);
                 return;
@@ -892,18 +892,6 @@
 
             bulkActionInput.value = action;
             showSelectsForAction(action);
-
-            if (action === 'export_csv') {
-                const params = new URLSearchParams();
-                const form = document.querySelector('form[method="GET"]');
-                if (form) {
-                    new FormData(form).forEach((v, k) => params.append(k, v));
-                }
-                params.append('export', 'csv');
-                params.append('asset_ids', bulkAssetIdsInput.value);
-                window.location.href = '{{ route("assets.export") }}?' + params.toString();
-                return;
-            }
 
             document.getElementById('bulkActionForm').submit();
         });

@@ -34,7 +34,6 @@ class BulkAssetActionRequest extends FormRequest
                 Rule::in([
                     'status_change',
                     'delete',
-                    'export_csv',
                     'assign_employee',
                 ]),
             ],
