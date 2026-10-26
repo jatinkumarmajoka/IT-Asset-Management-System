@@ -218,7 +218,7 @@
         <form method="POST" action="{{ route('assets.bulk-action') }}" id="bulkActionForm">
             @csrf
             <input type="hidden" name="action" id="bulkActionInput">
-            <input type="hidden" name="asset_ids[]" id="bulkAssetIdsInput" multiple>
+            <div id="assetIdsContainer"></div>
 
             <div class="row g-2 align-items-center">
                 <div class="col-auto">
@@ -226,7 +226,7 @@
                 </div>
 
                 <div class="col-auto">
-                    <select name="bulk_action_params[asset_status]" id="bulkStatusSelect" class="form-select form-select-sm d-none" style="width: auto;">
+                    <select name="asset_status" id="bulkStatusSelect" class="form-select form-select-sm d-none" style="width: auto;">
                         <option value="">Select Status</option>
                         <option value="Active">Active</option>
                         <option value="Assigned">Assigned</option>
@@ -239,14 +239,14 @@
                         <option value="Retired">Retired</option>
                     </select>
 
-                    <select name="bulk_action_params[present_occupant_id]" id="bulkEmployeeSelect" class="form-select form-select-sm d-none" style="width: auto;">
+                    <select name="present_occupant_id" id="bulkEmployeeSelect" class="form-select form-select-sm d-none" style="width: auto;">
                         <option value="">Select Employee</option>
                         @foreach($employees as $emp)
                             <option value="{{ $emp->id }}">{{ $emp->name }} ({{ $emp->employee_code }}) - {{ $emp->department?->name }}</option>
                         @endforeach
                     </select>
 
-                    <select name="bulk_action_params[present_sub_department_id]" id="bulkSubDeptSelect" class="form-select form-select-sm d-none" style="width: auto;">
+                    <select name="present_sub_department_id" id="bulkSubDeptSelect" class="form-select form-select-sm d-none" style="width: auto;">
                         <option value="">Select Sub-Department (optional)</option>
                         @foreach($subDepartments as $sd)
                             <option value="{{ $sd->id }}">{{ $sd->name }} ({{ $sd->department?->name }})</option>
@@ -791,7 +791,7 @@
         const applyBtn = document.getElementById('applyBulkAction');
         const clearBtn = document.getElementById('clearBulkSelection');
         const bulkActionInput = document.getElementById('bulkActionInput');
-        const bulkAssetIdsInput = document.getElementById('bulkAssetIdsInput');
+        const assetIdsContainer = document.getElementById('assetIdsContainer');
         const bulkStatusSelect = document.getElementById('bulkStatusSelect');
         const bulkEmployeeSelect = document.getElementById('bulkEmployeeSelect');
         const bulkSubDeptSelect = document.getElementById('bulkSubDeptSelect');
@@ -821,8 +821,15 @@
 
             selectedCount.textContent = count;
 
-            const ids = Array.from(checked).map(cb => cb.value);
-            bulkAssetIdsInput.value = ids.join(',');
+            // Build hidden inputs for asset_ids[]
+            assetIdsContainer.innerHTML = '';
+            checked.forEach(cb => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'asset_ids[]';
+                input.value = cb.value;
+                assetIdsContainer.appendChild(input);
+            });
 
             selectAll.checked = count > 0 && count === checkboxes.length;
             selectAll.indeterminate = count > 0 && count < checkboxes.length;

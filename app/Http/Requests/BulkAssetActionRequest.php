@@ -13,7 +13,16 @@ class BulkAssetActionRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && ($user->isSuperAdmin() || $user->canManageModule('assets'));
+        if (! $user || ! $user->canManageModule('assets')) {
+            return false;
+        }
+
+        // For assign_employee action, also require employees module permission
+        if ($this->input('action') === 'assign_employee' && ! $user->canManageModule('employees')) {
+            return false;
+        }
+
+        return true;
     }
 
     public function rules(): array
@@ -65,7 +74,9 @@ class BulkAssetActionRequest extends FormRequest
                 'required_if:action,assign_employee',
                 'nullable',
                 'integer',
-                'exists:employees,id',
+                Rule::exists('employees', 'id')->where(function ($query) {
+                    $query->where('status', 'active');
+                }),
             ],
 
             'present_sub_department_id' => [
