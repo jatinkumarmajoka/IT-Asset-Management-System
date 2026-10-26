@@ -175,6 +175,15 @@ Route::middleware(['auth', 'approved.session'])->group(function () {
         Route::post('/filter-presets', [AssetController::class, 'storeFilterPreset'])
             ->name('filter-presets.store');
 
+        Route::get('/assets/export', [AssetController::class, 'export'])
+            ->name('assets.export');
+
+        Route::get('/assets/template', [AssetController::class, 'downloadTemplate'])
+            ->name('assets.template');
+
+        Route::post('/assets/import', [AssetController::class, 'import'])
+            ->name('assets.import');
+
         Route::post('/assets/{asset}/documents/image/replace', [
             AssetDocumentController::class,
             'replaceImage',

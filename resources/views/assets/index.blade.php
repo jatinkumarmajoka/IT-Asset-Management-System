@@ -201,15 +201,47 @@
 
     </div>
 
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
         <a
             href="{{ route('assets.create') }}"
             class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i>
             Add Asset
         </a>
-    </div>
 
+        <a
+            href="{{ route('assets.export') }}"
+            class="btn btn-success">
+            <i class="bi bi-file-earmark-excel me-1"></i>
+            Export Excel
+        </a>
+
+        <a
+            href="{{ route('assets.template') }}"
+            class="btn btn-outline-info">
+            <i class="bi bi-download me-1"></i>
+            Template
+        </a>
+
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-upload me-1"></i> Import
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <form method="POST" action="{{ route('assets.import') }}" enctype="multipart/form-data" class="p-3" style="width: 300px;">
+                        @csrf
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Select Excel/CSV File</label>
+                            <input type="file" name="file" class="form-control form-control-sm" accept=".xlsx,.xls,.csv" required>
+                            <div class="form-text">Max 20MB. Use the template for correct format.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Import</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
 </div>
 
 <!-- Bulk Action Bar (hidden by default, shown when checkboxes selected) -->

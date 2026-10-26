@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BulkAssetActionRequest;
 use App\Http\Requests\StoreAssetRequest;
 use App\Http\Requests\UpdateAssetRequest;
+use App\Imports\AssetsImport;
 use App\Models\Asset;
 use App\Models\AssetDocument;
 use App\Models\Category;
@@ -16,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AssetController extends Controller
 {
@@ -703,5 +705,72 @@ class AssetController extends Controller
             'success' => true,
             'preset' => $preset,
         ]);
+    }
+
+    /**
+     * Export assets to Excel.
+     */
+    public function export(Request $request)
+    {
+        $filters = $request->only([
+            'search', 'department_id', 'category_id', 'asset_status',
+            'present_sub_department_id', 'condition', 'assigned_only',
+            'unassigned_only', 'has_image', 'has_bill', 'verified',
+            'unverified', 'date_from', 'date_to', 'qty_min', 'qty_max',
+            'verified_qty_min', 'verified_qty_max', 'employee_id',
+        ]);
+
+        $export = new AssetsExport($filters);
+        $filename = 'assets-export-'.now()->format('Y-m-d-His').'.xlsx';
+
+        return Excel::download($export, $filename);
+    }
+
+    /**
+     * Download Excel template for asset import.
+     */
+    public function downloadTemplate()
+    {
+        $export = new AssetsTemplateExport;
+        $filename = 'assets-import-template-'.now()->format('Y-m-d').'.xlsx';
+
+        return Excel::download($export, $filename);
+    }
+
+    /**
+     * Import assets from Excel file.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:20480'],
+        ]);
+
+        $import = new AssetsImport;
+
+        try {
+            Excel::import($import, $request->file('file'));
+
+            $failures = $import->failures();
+            $importedCount = $import->getRowCount() - count($failures);
+
+            if (empty($failures)) {
+                return redirect()
+                    ->route('assets.index')
+                    ->with('success', "Successfully imported {$importedCount} assets.");
+            }
+
+            return redirect()
+                ->route('assets.index')
+                ->with('warning', "Imported {$importedCount} assets. {$failures->count()} rows failed.")
+                ->with('import_failures', $failures);
+
+        } catch (\Throwable $e) {
+            \Log::error('Asset import failed', ['error' => $e->getMessage()]);
+
+            return back()->withErrors([
+                'file' => 'Import failed: '.$e->getMessage(),
+            ]);
+        }
     }
 }
