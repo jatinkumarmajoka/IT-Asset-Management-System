@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BulkAssetActionRequest;
 use App\Http\Requests\StoreAssetRequest;
 use App\Http\Requests\UpdateAssetRequest;
 use App\Models\Asset;
@@ -12,6 +13,7 @@ use App\Models\Employee;
 use App\Models\SubDepartment;
 use App\Services\AssetService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -94,10 +96,22 @@ class AssetController extends Controller
             ->orderBy('name')
             ->get();
 
+        $employees = Employee::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+        $subDepartments = SubDepartment::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
         return view('assets.index', compact(
             'assets',
             'departments',
-            'categories'
+            'categories',
+            'employees',
+            'subDepartments'
         ));
     }
 
@@ -399,5 +413,189 @@ class AssetController extends Controller
         return redirect()
             ->route('assets.index')
             ->with('success', 'Asset deleted successfully.');
+    }
+
+    /**
+     * Perform bulk actions on selected assets.
+     */
+    public function bulkAction(BulkAssetActionRequest $request)
+    {
+        $action = $request->input('action');
+        $assetIds = $request->input('asset_ids');
+        $user = $request->user();
+
+        $assets = Asset::whereIn('id', $assetIds)
+            ->with(['department', 'occupant'])
+            ->get();
+
+        if ($assets->count() !== count($assetIds)) {
+            return back()->withErrors([
+                'asset_ids' => 'One or more selected assets could not be found.',
+            ]);
+        }
+
+        $processed = 0;
+        $failed = 0;
+        $errors = [];
+
+        try {
+            DB::transaction(function () use (
+                $action,
+                $assets,
+                $request,
+                $user,
+                &$processed,
+                &$failed,
+                &$errors
+            ) {
+                foreach ($assets as $asset) {
+                    try {
+                        switch ($action) {
+                            case 'status_change':
+                                $this->bulkStatusChange($asset, $request, $user);
+                                break;
+
+                            case 'delete':
+                                $this->bulkDelete($asset, $user);
+                                break;
+
+                            case 'assign_employee':
+                                $this->bulkAssignEmployee($asset, $request, $user);
+                                break;
+
+                            case 'export_csv':
+                                // Export is handled separately via GET route
+                                break;
+
+                            default:
+                                throw new \InvalidArgumentException("Unknown action: {$action}");
+                        }
+                        $processed++;
+                    } catch (\Throwable $e) {
+                        $failed++;
+                        $errors[] = "Asset {$asset->asset_code}: {$e->getMessage()}";
+                        \Log::error('Bulk action failed', [
+                            'asset_id' => $asset->id,
+                            'asset_code' => $asset->asset_code,
+                            'action' => $action,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+            });
+        } catch (\Throwable $e) {
+            return back()->withErrors([
+                'bulk_action' => 'Bulk action failed: '.$e->getMessage(),
+            ]);
+        }
+
+        // Build response message
+        $actionLabels = [
+            'status_change' => 'Status updated',
+            'delete' => 'Deleted',
+            'assign_employee' => 'Employee assigned',
+        ];
+
+        $label = $actionLabels[$action] ?? 'Processed';
+
+        if ($failed === 0) {
+            return redirect()
+                ->route('assets.index')
+                ->with('success', "{$label} {$processed} asset(s) successfully.");
+        }
+
+        $message = "{$label} {$processed} asset(s). {$failed} failed.";
+        if (! empty($errors)) {
+            $message .= ' Errors: '.implode('; ', array_slice($errors, 0, 3));
+            if (count($errors) > 3) {
+                $message .= ' (and '.(count($errors) - 3).' more)';
+            }
+        }
+
+        return redirect()
+            ->route('assets.index')
+            ->with('warning', $message);
+    }
+
+    /**
+     * Bulk status change.
+     */
+    private function bulkStatusChange(Asset $asset, BulkAssetActionRequest $request, $user): void
+    {
+        $newStatus = $request->input('asset_status');
+
+        if ($asset->asset_status === $newStatus) {
+            return; // No change needed
+        }
+
+        $oldStatus = $asset->asset_status;
+
+        $asset->update([
+            'asset_status' => $newStatus,
+            'updated_by' => $user->id,
+        ]);
+
+        // Create history record
+        $asset->history()->create([
+            'action' => 'status_changed',
+            'old_value' => json_encode(['asset_status' => $oldStatus]),
+            'new_value' => json_encode(['asset_status' => $newStatus]),
+            'performed_by' => $user->id,
+            'ip_address' => request()->ip(),
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Bulk delete (soft delete).
+     */
+    private function bulkDelete(Asset $asset, $user): void
+    {
+        $asset->history()->create([
+            'action' => 'deleted',
+            'old_value' => json_encode($asset->toArray()),
+            'performed_by' => $user->id,
+            'ip_address' => request()->ip(),
+            'created_at' => now(),
+        ]);
+
+        $asset->delete();
+    }
+
+    /**
+     * Bulk assign employee.
+     */
+    private function bulkAssignEmployee(Asset $asset, BulkAssetActionRequest $request, $user): void
+    {
+        $employeeId = $request->input('present_occupant_id');
+        $subDeptId = $request->input('present_sub_department_id');
+
+        $employee = $employeeId ? Employee::find($employeeId) : null;
+        $subDept = $subDeptId ? SubDepartment::find($subDeptId) : null;
+
+        $asset->update([
+            'present_occupant_id' => $employeeId,
+            'present_occupant_name' => $employee?->name,
+            'present_sub_department_id' => $subDeptId,
+            'updated_by' => $user->id,
+        ]);
+
+        // Create history record
+        $asset->history()->create([
+            'action' => 'occupant_changed',
+            'old_value' => json_encode([
+                'present_occupant_id' => $asset->getOriginal('present_occupant_id'),
+                'present_occupant_name' => $asset->getOriginal('present_occupant_name'),
+                'present_sub_department_id' => $asset->getOriginal('present_sub_department_id'),
+            ]),
+            'new_value' => json_encode([
+                'present_occupant_id' => $employeeId,
+                'present_occupant_name' => $employee?->name,
+                'present_sub_department_id' => $subDeptId,
+            ]),
+            'performed_by' => $user->id,
+            'ip_address' => request()->ip(),
+            'created_at' => now(),
+        ]);
     }
 }

@@ -201,18 +201,70 @@
 
     </div>
 
-    <a
+    <div class="d-flex gap-2">
+        <a
+            href="{{ route('assets.create') }}"
+            class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>
+            Add Asset
+        </a>
+    </div>
 
-        href="{{ route('assets.create') }}"
+</div>
 
-        class="btn btn-primary">
+<!-- Bulk Action Bar (hidden by default, shown when checkboxes selected) -->
+<div id="bulkActionBar" class="card shadow-sm table-card mb-3 d-none">
+    <div class="card-body py-2">
+        <form method="POST" action="{{ route('assets.bulk-action') }}" id="bulkActionForm">
+            @csrf
+            <input type="hidden" name="action" id="bulkActionInput">
+            <input type="hidden" name="asset_ids[]" id="bulkAssetIdsInput" multiple>
 
-        <i class="bi bi-plus-lg me-1"></i>
+            <div class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <span class="fw-semibold" id="selectedCount">0</span> asset(s) selected
+                </div>
 
-        Add Asset
+                <div class="col-auto">
+                    <select name="bulk_action_params[asset_status]" id="bulkStatusSelect" class="form-select form-select-sm d-none" style="width: auto;">
+                        <option value="">Select Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Assigned">Assigned</option>
+                        <option value="Unassigned">Unassigned</option>
+                        <option value="Missing">Missing</option>
+                        <option value="Damaged">Damaged</option>
+                        <option value="Disposed">Disposed</option>
+                        <option value="Return to Store">Return to Store</option>
+                        <option value="Under Repair">Under Repair</option>
+                        <option value="Retired">Retired</option>
+                    </select>
 
-    </a>
+                    <select name="bulk_action_params[present_occupant_id]" id="bulkEmployeeSelect" class="form-select form-select-sm d-none" style="width: auto;">
+                        <option value="">Select Employee</option>
+                        @foreach($employees as $emp)
+                            <option value="{{ $emp->id }}">{{ $emp->name }} ({{ $emp->employee_code }}) - {{ $emp->department?->name }}</option>
+                        @endforeach
+                    </select>
 
+                    <select name="bulk_action_params[present_sub_department_id]" id="bulkSubDeptSelect" class="form-select form-select-sm d-none" style="width: auto;">
+                        <option value="">Select Sub-Department (optional)</option>
+                        @foreach($subDepartments as $sd)
+                            <option value="{{ $sd->id }}">{{ $sd->name }} ({{ $sd->department?->name }})</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-auto">
+                    <button type="button" class="btn btn-primary btn-sm" id="applyBulkAction" disabled>
+                        <i class="bi bi-check-lg me-1"></i> Apply
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="clearBulkSelection">
+                        <i class="bi bi-x-lg me-1"></i> Clear
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 <div class="card shadow-sm table-card">
@@ -416,6 +468,10 @@
 
                     <tr>
 
+                        <th style="width: 50px; text-align: center;">
+                            <input type="checkbox" id="selectAllAssets" class="form-check-input" title="Select all on this page">
+                        </th>
+
                         <th>S.No.</th>
 
                         <th>
@@ -478,7 +534,12 @@
 
                     @forelse($assets as $asset)
 
-                    <tr>
+                    <tr data-asset-id="{{ $asset->id }}">
+
+                        {{-- Checkbox --}}
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check-input asset-checkbox" value="{{ $asset->id }}" data-asset-code="{{ $asset->asset_code }}">
+                        </td>
 
                         {{-- S.No. --}}
 
@@ -721,10 +782,136 @@
         window.addEventListener('resize', updateWidth);
         if (window.ResizeObserver) new ResizeObserver(updateWidth).observe(table);
     }
+
+    function setupBulkActions() {
+        const selectAll = document.getElementById('selectAllAssets');
+        const checkboxes = document.querySelectorAll('.asset-checkbox');
+        const bulkActionBar = document.getElementById('bulkActionBar');
+        const selectedCount = document.getElementById('selectedCount');
+        const applyBtn = document.getElementById('applyBulkAction');
+        const clearBtn = document.getElementById('clearBulkSelection');
+        const bulkActionInput = document.getElementById('bulkActionInput');
+        const bulkAssetIdsInput = document.getElementById('bulkAssetIdsInput');
+        const bulkStatusSelect = document.getElementById('bulkStatusSelect');
+        const bulkEmployeeSelect = document.getElementById('bulkEmployeeSelect');
+        const bulkSubDeptSelect = document.getElementById('bulkSubDeptSelect');
+
+        if (!selectAll || !bulkActionBar) return;
+
+        const actionSelects = {
+            status_change: [bulkStatusSelect],
+            assign_employee: [bulkEmployeeSelect, bulkSubDeptSelect],
+            delete: [],
+            export_csv: [],
+        };
+
+        function updateBulkUI() {
+            const checked = document.querySelectorAll('.asset-checkbox:checked');
+            const count = checked.length;
+
+            if (count > 0) {
+                bulkActionBar.classList.remove('d-none');
+                bulkActionBar.classList.add('d-block');
+                applyBtn.disabled = false;
+            } else {
+                bulkActionBar.classList.add('d-none');
+                bulkActionBar.classList.remove('d-block');
+                applyBtn.disabled = true;
+            }
+
+            selectedCount.textContent = count;
+
+            const ids = Array.from(checked).map(cb => cb.value);
+            bulkAssetIdsInput.value = ids.join(',');
+
+            selectAll.checked = count > 0 && count === checkboxes.length;
+            selectAll.indeterminate = count > 0 && count < checkboxes.length;
+        }
+
+        function showSelectsForAction(action) {
+            Object.values(actionSelects).flat().forEach(s => {
+                if (s) s.classList.add('d-none');
+            });
+            if (actionSelects[action]) {
+                actionSelects[action].forEach(s => {
+                    if (s) s.classList.remove('d-none');
+                });
+            }
+        }
+
+        selectAll.addEventListener('change', () => {
+            checkboxes.forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+            updateBulkUI();
+        });
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                updateBulkUI();
+            });
+        });
+
+        clearBtn.addEventListener('click', () => {
+            selectAll.checked = false;
+            checkboxes.forEach(cb => cb.checked = false);
+            updateBulkUI();
+        });
+
+        applyBtn.addEventListener('click', () => {
+            const action = prompt('Select action:\n1. status_change - Change status\n2. delete - Delete assets\n3. assign_employee - Assign employee\n4. export_csv - Export to CSV\n\nEnter action name:');
+            if (!action) return;
+
+            const validActions = ['status_change', 'delete', 'assign_employee', 'export_csv'];
+            if (!validActions.includes(action)) {
+                alert('Invalid action: ' + action);
+                return;
+            }
+
+            if (action === 'status_change') {
+                const status = bulkStatusSelect.value;
+                if (!status) {
+                    alert('Please select a status');
+                    return;
+                }
+            }
+            if (action === 'assign_employee') {
+                const emp = bulkEmployeeSelect.value;
+                if (!emp) {
+                    alert('Please select an employee');
+                    return;
+                }
+            }
+
+            bulkActionInput.value = action;
+            showSelectsForAction(action);
+
+            if (action === 'export_csv') {
+                const params = new URLSearchParams();
+                const form = document.querySelector('form[method="GET"]');
+                if (form) {
+                    new FormData(form).forEach((v, k) => params.append(k, v));
+                }
+                params.append('export', 'csv');
+                params.append('asset_ids', bulkAssetIdsInput.value);
+                window.location.href = '{{ route("assets.export") }}?' + params.toString();
+                return;
+            }
+
+            document.getElementById('bulkActionForm').submit();
+        });
+
+        updateBulkUI();
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setupAssetsTopScrollbar);
+        document.addEventListener('DOMContentLoaded', () => {
+            setupAssetsTopScrollbar();
+            setupBulkActions();
+        });
     } else {
         setupAssetsTopScrollbar();
+        setupBulkActions();
     }
 })();
 </script>

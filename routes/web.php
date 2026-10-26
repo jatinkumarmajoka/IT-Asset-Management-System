@@ -169,6 +169,9 @@ Route::middleware(['auth', 'approved.session'])->group(function () {
     Route::middleware('module.access:assets')->group(function () {
         Route::resource('assets', AssetController::class);
 
+        Route::post('/assets/bulk-action', [AssetController::class, 'bulkAction'])
+            ->name('assets.bulk-action');
+
         Route::post('/assets/{asset}/documents/image/replace', [
             AssetDocumentController::class,
             'replaceImage',
