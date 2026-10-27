@@ -54,46 +54,6 @@ class AuthController extends Controller
         return redirect()->intended(route('dashboard'));
     }
 
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
-
-    public function register(Request $request)
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
-            'password' => ['required', 'string', 'min:12', 'confirmed'],
-        ]);
-
-        $name = trim($data['name']);
-        $email = strtolower(trim($data['email']));
-
-        if (User::whereRaw('LOWER(email) = ?', [$email])->exists()) {
-            throw ValidationException::withMessages([
-                'email' => 'This email address is already registered.',
-            ]);
-        }
-
-        User::forceCreate([
-            'name' => $name,
-            'email' => $email,
-            'password' => Hash::make($data['password']),
-            'role' => 'staff',
-            'account_status' => 'pending',
-            'permissions' => [],
-            'last_activity_at' => null,
-        ]);
-
-        return redirect()
-            ->route('login')
-            ->with(
-                'status',
-                'Registration submitted successfully. Please wait for Super Admin approval.'
-            );
-    }
-
     public function logout(Request $request)
     {
         Auth::guard('web')->logout();

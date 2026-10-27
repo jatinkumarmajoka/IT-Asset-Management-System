@@ -324,6 +324,7 @@
 
 <body>
 
+    @auth
     <div class="d-flex w-100 app-shell">
 
         {{-- =========================================================
@@ -517,8 +518,20 @@
 
             </nav>
 
-            {{-- Page Content --}}
-            <div class="app-content p-4">
+        @endauth
+
+        {{-- Guest Layout (Login/Register pages) --}}
+        @guest
+        <div class="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+            <main class="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+                @yield('content')
+            </main>
+        </div>
+        @endguest
+
+        {{-- Page Content --}}
+        @auth
+        <div class="app-content p-4">
 
                 {{-- Success --}}
                 @if (session('success'))
@@ -580,6 +593,7 @@
         </main>
 
     </div>
+    @endauth
 
     {{-- Bootstrap JavaScript --}}
     <script
