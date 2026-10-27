@@ -151,7 +151,7 @@
         scrollbar-color: #64748b #e2e8f0;
         -webkit-overflow-scrolling: touch;
     }
-    .assets-top-scroll-inner { height: 1px; }
+    .assets-top-scroll-inner { height: 18px; min-width: 1120px; }
     .assets-top-scroll::-webkit-scrollbar { height: 14px; }
     .assets-top-scroll::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 8px; }
     .assets-top-scroll::-webkit-scrollbar-thumb { background: #64748b; border-radius: 8px; border: 2px solid #e2e8f0; }
@@ -845,7 +845,8 @@
         if (!top || !inner || !tableWrap || !table) return;
 
         const updateWidth = () => {
-            inner.style.width = Math.max(table.scrollWidth, tableWrap.clientWidth) + 'px';
+            const scrollWidth = Math.max(table.scrollWidth, tableWrap.clientWidth);
+            inner.style.width = scrollWidth + 'px';
             top.scrollLeft = tableWrap.scrollLeft;
         };
         let syncing = false;
@@ -861,9 +862,15 @@
             top.scrollLeft = tableWrap.scrollLeft;
             syncing = false;
         }, { passive: true });
+        // Initial setup
+        inner.style.minWidth = '1120px';
         updateWidth();
         window.addEventListener('resize', updateWidth);
         if (window.ResizeObserver) new ResizeObserver(updateWidth).observe(table);
+        // Also sync on table content changes
+        if (window.MutationObserver) {
+            new MutationObserver(updateWidth).observe(table, { childList: true, subtree: true });
+        }
     }
 
     function setupBulkActions() {
