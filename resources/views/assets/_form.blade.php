@@ -490,16 +490,33 @@ $selectedDepartmentId = old('department_id', $asset->department_id ?? '');
                                             <h5 class="mb-1"><i class="bi bi-image me-2"></i>Asset Image</h5>
                                             <div class="text-muted">JPG, JPEG, PNG or WEBP</div>
                                         </div>
-                                        <span class="badge bg-secondary">Not Uploaded</span>
+                                        <span class="badge bg-secondary" id="asset_image_status">Not Selected</span>
                                     </div>
-                                    <label for="asset_image" class="form-label fw-semibold">Select Asset Image</label>
-                                    <input
-                                        type="file"
-                                        name="asset_image"
-                                        id="asset_image"
-                                        class="form-control @error('asset_image') is-invalid @enderror"
-                                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-                                    <div class="form-text">Maximum file size: 10 MB.</div>
+                                    <div class="drag-drop-zone border rounded-3 p-3 text-center mb-2" style="background: #f8f9fa; cursor: pointer;" ondrop="handleDrop(event, 'asset_image')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                                        <input
+                                            type="file"
+                                            name="asset_image"
+                                            id="asset_image"
+                                            class="form-control @error('asset_image') is-invalid @enderror d-none"
+                                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                            onchange="updateFileDisplay(this, 'asset_image')">
+                                        <div class="drag-drop-content">
+                                            <i class="bi bi-cloud-upload fs-1 text-muted mb-2"></i>
+                                            <p class="mb-1 fw-semibold">Drag & drop or click to select</p>
+                                            <small class="text-muted">JPG, JPEG, PNG, WEBP · Max 10 MB</small>
+                                        </div>
+                                    </div>
+                                    <div id="asset_image_preview" class="file-preview d-none mb-2">
+                                        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-file-earmark-image text-primary"></i>
+                                                <span id="asset_image_filename" class="fw-medium"></span>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFile('asset_image')">
+                                                <i class="bi bi-x-lg"></i> Remove
+                                            </button>
+                                        </div>
+                                    <div class="form-text">Maximum file size: 10 MB. JPG, JPEG, PNG, or WEBP.</div>
                                     @error('asset_image')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -515,16 +532,33 @@ $selectedDepartmentId = old('department_id', $asset->department_id ?? '');
                                             <h5 class="mb-1"><i class="bi bi-receipt me-2"></i>Bill / Invoice</h5>
                                             <div class="text-muted">PDF or supported image</div>
                                         </div>
-                                        <span class="badge bg-secondary">Not Uploaded</span>
+                                        <span class="badge bg-secondary" id="bill_invoice_status">Not Selected</span>
                                     </div>
-                                    <label for="bill_invoice" class="form-label fw-semibold">Select Bill / Invoice</label>
-                                    <input
-                                        type="file"
-                                        name="bill_invoice"
-                                        id="bill_invoice"
-                                        class="form-control @error('bill_invoice') is-invalid @enderror"
-                                        accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf">
-                                    <div class="form-text">Maximum file size: 10 MB. Bill / Invoice documents are locked after upload.</div>
+                                    <div class="drag-drop-zone border rounded-3 p-3 text-center mb-2" style="background: #f8f9fa; cursor: pointer;" ondrop="handleDrop(event, 'bill_invoice')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                                        <input
+                                            type="file"
+                                            name="bill_invoice"
+                                            id="bill_invoice"
+                                            class="form-control @error('bill_invoice') is-invalid @enderror d-none"
+                                            accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf"
+                                            onchange="updateFileDisplay(this, 'bill_invoice')">
+                                        <div class="drag-drop-content">
+                                            <i class="bi bi-cloud-upload fs-1 text-muted mb-2"></i>
+                                            <p class="mb-1 fw-semibold">Drag & drop or click to select</p>
+                                            <small class="text-muted">PDF, JPG, JPEG, PNG, WEBP · Max 10 MB</small>
+                                        </div>
+                                    </div>
+                                    <div id="bill_invoice_preview" class="file-preview d-none mb-2">
+                                        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-file-earmark-text text-primary"></i>
+                                                <span id="bill_invoice_filename" class="fw-medium"></span>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFile('bill_invoice')">
+                                                <i class="bi bi-x-lg"></i> Remove
+                                            </button>
+                                        </div>
+                                    <div class="form-text">Maximum file size: 10 MB. PDF or supported image. Bill / Invoice documents are locked after upload.</div>
                                     @error('bill_invoice')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -586,5 +620,123 @@ document.addEventListener('DOMContentLoaded', function () {
     locationSelect.addEventListener('change', updatePresentRoomField);
     updatePresentRoomField();
 });
+
+    // File upload drag & drop + preview
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleDrop(e, fieldName) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.remove('drag-over');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const input = document.getElementById(fieldName);
+            input.files = files;
+            updateFileDisplay(input, fieldName);
+        }
+    }
+
+    function updateFileDisplay(input, fieldName) {
+        const file = input.files[0];
+        const statusEl = document.getElementById(fieldName + '_status');
+        const previewEl = document.getElementById(fieldName + '_preview');
+        const filenameEl = document.getElementById(fieldName + '_filename');
+        const dropZone = document.querySelector(`[ondrop*="${fieldName}"]`);
+
+        if (file) {
+            // Update status badge
+            if (statusEl) {
+                statusEl.textContent = file.name;
+                statusEl.className = 'badge bg-success';
+            }
+
+            // Show preview
+            if (previewEl) previewEl.classList.remove('d-none');
+            const filenameEl = document.getElementById(fieldName + '_filename');
+            if (filenameEl) filenameEl.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+
+            // Hide drag-drop content
+            const dragDropContent = document.querySelector(`[ondrop*="${fieldName}"] .drag-drop-content`);
+            if (dragDropContent) dragDropContent.style.display = 'none';
+        } else {
+            // Reset UI
+            if (statusEl) {
+                statusEl.textContent = 'Not Selected';
+                statusEl.className = 'badge bg-secondary';
+            }
+            if (previewEl) previewEl.classList.add('d-none');
+            const dragDropContent = document.querySelector(`[ondrop*="${fieldName}"] .drag-drop-content`);
+            if (dragDropContent) dragDropContent.style.display = 'block';
+        }
+    }
+
+    function clearFile(fieldName) {
+        const input = document.getElementById(fieldName);
+        input.value = '';
+        updateFileDisplay(input, fieldName);
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // Initialize drag-drop zones
+    document.querySelectorAll('.drag-drop-zone').forEach(zone => {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            zone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            zone.addEventListener(eventName, () => zone.classList.add('drag-over'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            zone.addEventListener(eventName, () => zone.classList.remove('drag-over'), false);
+        });
+
+        zone.addEventListener('drop', (e) => {
+            const fieldName = zone.getAttribute('ondrop').match(/'([^']+)'/)[1];
+            handleDrop(e, fieldName);
+        }, false);
+    });
+
+    // Also handle click on drop zone to trigger file input
+    document.querySelectorAll('.drag-drop-zone').forEach(zone => {
+        zone.addEventListener('click', (e) => {
+            if (e.target === zone || zone.contains(e.target)) {
+                const input = zone.querySelector('input[type="file"]');
+                if (input) input.click();
+            });
+        });
+    });
+
+    // Update file display on change (for click-based selection)
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', function() {
+            const fieldName = this.id;
+            updateFileDisplay(this, fieldName);
+        });
+    });
 </script>
 @endpush
