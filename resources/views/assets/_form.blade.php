@@ -477,36 +477,34 @@ $selectedDepartmentId = old('department_id', $asset->department_id ?? '');
         <div class="col-12">
             <div class="card border shadow-sm mt-2">
                 <div class="card-header bg-white py-3">
-                    <h4 class="mb-1"><i class="bi bi-paperclip me-2"></i>Asset Image &amp; Bill/Invoice</h4>
-                    <div class="text-muted">Choose documents now. They will be uploaded when you click Create Asset.</div>
+                    <h4 class="mb-1"><i class="bi bi-paperclip me-2"></i>Asset Image & Bill/Invoice</h4>
+                    <div class="text-muted">Select files below. They will be uploaded when you click Create Asset.</div>
                 </div>
                 <div class="card-body">
                     <div class="row g-4">
                         @if($canManageAssets ?? false)
                             <div class="col-lg-6">
                                 <div class="border rounded-3 p-3 h-100">
-                                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                                        <div>
-                                            <h5 class="mb-1"><i class="bi bi-image me-2"></i>Asset Image</h5>
-                                            <div class="text-muted">JPG, JPEG, PNG or WEBP</div>
-                                        </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0"><i class="bi bi-image me-2"></i>Asset Image</h6>
                                         <span class="badge bg-secondary" id="asset_image_status">Not Selected</span>
                                     </div>
-                                    <div class="drag-drop-zone border rounded-3 p-3 text-center mb-2" style="background: #f8f9fa; cursor: pointer;" ondrop="handleDrop(event, 'asset_image')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-                                        <input
-                                            type="file"
-                                            name="asset_image"
-                                            id="asset_image"
-                                            class="form-control @error('asset_image') is-invalid @enderror d-none"
-                                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                                            onchange="updateFileDisplay(this, 'asset_image')">
-                                        <div class="drag-drop-content">
-                                            <i class="bi bi-cloud-upload fs-1 text-muted mb-2"></i>
-                                            <p class="mb-1 fw-semibold">Drag & drop or click to select</p>
-                                            <small class="text-muted">JPG, JPEG, PNG, WEBP · Max 10 MB</small>
-                                        </div>
+                                    <div class="d-flex gap-2 mb-3">
+                                        <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('asset_image').click()">
+                                            <i class="bi bi-folder2-open me-1"></i> Select Image
+                                        </button>
+                                        <button type="button" class="btn btn-primary" id="asset_image_upload_btn" disabled onclick="uploadSingleFile('asset_image')">
+                                            <i class="bi bi-cloud-upload me-1"></i> Upload
+                                        </button>
                                     </div>
-                                    <div id="asset_image_preview" class="file-preview d-none mb-2">
+                                    <input
+                                        type="file"
+                                        name="asset_image"
+                                        id="asset_image"
+                                        class="form-control @error('asset_image') is-invalid @enderror d-none"
+                                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                        onchange="updateFileDisplay(this, 'asset_image')">
+                                    <div id="asset_image_preview" class="file-preview d-none mb-3">
                                         <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded">
                                             <div class="d-flex align-items-center gap-2">
                                                 <i class="bi bi-file-earmark-image text-primary"></i>
@@ -516,8 +514,50 @@ $selectedDepartmentId = old('department_id', $asset->department_id ?? '');
                                                 <i class="bi bi-x-lg"></i> Remove
                                             </button>
                                         </div>
+                                    </div>
                                     <div class="form-text">Maximum file size: 10 MB. JPG, JPEG, PNG, or WEBP.</div>
                                     @error('asset_image')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($canManageBills ?? false)
+                            <div class="col-lg-6">
+                                <div class="border rounded-3 p-3 h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0"><i class="bi bi-receipt me-2"></i>Bill / Invoice</h6>
+                                        <span class="badge bg-secondary" id="bill_invoice_status">Not Selected</span>
+                                    </div>
+                                    <div class="d-flex gap-2 mb-3">
+                                        <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('bill_invoice').click()">
+                                            <i class="bi bi-folder2-open me-1"></i> Select Bill
+                                        </button>
+                                        <button type="button" class="btn btn-primary" id="bill_invoice_upload_btn" disabled onclick="uploadSingleFile('bill_invoice')">
+                                            <i class="bi bi-cloud-upload me-1"></i> Upload
+                                        </button>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        name="bill_invoice"
+                                        id="bill_invoice"
+                                        class="form-control @error('bill_invoice') is-invalid @enderror d-none"
+                                        accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf"
+                                        onchange="updateFileDisplay(this, 'bill_invoice')">
+                                    <div id="bill_invoice_preview" class="file-preview d-none mb-3">
+                                        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-file-earmark-text text-primary"></i>
+                                                <span id="bill_invoice_filename" class="fw-medium"></span>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFile('bill_invoice')">
+                                                <i class="bi bi-x-lg"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-text">Maximum file size: 10 MB. PDF or supported image. Bill / Invoice documents are locked after upload.</div>
+                                    @error('bill_invoice')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
