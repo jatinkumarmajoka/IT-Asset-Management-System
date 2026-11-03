@@ -563,6 +563,10 @@ class AssetImportService
 
             'location' => $data['location'] ?? null,
 
+            'present_location' => $data['present_location'] ?? null,
+
+            'present_location_custom' => $data['present_location_custom'] ?? null,
+
             'present_room_number' => $data['present_room_number'] ?? null,
 
             'present_sub_department_id' => $data['present_sub_department_id'] ?? null,

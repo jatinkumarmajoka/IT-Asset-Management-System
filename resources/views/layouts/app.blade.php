@@ -79,8 +79,16 @@
         .sidebar {
             min-height: 100vh;
             background: var(--sidebar-bg);
-            flex: 0 0 250px;
-            width: 250px;
+            flex: 0 0 260px;
+            width: 260px;
+            min-width: 260px;
+        }
+
+        .app-main {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar a {
@@ -336,7 +344,7 @@
         <aside
             class="sidebar p-3"
             id="sidebar"
-            style="width: 250px;">
+            style="width: 260px;">
 
             <div class="brand fs-5 mb-4 d-flex flex-column align-items-start gap-0">
 
@@ -442,7 +450,7 @@
 
          ========================================================= --}}
 
-        <main class="app-main">
+        <main class="app-main flex-grow-1 min-w-0">
 
             {{-- Top Navbar --}}
             <nav class="navbar px-4 py-3">
@@ -531,7 +539,7 @@
 
         {{-- Page Content --}}
         @auth
-        <div class="app-content p-4">
+        <div class="app-content p-4 w-100 overflow-hidden">
 
                 {{-- Success --}}
                 @if (session('success'))

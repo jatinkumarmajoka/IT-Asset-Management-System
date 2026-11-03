@@ -7,23 +7,23 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4">Subject</th>
-                        <th>Type</th>
-                        <th>Department</th>
-                        <th>Submitted By</th>
-                        <th>Date</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-end pe-4">Actions</th>
+                        <th class="ps-4" style="min-width: 220px;">Subject</th>
+                        <th style="min-width: 140px;">Type</th>
+                        <th style="min-width: 160px;">Department</th>
+                        <th style="min-width: 160px;">Submitted By</th>
+                        <th style="min-width: 120px;">Date</th>
+                        <th class="text-center" style="min-width: 120px;">Status</th>
+                        <th class="text-end pe-4" style="min-width: 140px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($operationalRequests as $request)
                         <tr>
-                            <td class="ps-4 fw-medium">{{ $request->subject }}</td>
+                            <td class="ps-4 fw-medium text-truncate" style="max-width: 220px;">{{ $request->subject }}</td>
                             <td><span class="badge bg-secondary bg-opacity-10 text-secondary">{{ $request->type }}</span></td>
-                            <td>{{ $request->department?->name ?? $request->user?->department?->name ?? 'No department' }}</td>
-                            <td>{{ $request->user?->name ?? 'Unknown' }}</td>
-                            <td>{{ $request->created_at?->format('M d, Y') }}</td>
+                            <td class="text-truncate" style="max-width: 160px;">{{ $request->department?->name ?? $request->user?->department?->name ?? 'No department' }}</td>
+                            <td class="text-truncate" style="max-width: 160px;">{{ $request->user?->name ?? 'Unknown' }}</td>
+                            <td class="text-nowrap">{{ $request->created_at?->format('M d, Y') }}</td>
                             <td class="text-center">
                                 <span class="badge px-3 py-1
                                     {{ $request->status === 'approved' ? 'bg-success' : ($request->status === 'pending' ? 'bg-warning' : 'bg-danger') }}">
@@ -104,6 +104,7 @@
                                 <button type="submit" class="btn btn-danger">Reject</button>
                             </div>
                         </form>
+                    </div>
                 </div>
             </div>
         @endif

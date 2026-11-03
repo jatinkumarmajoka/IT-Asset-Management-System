@@ -5,162 +5,119 @@
 @section('content')
 
 <style>
-
     /* Assets table: stable column sizing so headers never overlap. */
-
     .assets-table {
-
         width: 100%;
-
-        min-width: 1120px; /* Keeps all ten columns readable; wrapper scrolls on small screens. */
-
+        min-width: 1300px; /* Keeps all columns readable; wrapper scrolls on small screens. */
         table-layout: fixed;
-
     }
 
     .assets-table thead th {
-
         white-space: nowrap;
-
         vertical-align: middle;
-
-        overflow: hidden;
-
-        text-overflow: ellipsis;
-
-        padding: 14px 12px;
-
+        padding: 12px 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        /* NO overflow:hidden or text-overflow:ellipsis - headings must be fully visible */
     }
 
     .assets-table tbody td {
-
         vertical-align: middle;
-
         overflow-wrap: anywhere;
-
         word-break: break-word;
-
-        padding: 14px 12px;
-
+        padding: 12px 10px;
     }
 
+    /* Column widths - using percentages for fluidity with min-width fallbacks */
     .assets-table th:nth-child(1),
-
-    .assets-table td:nth-child(1) {
-
-        width: 70px;
-
+    .assets-table td:nth-child(1) { /* Checkbox */
+        width: 4%;
+        min-width: 50px;
+        text-align: center;
     }
 
     .assets-table th:nth-child(2),
-
-    .assets-table td:nth-child(2) {
-
-        width: 190px;
-
+    .assets-table td:nth-child(2) { /* S.No. */
+        width: 4%;
+        min-width: 65px;
     }
 
     .assets-table th:nth-child(3),
-
-    .assets-table td:nth-child(3) {
-
-        width: 145px;
-
+    .assets-table td:nth-child(3) { /* Asset */
+        width: 22%;
+        min-width: 240px;
     }
 
     .assets-table th:nth-child(4),
-
-    .assets-table td:nth-child(4) {
-
-        width: 175px;
-
+    .assets-table td:nth-child(4) { /* Make & Model */
+        width: 16%;
+        min-width: 180px;
     }
 
     .assets-table th:nth-child(5),
-
-    .assets-table td:nth-child(5) {
-
-        width: 100px;
-
+    .assets-table td:nth-child(5) { /* Department */
+        width: 16%;
+        min-width: 180px;
+        white-space: nowrap;
     }
 
     .assets-table th:nth-child(6),
-
-    .assets-table td:nth-child(6) {
-
-        width: 100px;
-
+    .assets-table td:nth-child(6) { /* Qty Issued */
+        width: 6%;
+        min-width: 95px;
+        text-align: center;
     }
 
     .assets-table th:nth-child(7),
-
-    .assets-table td:nth-child(7) {
-
-        width: 175px;
-
+    .assets-table td:nth-child(7) { /* Verified */
+        width: 6%;
+        min-width: 95px;
+        text-align: center;
     }
 
     .assets-table th:nth-child(8),
-
-    .assets-table td:nth-child(8) {
-
-        width: 115px;
-
+    .assets-table td:nth-child(8) { /* Occupant */
+        width: 16%;
+        min-width: 180px;
     }
 
     .assets-table th:nth-child(9),
-
-    .assets-table td:nth-child(9) {
-
-        width: 95px;
-
+    .assets-table td:nth-child(9) { /* Barcode */
+        width: 10%;
+        min-width: 130px;
     }
 
     .assets-table th:nth-child(10),
-
-    .assets-table td:nth-child(10) {
-
-        width: 85px;
-
+    .assets-table td:nth-child(10) { /* Status */
+        width: 10%;
+        min-width: 120px;
+        text-align: center;
     }
 
+    .assets-table th:nth-child(11),
+    .assets-table td:nth-child(11) { /* Actions */
+        width: 4%;
+        min-width: 50px;
+        text-align: center;
+    }
 
+    @media (max-width: 1400px) {
+        .assets-table { min-width: 1200px; }
+    }
     @media (max-width: 1200px) {
-
-        .assets-table {
-
-            min-width: 1120px;
-
-        }
-
+        .assets-table { min-width: 1100px; }
     }
-
+    @media (max-width: 992px) {
+        .assets-table { min-width: 1000px; }
+    }
 
     /* Compact controls; keep the table horizontally scrollable instead of clipping the page. */
-    /* Always-visible horizontal scrollbar positioned ABOVE the table. */
-    .assets-top-scroll {
-        display: block;
-        width: 100%;
-        height: 18px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        margin: 0 0 8px;
-        background: #e2e8f0;
-        border-radius: 8px;
-        scrollbar-width: auto;
-        scrollbar-color: #64748b #e2e8f0;
-        -webkit-overflow-scrolling: touch;
-    }
-    .assets-top-scroll-inner { height: 18px; min-width: 1120px; }
-    .assets-top-scroll::-webkit-scrollbar { height: 14px; }
-    .assets-top-scroll::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 8px; }
-    .assets-top-scroll::-webkit-scrollbar-thumb { background: #64748b; border-radius: 8px; border: 2px solid #e2e8f0; }
 
     .assets-table-wrap {
         display: block;
         width: 100%;
         max-width: 100%;
-        overflow-x: scroll !important;
+        overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: auto;
@@ -170,35 +127,54 @@
         box-sizing: border-box;
     }
     .assets-table-wrap > .assets-table {
-        width: 1120px !important;
-        min-width: 1120px !important;
-        max-width: none !important;
-        table-layout: fixed !important;
+        width: 100%;
+        min-width: 1300px;
+        max-width: none;
+        table-layout: fixed;
     }
     .assets-table-wrap::-webkit-scrollbar { height: 14px; }
     .assets-table-wrap::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 8px; }
     .assets-table-wrap::-webkit-scrollbar-thumb { background: #64748b; border-radius: 8px; border: 2px solid #e2e8f0; }
     .assets-table-wrap::-webkit-scrollbar-thumb:hover { background: #475569; }
-    .assets-table .badge { font-size: .72rem; padding: .35em .5em; }
+
+    .assets-table .badge { font-size: .75rem; padding: .35em .5em; }
     .assets-table .btn { padding: .25rem .4rem; font-size: .75rem; }
     .assets-table td:last-child, .assets-table th:last-child { text-align: center; }
+
     @media (max-width: 576px) {
-        .assets-table thead th, .assets-table tbody td { padding: 9px 8px; }
+        .assets-table thead th, .assets-table tbody td { padding: 9px 6px; }
+        .assets-table { min-width: 900px; }
+        .assets-table-wrap > .assets-table { min-width: 900px; }
+    }
+
+    /* Filter form improvements */
+    .filter-form .form-control,
+    .filter-form .form-select {
+        height: calc(1.5em + 0.75rem + 2px);
+    }
+
+    @media (max-width: 767.98px) {
+        .filter-form .row > [class*="col-"] {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        .filter-form .col-md-4 { order: 1; }
+        .filter-form .col-md-2 { order: 2; }
+        .filter-form .col-md-2:last-of-type { order: 3; } /* Filter button last */
+    }
+
+    /* Ensure page header stays within content bounds */
+    .page-header {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-
-    <div>
-
-        <h2>Assets</h2>
-
-        <p class="text-muted mb-0">
-
-            Departmental stock register
-
-        </p>
-
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3 page-header">
+    <div class="min-w-0">
+        <h2 class="mb-1">Assets</h2>
+        <p class="text-muted mb-0">Departmental stock register</p>
     </div>
 
     <div class="d-flex gap-2 flex-wrap">
@@ -215,32 +191,6 @@
             <i class="bi bi-file-earmark-excel me-1"></i>
             Export Excel
         </a>
-
-        <a
-            href="{{ route('assets.template') }}"
-            class="btn btn-outline-info">
-            <i class="bi bi-download me-1"></i>
-            Template
-        </a>
-
-        <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-upload me-1"></i> Import
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                    <form method="POST" action="{{ route('assets.import') }}" enctype="multipart/form-data" class="p-3" style="width: 300px;">
-                        @csrf
-                        <div class="mb-2">
-                            <label class="form-label small fw-bold">Select Excel/CSV File</label>
-                            <input type="file" name="file" class="form-control form-control-sm" accept=".xlsx,.xls,.csv" required>
-                            <div class="form-text">Max 20MB. Use the template for correct format.</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-sm w-100">Import</button>
-                    </form>
-                </li>
-            </ul>
-        </div>
     </div>
 </div>
 
@@ -300,53 +250,22 @@
 </div>
 
 <div class="card shadow-sm table-card">
-
     <div class="card-body">
 
         {{-- =====================================================
-
                 Filters
+        ====================================================== --}}
 
-                ====================================================== --}}
-
-        <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="mb-0"><i class="bi bi-funnel me-1"></i> Filters</h6>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="toggleAdvancedFilters" title="Toggle advanced filters">
-                        <i class="bi bi-sliders me-1"></i> Advanced
-                    </button>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-bookmark-star me-1"></i> Presets
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            @if($filterPresets->isNotEmpty())
-                                @foreach($filterPresets as $preset)
-                                    <li>
-                                        <a class="dropdown-item load-preset" href="#" data-preset='{{ json_encode($preset->filters) }}' data-name="{{ $preset->name }}">
-                                            <i class="bi bi-bookmark me-2"></i> {{ $preset->name }}
-                                            @if($preset->is_default) <span class="badge bg-primary ms-1">Default</span> @endif
-                                        </a>
-                                    </li>
-                                @endforeach
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#" id="saveCurrentPreset"><i class="bi bi-plus-circle me-2"></i> Save current as preset</a></li>
-                                <li><a class="dropdown-item text-danger" href="#" id="clearAllFilters"><i class="bi bi-x-circle me-2"></i> Clear all filters</a></li>
-                            @else
-                                <li><a class="dropdown-item" href="#" id="saveFirstPreset"><i class="bi bi-plus-circle me-2"></i> Save current as preset</a></li>
-                            @endif
-                        </ul>
-                    </div>
-                </div>
-            </div>
+        <div class="mb-4">
+            <h6 class="mb-3"><i class="bi bi-funnel me-1"></i> Filters</h6>
 
             {{-- Basic Filters --}}
-            <form class="row g-2 mb-3" id="basicFiltersForm">
-
+            <form class="row g-3 align-items-end filter-form" id="basicFiltersForm">
                 {{-- Search --}}
-                <div class="col-md-4">
+                <div class="col-12 col-md-5 col-lg-4 col-xl-3">
+                    <label class="form-label visually-hidden" for="searchInput">Search</label>
                     <input
+                        id="searchInput"
                         name="search"
                         class="form-control"
                         placeholder="Search asset, barcode, serial..."
@@ -354,8 +273,10 @@
                 </div>
 
                 {{-- Department --}}
-                <div class="col-md-2">
+                <div class="col-6 col-md-3 col-lg-2">
+                    <label class="form-label visually-hidden" for="deptFilter">Department</label>
                     <select
+                        id="deptFilter"
                         name="department_id"
                         class="form-select">
                         <option value="">All Departments</option>
@@ -370,8 +291,10 @@
                 </div>
 
                 {{-- Category --}}
-                <div class="col-md-2">
+                <div class="col-6 col-md-2 col-lg-2">
+                    <label class="form-label visually-hidden" for="catFilter">Category</label>
                     <select
+                        id="catFilter"
                         name="category_id"
                         class="form-select">
                         <option value="">All Categories</option>
@@ -386,8 +309,10 @@
                 </div>
 
                 {{-- Status --}}
-                <div class="col-md-2">
+                <div class="col-12 col-md-3 col-lg-2">
+                    <label class="form-label visually-hidden" for="statusFilter">Status</label>
                     <select
+                        id="statusFilter"
                         name="asset_status"
                         class="form-select">
                         <option value="">All Status</option>
@@ -412,467 +337,135 @@
                 </div>
 
                 {{-- Filter Button --}}
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-dark w-100">
+                <div class="col-12 col-md-auto">
+                    <button type="submit" class="btn btn-dark w-100 w-md-auto">
                         <i class="bi bi-funnel me-1"></i> Filter
                     </button>
                 </div>
-
             </form>
-
-            {{-- Advanced Filters (Collapsible) --}}
-            <div class="card border-0 bg-light rounded p-3 mb-3" id="advancedFiltersPanel" style="display: none;">
-                <form class="row g-2" id="advancedFiltersForm">
-                    <input type="hidden" name="search" value="{{ request('search') }}">
-                    <input type="hidden" name="department_id" value="{{ request('department_id') }}">
-                    <input type="hidden" name="category_id" value="{{ request('category_id') }}">
-                    <input type="hidden" name="asset_status" value="{{ request('asset_status') }}">
-
-                    {{-- Sub Department --}}
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">Sub Department</label>
-                        <select name="present_sub_department_id" class="form-select">
-                            <option value="">All Sub Departments</option>
-                            @foreach($subDepartments as $sd)
-                            <option value="{{ $sd->id }}" @selected(request('present_sub_department_id') == $sd->id)>{{ $sd->name }} ({{ $sd->department?->name }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- Condition --}}
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold">Condition</label>
-                        <select name="condition" class="form-select">
-                            <option value="">All Conditions</option>
-                            @foreach($conditions as $c)
-                            <option value="{{ $c }}" @selected(request('condition') == $c)>{{ $c }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- Employee --}}
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">Employee</label>
-                        <select name="employee_id" class="form-select">
-                            <option value="">All Employees</option>
-                            @foreach($employees as $emp)
-                            <option value="{{ $emp->id }}" @selected(request('employee_id') == $emp->id)>{{ $emp->name }} ({{ $emp->employee_code }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- Date Range --}}
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold">Date From</label>
-                        <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold">Date To</label>
-                        <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
-                    </div>
-
-                    {{-- Quantity Range --}}
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold">Qty Min</label>
-                        <input type="number" name="qty_min" class="form-control" min="0" value="{{ request('qty_min') }}">
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold">Qty Max</label>
-                        <input type="number" name="qty_max" class="form-control" min="0" value="{{ request('qty_max') }}">
-                    </div>
-
-                    {{-- Verified Qty Range --}}
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold">Verified Min</label>
-                        <input type="number" name="verified_qty_min" class="form-control" min="0" value="{{ request('verified_qty_min') }}">
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold">Verified Max</label>
-                        <input type="number" name="verified_qty_max" class="form-control" min="0" value="{{ request('verified_qty_max') }}">
-                    </div>
-
-                    {{-- Quick Filters --}}
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">Quick Filters</label>
-                        <div class="d-flex flex-wrap gap-2">
-                            <input type="checkbox" name="assigned_only" value="1" id="filter_assigned" @checked(request('assigned_only')) class="form-check-input" style="margin-top: 0.5rem;">
-                            <label for="filter_assigned" class="form-check-label small ms-1">Assigned Only</label>
-
-                            <input type="checkbox" name="unassigned_only" value="1" id="filter_unassigned" @checked(request('unassigned_only')) class="form-check-input" style="margin-top: 0.5rem;">
-                            <label for="filter_unassigned" class="form-check-label small ms-1">Unassigned Only</label>
-
-                            <input type="checkbox" name="has_image" value="1" id="filter_image" @checked(request('has_image')) class="form-check-input" style="margin-top: 0.5rem;">
-                            <label for="filter_image" class="form-check-label small ms-1">Has Image</label>
-
-                            <input type="checkbox" name="has_bill" value="1" id="filter_bill" @checked(request('has_bill')) class="form-check-input" style="margin-top: 0.5rem;">
-                            <label for="filter_bill" class="form-check-label small ms-1">Has Bill</label>
-
-                            <input type="checkbox" name="verified" value="1" id="filter_verified" @checked(request('verified')) class="form-check-input" style="margin-top: 0.5rem;">
-                            <label for="filter_verified" class="form-check-label small ms-1">Verified</label>
-
-                            <input type="checkbox" name="unverified" value="1" id="filter_unverified" @checked(request('unverified')) class="form-check-input" style="margin-top: 0.5rem;">
-                            <label for="filter_unverified" class="form-check-label small ms-1">Unverified</label>
-                        </div>
-                    </div>
-
-                    {{-- Submit & Clear --}}
-                    <div class="col-md-12 mt-2">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-funnel me-1"></i> Apply Advanced Filters
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" id="clearAdvancedFilters">
-                                <i class="bi bi-x-lg me-1"></i> Clear Advanced
-                            </button>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
         </div>
 
         {{-- =====================================================
-
         Assets Table
-
         ====================================================== --}}
 
-        <div class="assets-top-scroll" id="assetsTopScroll" aria-label="Scroll table horizontally">
-            <div class="assets-top-scroll-inner" id="assetsTopScrollInner"></div>
-        </div>
         <div class="table-responsive assets-table-wrap" id="assetsTableScroll">
-
             <table class="table table-hover align-middle assets-table">
-
                 <thead>
-
                     <tr>
-
-                        <th style="width: 50px; text-align: center;">
+                        <th style="width: 4%; min-width: 50px; text-align: center;">
                             <input type="checkbox" id="selectAllAssets" class="form-check-input" title="Select all on this page">
                         </th>
-
-                        <th>S.No.</th>
-
-                        <th>
-
-                            Asset
-
-                        </th>
-
-                        <th>
-
-                            Make & Model
-
-                        </th>
-
-                        <th>
-
-                            Department
-
-                        </th>
-
-                        <th>
-
-                            Qty Issued
-
-                        </th>
-
-                        <th>
-
-                            Verified
-
-                        </th>
-
-                        <th>
-
-                            Occupant
-
-                        </th>
-
-                        <th>
-
-                            Barcode
-
-                        </th>
-
-                        <th>
-
-                            Status
-
-                        </th>
-
-                        <th>
-
-                        </th>
-
+                        <th style="width: 4%; min-width: 55px;">S.No.</th>
+                        <th style="width: 20%; min-width: 220px;">Asset</th>
+                        <th style="width: 16%; min-width: 180px;">Make & Model</th>
+                        <th style="width: 16%; min-width: 180px;">Department</th>
+                        <th style="width: 6%; min-width: 85px; text-align: center;">Qty Issued</th>
+                        <th style="width: 6%; min-width: 85px; text-align: center;">Verified</th>
+                        <th style="width: 16%; min-width: 180px;">Occupant</th>
+                        <th style="width: 10%; min-width: 120px;">Barcode</th>
+                        <th style="width: 10%; min-width: 110px; text-align: center;">Status</th>
+                        <th style="width: 4%; min-width: 50px; text-align: center;"></th>
                     </tr>
-
                 </thead>
-
                 <tbody>
-
                     @forelse($assets as $asset)
-
                     <tr data-asset-id="{{ $asset->id }}">
-
                         {{-- Checkbox --}}
                         <td class="text-center">
                             <input type="checkbox" class="form-check-input asset-checkbox" value="{{ $asset->id }}" data-asset-code="{{ $asset->asset_code }}">
                         </td>
 
                         {{-- S.No. --}}
-
-                        <td>
-
-                            {{ $assets->firstItem() + $loop->index }}
-
-                        </td>
+                        <td>{{ $assets->firstItem() + $loop->index }}</td>
 
                         {{-- Asset --}}
-
                         <td>
-
                             <a
-
-                                class="fw-semibold text-decoration-none"
-
+                                class="fw-semibold text-decoration-none text-truncate d-block"
+                                style="max-width: 100%;"
                                 href="{{ route('assets.show', $asset) }}">
-
                                 {{ $asset->item_name }}
-
                             </a>
-
-                            <br>
-
-                            <small class="text-muted">
-
-                                {{ $asset->asset_code }}
-
-                            </small>
-
+                            <small class="text-muted text-truncate d-block" style="max-width: 100%;">{{ $asset->asset_code }}</small>
                         </td>
 
                         {{-- Make & Model --}}
-
                         <td>
-
                             {{ trim(
-
-                        ($asset->make ?? '') .
-
-                        ' ' .
-
-                        ($asset->model ?? '')
-
-                        ) ?: '—' }}
-
+                            ($asset->make ?? '') .
+                            ' ' .
+                            ($asset->model ?? '')
+                            ) ?: '—' }}
                         </td>
 
                         {{-- Department --}}
-
-                        <td>
-
-                            {{ $asset->department?->name ?? '—' }}
-
-                        </td>
+                        <td class="text-nowrap">{{ $asset->department?->name ?? '—' }}</td>
 
                         {{-- Issued Quantity --}}
-
-                        <td>
-
-                            {{ $asset->issued_quantity }}
-
-                        </td>
+                        <td class="text-center">{{ $asset->issued_quantity }}</td>
 
                         {{-- Verified Quantity --}}
+                        <td class="text-center">{{ $asset->physically_verified_quantity }}</td>
 
+                        {{-- Occupant --}}
                         <td>
-
-                            {{ $asset->physically_verified_quantity }}
-
-                        </td>
-
-                        {{-- =================================================
-
-                    Present Occupant
-
-                    If employee exists:
-
-                    show employee
-
-                    If employee does not exist:
-
-                    show department
-
-                    IMPORTANT:
-
-                    The department is NOT stored as an employee.
-
-                    present_occupant_id remains NULL.
-
-                    ================================================== --}}
-
-                        <td>
-
                             @if($asset->occupant)
-
-                            <span class="fw-semibold">
-
+                            <span class="fw-semibold text-truncate d-block" style="max-width: 100%;">
                                 {{ $asset->occupant->name }}
-
                             </span>
-
                             @if($asset->occupant->employee_code)
-
-                            <br>
-
-                            <small class="text-muted">
-
+                            <small class="text-muted text-truncate d-block" style="max-width: 100%;">
                                 {{ $asset->occupant->employee_code }}
-
                             </small>
-
                             @endif
-
                             @elseif($asset->department)
-
-                            <span class="fw-semibold">
-
+                            <span class="fw-semibold text-truncate d-block" style="max-width: 100%;">
                                 {{ $asset->department->name }}
-
                             </span>
-
-                            <br>
-
-                            <small class="text-muted">
-
-                                Department
-
-                            </small>
-
+                            <small class="text-muted text-truncate d-block" style="max-width: 100%;">Department</small>
                             @else
-
                             —
-
                             @endif
-
                         </td>
 
                         {{-- Barcode --}}
-
                         <td>
-
-                            <span class="text-truncate" title="{{ $asset->barcode_number ?? '—' }}">{{ $asset->barcode_number ?? '—' }}</span>
-
+                            <span class="text-truncate d-block" style="max-width: 100%;" title="{{ $asset->barcode_number ?? '—' }}">{{ $asset->barcode_number ?? '—' }}</span>
                         </td>
 
                         {{-- Status --}}
-
-                        <td>
-
-                            <span class="badge text-bg-light">
-
-                                {{ $asset->asset_status }}
-
-                            </span>
-
+                        <td class="text-center">
+                            <span class="badge text-bg-light">{{ $asset->asset_status }}</span>
                         </td>
 
                         {{-- Edit --}}
-
-                        <td>
-
+                        <td class="text-center">
                             <a
-
                                 href="{{ route('assets.edit', $asset) }}"
-
                                 class="btn btn-sm btn-outline-secondary"
-
                                 title="Edit Asset">
-
                                 <i class="bi bi-pencil"></i>
-
                             </a>
-
                         </td>
-
                     </tr>
-
                     @empty
-
                     <tr>
-
-                        <td
-
-                            colspan="10"
-
-                            class="text-center py-5 text-muted">
-
-                            No assets found.
-
-                        </td>
-
+                        <td colspan="11" class="text-center py-5 text-muted">No assets found.</td>
                     </tr>
-
                     @endforelse
-
                 </tbody>
-
-            </table>
-
+            </table
         </div>
 
         {{-- Pagination --}}
-
         {{ $assets->links() }}
 
     </div>
-
 </div>
-
 
 <script>
 (function () {
-    function setupAssetsTopScrollbar() {
-        const top = document.getElementById('assetsTopScroll');
-        const inner = document.getElementById('assetsTopScrollInner');
-        const tableWrap = document.getElementById('assetsTableScroll');
-        const table = tableWrap ? tableWrap.querySelector('.assets-table') : null;
-        if (!top || !inner || !tableWrap || !table) return;
-
-        const updateWidth = () => {
-            const scrollWidth = Math.max(table.scrollWidth, tableWrap.clientWidth);
-            inner.style.width = scrollWidth + 'px';
-            top.scrollLeft = tableWrap.scrollLeft;
-        };
-        let syncing = false;
-        top.addEventListener('scroll', () => {
-            if (syncing) return;
-            syncing = true;
-            tableWrap.scrollLeft = top.scrollLeft;
-            syncing = false;
-        }, { passive: true });
-        tableWrap.addEventListener('scroll', () => {
-            if (syncing) return;
-            syncing = true;
-            top.scrollLeft = tableWrap.scrollLeft;
-            syncing = false;
-        }, { passive: true });
-        // Initial setup
-        inner.style.minWidth = '1120px';
-        updateWidth();
-        window.addEventListener('resize', updateWidth);
-        if (window.ResizeObserver) new ResizeObserver(updateWidth).observe(table);
-        // Also sync on table content changes
-        if (window.MutationObserver) {
-            new MutationObserver(updateWidth).observe(table, { childList: true, subtree: true });
-        }
-    }
-
     function setupBulkActions() {
         const selectAll = document.getElementById('selectAllAssets');
         const checkboxes = document.querySelectorAll('.asset-checkbox');
@@ -989,108 +582,6 @@
         updateBulkUI();
     }
 
-    // Advanced Filters
-    function setupAdvancedFilters() {
-        const toggleBtn = document.getElementById('toggleAdvancedFilters');
-        const panel = document.getElementById('advancedFiltersPanel');
-        const clearBtn = document.getElementById('clearAdvancedFilters');
-        const basicForm = document.getElementById('basicFiltersForm');
-        const advancedForm = document.getElementById('advancedFiltersForm');
-        const savePresetBtn = document.getElementById('saveCurrentPreset') || document.getElementById('saveFirstPreset');
-        const clearAllBtn = document.getElementById('clearAllFilters');
-        const loadPresetLinks = document.querySelectorAll('.load-preset');
-
-        if (!toggleBtn || !panel) return;
-
-        toggleBtn.addEventListener('click', () => {
-            const isVisible = panel.style.display !== 'none';
-            panel.style.display = isVisible ? 'none' : 'block';
-            toggleBtn.innerHTML = isVisible
-                ? '<i class="bi bi-sliders me-1"></i> Advanced'
-                : '<i class="bi bi-sliders me-1"></i> Advanced <span class="badge bg-success ms-1">Open</span>';
-        });
-
-        clearBtn?.addEventListener('click', () => {
-            advancedForm.querySelectorAll('input, select').forEach(el => {
-                if (el.type === 'checkbox') el.checked = false;
-                else if (el.type === 'hidden') return;
-                else el.value = '';
-            });
-            advancedForm.submit();
-        });
-
-        // Save preset
-        savePresetBtn?.addEventListener('click', (e) => {
-            e.preventDefault();
-            const name = prompt('Enter preset name:');
-            if (!name) return;
-
-            const params = new URLSearchParams();
-            [...basicForm.querySelectorAll('input, select'), ...advancedForm.querySelectorAll('input, select')].forEach(el => {
-                if (el.type === 'checkbox') {
-                    if (el.checked) params.append(el.name, el.value);
-                } else if (el.type !== 'submit' && el.name) {
-                    params.append(el.name, el.value);
-                }
-            });
-            params.append('preset_name', name);
-            params.append('module', 'assets');
-
-            fetch('{{ route("filter-presets.store") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: params.toString()
-            }).then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Preset saved!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + (data.message || 'Failed to save'));
-                }
-            });
-        });
-
-        // Clear all filters
-        clearAllBtn?.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (confirm('Clear all filters?')) {
-                window.location.href = '{{ route("assets.index") }}';
-            }
-        });
-
-        // Load preset
-        loadPresetLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const filters = JSON.parse(link.dataset.preset);
-                Object.entries(filters).forEach(([key, value]) => {
-                    const basicEl = basicForm.querySelector(`[name="${key}"]`);
-                    const advancedEl = advancedForm.querySelector(`[name="${key}"]`);
-                    if (basicEl) basicEl.value = value;
-                    if (advancedEl) {
-                        if (advancedEl.type === 'checkbox') advancedEl.checked = value;
-                        else advancedEl.value = value;
-                    }
-                });
-                basicForm.submit();
-            });
-        });
-
-        // Sync hidden fields
-        const syncFields = ['search', 'department_id', 'category_id', 'asset_status'];
-        basicForm.addEventListener('submit', () => {
-            syncFields.forEach(name => {
-                const basicEl = basicForm.querySelector(`[name="${name}"]`);
-                const advancedEl = advancedForm.querySelector(`[name="${name}"]`);
-                if (basicEl && advancedEl) advancedEl.value = basicEl.value;
-            });
-        });
-    }
-
     // Drag & Drop for file uploads
     function setupDragDrop() {
         const dropZones = document.querySelectorAll('.drag-drop-zone');
@@ -1202,16 +693,12 @@
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            setupAssetsTopScrollbar();
             setupBulkActions();
-            setupAdvancedFilters();
             setupDragDrop();
             setupTableDragDrop();
         });
     } else {
-        setupAssetsTopScrollbar();
         setupBulkActions();
-        setupAdvancedFilters();
         setupDragDrop();
         setupTableDragDrop();
     }
@@ -1219,4 +706,3 @@
 </script>
 
 @endsection
-

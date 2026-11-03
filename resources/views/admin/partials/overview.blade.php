@@ -1,67 +1,71 @@
-<div class="row g-4">
-    <div class="col-md-6 col-xl-3">
+<div class="row g-3 mb-4" id="adminStatsGrid">
+    <div class="col-6 col-md-3">
         <div class="card card-stat shadow-sm h-100 border-0">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <p class="text-muted small mb-1">Total Staff</p>
-                        <h3 class="fw-bold fs-3 mb-0">{{ $staffCount }}</h3>
+                        <p class="text-muted small mb-1 fw-medium">Total Staff</p>
+                        <h3 class="fw-bold fs-4 mb-0">{{ $staffCount }}</h3>
                     </div>
                     <div class="rounded-circle bg-primary bg-opacity-10 p-3">
-                        <i class="bi bi-people fs-2 text-primary"></i>
+                        <i class="bi bi-people fs-3 text-primary"></i>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-    <div class="col-md-6 col-xl-3">
+    <div class="col-6 col-md-3">
         <div class="card card-stat shadow-sm h-100 border-0">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <p class="text-muted small mb-1">Approved Staff</p>
-                        <h3 class="fw-bold fs-3 mb-0 text-success">{{ $approvedCount }}</h3>
+                        <p class="text-muted small mb-1 fw-medium">Approved Staff</p>
+                        <h3 class="fw-bold fs-4 mb-0 text-success">{{ $approvedCount }}</h3>
                     </div>
                     <div class="rounded-circle bg-success bg-opacity-10 p-3">
-                        <i class="bi bi-check-circle fs-2 text-success"></i>
+                        <i class="bi bi-check-circle fs-3 text-success"></i>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-    <div class="col-md-6 col-xl-3">
+    <div class="col-6 col-md-3">
         <div class="card card-stat shadow-sm h-100 border-0">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <p class="text-muted small mb-1">Pending Approval</p>
-                        <h3 class="fw-bold fs-3 mb-0 text-warning">{{ $staffCount - $approvedCount }}</h3>
+                        <p class="text-muted small mb-1 fw-medium">Pending Approval</p>
+                        <h3 class="fw-bold fs-4 mb-0 text-warning">{{ $staffCount - $approvedCount }}</h3>
                     </div>
                     <div class="rounded-circle bg-warning bg-opacity-10 p-3">
-                        <i class="bi bi-hourglass-split fs-2 text-warning"></i>
+                        <i class="bi bi-hourglass-split fs-3 text-warning"></i>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-    <div class="col-md-6 col-xl-3">
+    <div class="col-6 col-md-3">
         <div class="card card-stat shadow-sm h-100 border-0">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <p class="text-muted small mb-1">Rejected</p>
-                        <h3 class="fw-bold fs-3 mb-0 text-danger">{{ \App\Models\User::where('role', 'staff')->where('account_status', 'rejected')->count() }}</h3>
+                        <p class="text-muted small mb-1 fw-medium">Rejected</p>
+                        <h3 class="fw-bold fs-4 mb-0 text-danger">{{ \App\Models\User::where('role', 'staff')->where('account_status', 'rejected')->count() }}</h3>
                     </div>
                     <div class="rounded-circle bg-danger bg-opacity-10 p-3">
-                        <i class="bi bi-x-circle fs-2 text-danger"></i>
+                        <i class="bi bi-x-circle fs-3 text-danger"></i>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 </div>
 
-<div class="row g-4 mt-4">
-    <div class="col-lg-6">
+<div class="row g-3" id="adminDashboardSections">
+    <div class="col-12 col-lg-6">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 fw-semibold"><i class="bi bi-arrow-left-right me-2"></i> Transfer Requests</h6>
@@ -71,11 +75,11 @@
                 @forelse($assetTransfers as $transfer)
                     <div class="border-top px-4 py-3">
                         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                            <div>
-                                <div class="fw-semibold">{{ $transfer->reference_number ?? 'Transfer #' . $transfer->id }}</div>
-                                <small class="text-muted">{{ $transfer->fromDepartment?->name ?? 'Unknown' }} &rarr; {{ $transfer->toDepartment?->name ?? 'Unknown' }}</small>
+                            <div class="min-w-0">
+                                <div class="fw-semibold text-truncate">{{ $transfer->reference_number ?? 'Transfer #' . $transfer->id }}</div>
+                                <small class="text-muted d-block text-truncate" style="max-width: 300px;">{{ $transfer->fromDepartment?->name ?? 'Unknown' }} &rarr; {{ $transfer->toDepartment?->name ?? 'Unknown' }}</small>
                             </div>
-                            <span class="badge px-3 py-1
+                            <span class="badge px-3 py-1 flex-shrink-0
                                 {{ $transfer->status === 'completed' ? 'bg-success' : ($transfer->status === 'pending' ? 'bg-warning' : ($transfer->status === 'approved' ? 'bg-info' : 'bg-secondary')) }}">
                                 {{ ucfirst($transfer->status) }}
                             </span>
@@ -104,22 +108,22 @@
         </div>
     </div>
 
-    <div class="col-lg-6">
+    <div class="col-12 col-lg-6">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bi bi-file-text me-2"></i> Operational Requests</h6>
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-file-text me-2"></i> Operational Requests</h6>
                 <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-1">{{ $operationalRequests->count() }} total</span>
             </div>
             <div class="card-body p-0">
                 @forelse($operationalRequests as $request)
                     <div class="border-top px-4 py-3">
                         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                            <div>
-                                <h6 class="mb-1 fw-semibold">{{ $request->subject }}</h6>
-                                <small class="text-muted">{{ $request->type }} &middot; {{ $request->department?->name ?? $request->user?->department?->name ?? 'No department' }}</small>
-                                <br><small class="text-muted">Submitted by {{ $request->user?->name ?? 'Unknown' }} &middot; {{ $request->created_at?->format('M d, Y h:i A') }}</small>
+                            <div class="min-w-0">
+                                <h6 class="mb-1 fw-semibold text-truncate">{{ $request->subject }}</h6>
+                                <small class="text-muted d-block text-truncate" style="max-width: 300px;">{{ $request->type }} &middot; {{ $request->department?->name ?? $request->user?->department?->name ?? 'No department' }}</small>
+                                <small class="text-muted">Submitted by {{ $request->user?->name ?? 'Unknown' }} &middot; {{ $request->created_at?->format('M d, Y h:i A') }}</small>
                             </div>
-                            <span class="badge px-3 py-1
+                            <span class="badge px-3 py-1 flex-shrink-0
                                 {{ $request->status === 'approved' ? 'bg-success' : ($request->status === 'pending' ? 'bg-warning' : 'bg-danger') }}">
                                 {{ ucfirst($request->status) }}
                             </span>

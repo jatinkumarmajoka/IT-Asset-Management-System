@@ -352,7 +352,8 @@ class AssetDocumentController extends Controller
                 $document->document_type ===
                 AssetDocument::TYPE_BILL_INVOICE
             ) {
-                abort_unless($canManageBills, 403);
+                // Bills: Allow viewing for all approved staff, but require bills permission for upload/delete/replace
+                abort_unless($user->isApproved(), 403);
             } else {
                 abort(404);
             }

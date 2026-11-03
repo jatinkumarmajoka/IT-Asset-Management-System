@@ -98,6 +98,30 @@ class DepartmentSeeder extends Seeder
             );
         }
 
+        // Schools of Studies
+        $schools = [
+            ['name' => 'School of Humanities and Social Sciences', 'code' => 'SHSS'],
+            ['name' => 'School of Interdisciplinary and Applied Sciences', 'code' => 'SIAS'],
+            ['name' => 'School of Basic Sciences', 'code' => 'SBS'],
+            ['name' => 'School of Law', 'code' => 'SOL'],
+            ['name' => 'School of Engineering and Technology', 'code' => 'SOET'],
+            ['name' => 'School of Business and Management Studies', 'code' => 'SBMS'],
+            ['name' => 'School of Education', 'code' => 'SOE'],
+            ['name' => 'School of Life-long Learning', 'code' => 'SLLL'],
+        ];
+
+        foreach ($schools as $school) {
+            Department::firstOrCreate(
+                ['code' => $school['code']],
+                [
+                    'name' => $school['name'],
+                    'description' => null,
+                    'status' => 'active',
+                    'type' => 'academic',
+                ]
+            );
+        }
+
         // Non-Teaching Offices and Administrative Branches
         // These entries represent offices/branches, not employees or posts.
         $nonTeachingDepartments = [

@@ -129,10 +129,35 @@ Route::middleware(['auth', 'approved.session'])->group(function () {
                 'updateStaff',
             ])->name('staff.update');
 
+            Route::put('/staff/{user}/password', [
+                AdminController::class,
+                'updateStaffPassword',
+            ])->name('staff.password.update');
+
+            Route::post('/staff/{user}/activate', [
+                AdminController::class,
+                'activateStaff',
+            ])->name('staff.activate');
+
+            Route::post('/staff/{user}/deactivate', [
+                AdminController::class,
+                'deactivateStaff',
+            ])->name('staff.deactivate');
+
+            Route::delete('/staff/{user}', [
+                AdminController::class,
+                'deleteStaff',
+            ])->name('staff.delete');
+
             Route::put('/staff/{user}/permissions', [
                 AdminController::class,
                 'updatePermissions',
             ])->name('staff.permissions');
+
+            Route::patch('/staff/{user}/permissions/{module}', [
+                AdminController::class,
+                'updateSinglePermission',
+            ])->name('staff.permission.update');
 
             Route::post('/staff/{user}/password-reset-link', [
                 AdminController::class,
